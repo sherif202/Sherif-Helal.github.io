@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sherif Hilal, product manager</title>
+<meta name="description" content="Product case studies by Sherif Hilal: each one taken from research to a PRD, a prototype and a roadmap.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F2F5F1;
+    --sheet: #FFFFFF;
+    --ink: #13242B;
+    --soft: #51636A;
+    --line: #CBD5CF;
+    --nile: #0C5C57;
+    --nile-deep: #083F3C;
+    --saffron: #F0B429;
+    --saffron-wash: #FFF4D2;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 17px/1.55 "IBM Plex Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--nile); text-underline-offset: 3px; }
+  a:focus-visible, summary:focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; border-radius: 2px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 28px; }
+
+  /* Opening */
+  .open { background: var(--nile-deep); color: #EAF3EF; padding: 28px 0 72px; }
+  .open nav { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; font-size: 15px; }
+  .open nav a { color: #EAF3EF; }
+  .open nav strong { font-weight: 600; }
+  .open h1 {
+    font: 700 clamp(2.3rem, 6.2vw, 4.6rem)/1.02 "Bricolage Grotesque", sans-serif;
+    letter-spacing: -0.025em;
+    margin: 84px 0 0;
+    max-width: 17ch;
+  }
+  .open p { max-width: 58ch; margin: 28px 0 0; font-size: 1.12rem; color: #C7DAD3; }
+  .chain { display: flex; flex-wrap: wrap; gap: 0; margin: 44px 0 0; padding: 0; list-style: none; font: 600 1rem "Bricolage Grotesque", sans-serif; }
+  .chain li { padding: 9px 18px 9px 26px; background: #0F6B64; clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%); margin-right: -4px; }
+  .chain li:first-child { clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%); padding-left: 16px; }
+  .chain li:last-child { background: var(--saffron); color: var(--ink); }
+
+  /* Groups */
+  .group { padding: 64px 0 8px; }
+  .group-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 32px; align-items: end; border-bottom: 2px solid var(--ink); padding-bottom: 16px; }
+  .group-head h2 { font: 700 clamp(1.7rem, 3.4vw, 2.4rem)/1.05 "Bricolage Grotesque", sans-serif; letter-spacing: -0.02em; margin: 0; }
+  .group-head h2 span { font: 500 0.8em "IBM Plex Sans Arabic", sans-serif; color: var(--nile); margin-inline-start: 10px; }
+  .group-head p { margin: 0; color: var(--soft); font-size: 0.98rem; max-width: 62ch; }
+
+  /* Product */
+  .product { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 32px; padding: 36px 0; border-bottom: 1px solid var(--line); }
+  .cover { display: block; background: var(--sheet); border: 1px solid var(--line); align-self: start; }
+  .cover img { display: block; width: 100%; height: auto; }
+  .cover.blank { aspect-ratio: 16 / 10; display: grid; place-content: center; padding: 20px; background: var(--nile); color: #EAF3EF; border: 0; text-decoration: none; font: 700 1.7rem/1.05 "Bricolage Grotesque", sans-serif; letter-spacing: -0.02em; }
+  .product h3 { font: 700 1.55rem/1.15 "Bricolage Grotesque", sans-serif; letter-spacing: -0.015em; margin: 0; }
+  .line { font-size: 1.14rem; line-height: 1.45; margin: 10px 0 0; max-width: 56ch; }
+  .detail { color: var(--soft); margin: 12px 0 0; max-width: 64ch; }
+  .facts { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .facts li { background: var(--sheet); border: 1px solid var(--line); padding: 5px 11px; font-size: 0.9rem; border-radius: 3px; }
+  .status { margin: 20px 0 0; padding: 10px 14px; background: var(--saffron-wash); border-inline-start: 4px solid var(--saffron); font-size: 0.95rem; max-width: 64ch; }
+  .status b { font-weight: 600; }
+  .role { margin: 6px 0 0; color: var(--soft); font-size: 0.95rem; }
+  .pieces { list-style: none; padding: 0; margin: 22px 0 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .pieces a, .pieces span { display: inline-block; padding: 9px 15px; border-radius: 3px; font-weight: 500; font-size: 0.97rem; }
+  .pieces a { background: var(--nile); color: #fff; text-decoration: none; }
+  .pieces a:hover { background: var(--nile-deep); }
+  .pieces span { border: 1px dashed #93A39B; color: var(--soft); }
+
+  footer { padding: 56px 0 72px; color: var(--soft); font-size: 0.95rem; }
+  footer p { max-width: 70ch; margin: 0 0 10px; }
+
+  @media (max-width: 760px) {
+    .group-head, .product { grid-template-columns: 1fr; gap: 16px; }
+    .open h1 { margin-top: 56px; }
+    .cover.blank { aspect-ratio: 16 / 7; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<header class="open">
+  <div class="wrap">
+    <nav>
+      <strong>Sherif Hilal</strong>
+      <a href="https://github.com/sherif202">GitHub profile</a>
+    </nav>
+    <h1>I take one product problem from research to a roadmap.</h1>
+    <p>Product manager working on Egyptian and Gulf products: payroll, banking support, rentals and quick-commerce. Each case study below says plainly what was built, what was tested, and what is still an assumption.</p>
+    <ul class="chain" aria-label="How each case study runs">
+      <li>Research</li><li>Problem</li><li>PRD</li><li>Prototype</li><li>Roadmap</li>
+    </ul>
+  </div>
+</header>
+
+<main class="wrap" id="work">
+  <noscript><p style="padding:48px 0">This page lists the case studies with JavaScript. The same list is in the <a href="README.md">README</a>, and the PDFs are in the <a href="case-studies/">case-studies</a> folder.</p></noscript>
+</main>
+
+<footer class="wrap">
+  <p>Some links open documents hosted on claude.ai or Google Stitch. The PDFs on this site hold the full case study for each product.</p>
+  <p>Sherif Hilal, 2026. <a href="https://github.com/sherif202">github.com/sherif202</a></p>
+</footer>
+
+<script src="products.js"></script>
+<script>
+(function () {
+  var main = document.getElementById('work');
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function external(a, url) {
+    if (/^https?:/.test(url)) { a.target = '_blank'; a.rel = 'noopener'; }
+  }
+  (window.PORTFOLIO || []).forEach(function (g) {
+    var section = el('section', 'group');
+    var head = el('div', 'group-head');
+    var h2 = el('h2', null, g.group);
+    if (g.arabic) { var ar = el('span', null, g.arabic); ar.lang = 'ar'; ar.dir = 'rtl'; h2.appendChild(ar); }
+    head.appendChild(h2);
+    head.appendChild(el('p', null, g.about || ''));
+    section.appendChild(head);
+
+    g.products.forEach(function (p) {
+      var art = el('article', 'product');
+      var first = (p.pieces || []).filter(function (x) { return x.url; })[0];
+      var cover = el(first ? 'a' : 'div', 'cover' + (p.cover ? '' : ' blank'));
+      if (first) { cover.href = first.url; external(cover, first.url); cover.setAttribute('aria-label', p.name + ': ' + first.label); }
+      if (p.cover) {
+        var img = el('img'); img.src = p.cover; img.alt = 'First page of the ' + p.name + ' case study'; img.loading = 'lazy';
+        cover.appendChild(img);
+      } else { cover.textContent = p.name; }
+      art.appendChild(cover);
+
+      var body = el('div');
+      body.appendChild(el('h3', null, p.name));
+      if (p.role) body.appendChild(el('p', 'role', p.role));
+      body.appendChild(el('p', 'line', p.line));
+      if (p.detail) body.appendChild(el('p', 'detail', p.detail));
+      if (p.facts && p.facts.length) {
+        var ul = el('ul', 'facts');
+        p.facts.forEach(function (f) { ul.appendChild(el('li', null, f)); });
+        body.appendChild(ul);
+      }
+      if (p.status) {
+        var st = el('p', 'status'); st.appendChild(el('b', null, 'Where it stands: ')); st.appendChild(document.createTextNode(p.status));
+        body.appendChild(st);
+      }
+      var pieces = el('ul', 'pieces');
+      (p.pieces || []).forEach(function (x) {
+        var li = el('li'), node;
+        if (x.url) { node = el('a', null, x.label); node.href = x.url; external(node, x.url); }
+        else { node = el('span', null, x.label + ': not built yet'); }
+        li.appendChild(node); pieces.appendChild(li);
+      });
+      body.appendChild(pieces);
+      art.appendChild(body);
+      section.appendChild(art);
+    });
+    main.appendChild(section);
+  });
+})();
+</script>
+</body>
+</html>
