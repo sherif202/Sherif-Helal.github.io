@@ -18,7 +18,8 @@ window.PORTFOLIO = [
         detail:
           "Every January, Egypt's insured salary band resets. OVARC's compliance engine drafts the rule pack, legal counsel confirms it, and payroll sees the impact on each client before approving, with source, version and undo kept.",
         role: "Product manager, self-initiated",
-        status: "Research to PRD, prototype and roadmap. Not built or tested with OVARC.",
+        status: "Research to PRD, prototype and roadmap, plus a clickable demo on simulated data. Not tested with OVARC.",
+        cover: "covers/ovarc-rule-watch.jpg",
         facts: ["19 must-have requirements", "Given / When / Then acceptance criteria", "Rule feed to impact report to approval"],
         pieces: [
           { label: "One-page PRD", url: "https://claude.ai/artifact/FU4A79tkD8ikWRGD2KmyKD" },
@@ -117,14 +118,53 @@ window.PORTFOLIO = [
         detail:
           "A free, earned-status programme for weekly households in one Dubai zone. It rewards order frequency and basket value equally, and pays an automatic credit when an order is late.",
         role: "Product manager",
-        status: "PRD v0.2 and a three-stage pilot plan. No surveys run and no results yet.",
+        status: "PRD v0.2, a clickable demo on simulated data, and a three-stage pilot plan. No surveys run and no results yet.",
         facts: ["Target: +0.2 repeat orders per active user a month", "Reward cost capped at AED 9.18 per redeemed order", "15 ideas, 1 pilot"],
         cover: "covers/oasis-regulars.jpg",
         pieces: [
           { label: "Case study (PDF)", url: "case-studies/oasis-regulars.pdf" },
           { label: "Financial model", url: "https://claude.ai/artifact/G6TeVJtQL6HWdVsZd6Qcmb" },
-          { label: "Prototype" }
+          { label: "Demo code on GitHub", url: "https://github.com/sherif202/oasis-rewards-demo" }
         ]
+      }
+    ]
+  },
+  {
+    group: "Careem",
+    about: "A practice build for a ride-hailing and delivery support team. Not affiliated with Careem.",
+    products: [
+      {
+        name: "Support Triage",
+        line: "Paste incoming rider complaints and see the most urgent ones first.",
+        detail:
+          "A one-page internal dashboard for a support agent. Each complaint gets a category (Safety, Payment, Driver, App or Other) and a one-line reason it is urgent, with safety cases marked in red.",
+        status: "Interface only. It shows five fixed example cards; no AI model is connected yet.",
+        facts: ["5 complaint categories", "Safety flagged first"],
+        pieces: [{ label: "Code on GitHub", url: "https://github.com/sherif202/Careem_-triage-" }]
+      }
+    ]
+  },
+  {
+    group: "Data and analytics",
+    about: "Earlier analytics projects, 2024 to 2025.",
+    products: [
+      {
+        name: "University evaluation system",
+        line: "Moves a university's teaching evaluations from Excel sheets and forms to a data pipeline with dashboards.",
+        detail:
+          "An SSIS pipeline loads the Excel data into SQL Server and a data warehouse, a sentiment model reads the open-ended feedback as positive, negative or neutral, and Power BI shows the results.",
+        status: "Pipeline files, sentiment notebook and report are in the repository.",
+        facts: ["SSIS and SQL Server", "Sentiment analysis", "Power BI"],
+        pieces: [{ label: "Repository", url: "https://github.com/sherif202/Evaluation-System-Digitalization" }]
+      },
+      {
+        name: "Olist e-commerce analysis",
+        line: "Brazilian marketplace orders from 2016 to 2018, cleaned in SQL and modelled in Power BI.",
+        detail:
+          "Covers data-quality fixes, ten descriptive questions on revenue, products, customers and sellers, customer segmentation, and a six-month sales forecast by product category.",
+        status: "SQL scripts and the final report are in the repository.",
+        facts: ["SQL data cleaning", "Customer segmentation", "6-month sales forecast"],
+        pieces: [{ label: "Repository", url: "https://github.com/sherif202/Olist-" }]
       }
     ]
   }
