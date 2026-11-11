@@ -1,8 +1,10 @@
-# Sherif Hilal, product portfolio
+# Product Management Portfolio
+
+Sherif Hilal
 
 Product case studies, each taken from research to a PRD, a prototype and a roadmap.
 
-Live site: https://sherif202.github.io/Sherif-Helal.github.io/
+Live site: https://sherif202.github.io/product-management-portfolio/
 
 | Product | What it is | Where it stands | Open |
 |---|---|---|---|
