@@ -8,6 +8,7 @@ Live site: https://sherif202.github.io/product-management-portfolio/
 
 | Product | What it is | Where it stands | Open |
 |---|---|---|---|
+| **Demo Web Shop checkout** | Why first-time buyers abandon checkout, and a 3-release plan to fix it | Expert and AI review; no real users interviewed | [Case study](checkout-case-study/case-study.html), [Playbook](checkout-case-study/index.html), [PDF](checkout-case-study/Demo-Web-Shop-Checkout-Case-Study.pdf), [README](checkout-case-study/README.md) |
 | **OVARC Rule Watch** | Turns each Egyptian payroll law change into one versioned rule pack | PRD, prototype, roadmap and a demo on simulated data; not tested with OVARC | [One-page PRD](https://claude.ai/artifact/FU4A79tkD8ikWRGD2KmyKD), [Detailed PRD](https://claude.ai/artifact/DnjrAc5181Kn4VX1a4BHu1), [Prototype](https://stitch.withgoogle.com/preview/16220401715492585262?node-id=c16ef6e9c8324cfea4287be9b564e18d), [Roadmap](https://claude.ai/artifact/DNWSpp7tFPeZ52zxMbYCuE) |
 | **OVARC Payroll** | A monthly payroll run that lands right the first time | Illustrative delivery portfolio | [PDF](case-studies/ovarc-payroll.pdf) |
 | **OVARC Leave Management** | Leave requested, approved and paid correctly, without email or Excel | Illustrative delivery portfolio | [PDF](case-studies/ovarc-leave-management.pdf) |

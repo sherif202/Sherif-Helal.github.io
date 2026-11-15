@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impact Review — Guest checkout</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  .screen-topbar {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .screen-topbar .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .screen-topbar .back-link {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #555;
+    transition: background 0.15s;
+  }
+  .screen-topbar .back-link:hover { background: #ddd; }
+  .screen-topbar .back-link svg { width: 18px; height: 18px; }
+  .screen-topbar .breadcrumb {
+    font-size: 13px;
+    color: #999;
+  }
+  .screen-topbar .breadcrumb a { color: #999; text-decoration: none; }
+  .screen-topbar .breadcrumb a:hover { color: #00a862; }
+  .screen-topbar .breadcrumb .current { color: #1a1a1a; font-weight: 600; }
+
+  .critique-card {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: 1px solid #e8e8e8;
+  }
+
+  /* KR Header */
+  .kr-header {
+    background: #1a1a1a;
+    padding: 24px;
+    color: #fff;
+  }
+  .kr-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #888;
+    margin-bottom: 10px;
+  }
+  .kr-item {
+    margin-bottom: 10px;
+    padding-left: 12px;
+    border-left: 3px solid #555;
+  }
+  .kr-item:last-of-type { margin-bottom: 0; }
+  .kr-item.ret { border-color: #90caf9; }
+  .kr-item.eng { border-color: #a5d6a7; }
+  .kr-item .kr-tag {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .kr-item.ret .kr-tag { color: #90caf9; }
+  .kr-item.eng .kr-tag { color: #a5d6a7; }
+  .kr-item .kr-text {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #fff;
+  }
+  .kr-model {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #888;
+    line-height: 1.4;
+  }
+  .kr-flow {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #888;
+  }
+  .kr-flow .flow-tag {
+    background: #333;
+    padding: 3px 10px;
+    border-radius: 6px;
+    color: #ccc;
+    font-weight: 500;
+  }
+
+  /* Alignment Score */
+  .alignment-section {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .alignment-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+  .alignment-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .alignment-dots .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #eee;
+  }
+  .alignment-dots .dot.filled { background: #f5a623; }
+  .alignment-verdict {
+    font-size: 12px;
+    font-weight: 600;
+    color: #f5a623;
+    margin-left: 8px;
+  }
+
+  /* Sections */
+  .section {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .section:last-child { border-bottom: none; }
+  .section-header {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #999;
+    margin-bottom: 14px;
+  }
+  .section-header.green { color: #2e7d32; }
+  .section-header.amber { color: #f5a623; }
+  .section-header.blue { color: #2196F3; }
+
+  /* Items */
+  .item {
+    margin-bottom: 16px;
+  }
+  .item:last-child { margin-bottom: 0; }
+  .item-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .item-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .item-dot.green { background: #2e7d32; }
+  .rec-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .rec-num.amber { background: #f5a623; }
+  .rec-num.blue { background: #2196F3; }
+  .item-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.4;
+  }
+  .item-body {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .screen-ref {
+    font-size: 11px;
+    color: #999;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .impact-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .impact-level {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .impact-level.high { color: #d32f2f; }
+  .impact-level.medium { color: #f5a623; }
+  .impact-tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .impact-tag.retention { background: #e3f2fd; color: #1565c0; }
+  .impact-tag.engagement { background: #e8f5e9; color: #2e7d32; }
+  .impact-tag.activation { background: #fff3e0; color: #e65100; }
+
+  /* Progressive disclosure — "How did I get this?" */
+  details.how {
+    margin-top: 8px;
+    border-top: 1px dashed #eee;
+    padding-top: 8px;
+  }
+  details.how > summary {
+    font-size: 11px;
+    font-weight: 600;
+    color: #2196F3;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+  details.how > summary::-webkit-details-marker { display: none; }
+  details.how > summary::before { content: "▸ "; }
+  details.how[open] > summary::before { content: "▾ "; }
+  details.how .how-body {
+    font-size: 12px;
+    color: #777;
+    line-height: 1.5;
+    margin-top: 6px;
+  }
+
+  /* Footer */
+  .critique-footer {
+    padding: 16px 24px;
+    background: #fafafa;
+    border-top: 1px solid #f0f0f0;
+    font-size: 11px;
+    color: #999;
+    line-height: 1.6;
+  }
+
+  .impact-tag.conversion { background: #e8f5e9; color: #2e7d32; }
+  .impact-tag.completion { background: #e3f2fd; color: #1565c0; }
+  .impact-tag.trust { background: #f3e5f5; color: #6a1b9a; }
+  .impact-tag.cost { background: #fff3e0; color: #e65100; }
+  .impact-tag.measurement { background: #eceff1; color: #455a64; }
+  .kr-item.conv { border-color: #a5d6a7; }
+  .kr-item.conv .kr-tag { color: #a5d6a7; }
+</style>
+</head>
+<body>
+
+<div class="screen-topbar">
+  <div class="nav-left">
+    <a class="back-link" href="../telos-check.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <div class="breadcrumb">
+      <a href="../telos-check.html">Demo Web Shop</a> / <span class="current">Guest checkout Impact Review</span>
+    </div>
+  </div>
+</div>
+
+<div class="critique-card">
+
+  <!-- KR Header -->
+  <div class="kr-header">
+    <div class="kr-label">Key Result</div>
+    <div class="kr-item conv">
+      <div class="kr-tag">KR 1: Conversion</div>
+      <div class="kr-text">Increase checkout completion rate (cart &rarr; order placed) for first-time guest buyers</div>
+    </div>
+    <div class="kr-model">Model: a nopCommerce desktop web shop. The guest goes from Home to the Shopping cart (terms-of-service checkbox + grey Checkout button), a sign-in gate ("Checkout as Guest" vs. Register vs. Log in), then a 6-step accordion checkout (Billing address, Shipping address, Shipping method, Payment method, Payment information, Confirm order) and a Thank-you page. Baseline completion rate is not yet measured.</div>
+    <div class="kr-flow">
+      <span class="flow-tag">Guest checkout</span>
+      11 screens
+    </div>
+  </div>
+
+  <!-- Alignment Score: 2/5 -->
+  <div class="alignment-section">
+    <span class="alignment-label">KR Alignment</span>
+    <div class="alignment-dots">
+      <div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <span class="alignment-verdict">Weak</span>
+    </div>
+  </div>
+
+  <!-- Critique confidence (filled by `telos-registry set-eval` after --eval; default shows "not scored") -->
+  <!--TELOS_EVAL_START--><div style="padding:16px 24px;border-bottom:1px solid #f0f0f0;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><span style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#999;">Critique Confidence</span><span style="display:inline-flex;align-items:center;gap:8px;"><span style="font-size:13px;color:#666;">26/30 &middot; PASS</span><span style="background:#2e7d32;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;">87%</span></span></div><div style="display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:12px;color:#555;"><span>KR Relevance</span><span style="font-weight:600;color:#1a1a1a;">5/5</span><span>Blind Spot Detection</span><span style="font-weight:600;color:#1a1a1a;">4/5</span><span>Screen Reference Accuracy</span><span style="font-weight:600;color:#1a1a1a;">4/5</span><span>Actionability</span><span style="font-weight:600;color:#1a1a1a;">5/5</span><span>Impact Calibration</span><span style="font-weight:600;color:#1a1a1a;">4/5</span><span>Sub-metric Accuracy</span><span style="font-weight:600;color:#1a1a1a;">4/5</span></div><div style="margin-top:10px;font-size:11px;color:#999;">This scores the quality of the critique, not whether the design is right.</div></div><!--TELOS_EVAL_END-->
+
+  <!-- What Serves the KRs -->
+  <div class="section">
+    <div class="section-header green">What Serves the KR</div>
+
+    <div class="item">
+      <div class="item-header">
+        <div class="item-dot green"></div>
+        <div class="item-title">A no-password guest path exists.</div>
+      </div>
+      <div class="item-body">The sign-in gate offers a <b>"Checkout as Guest"</b> button, so a first-time buyer can finish without creating an account. Forced registration is one of the most common reasons people abandon checkout, and this flow avoids it. The path is there, even though it is not emphasised (see rec 2).</div>
+      <span class="screen-ref">03-signin</span>
+      <div class="impact-bar"><span class="impact-tag conversion">Conversion</span><span class="impact-tag completion">Completion</span></div>
+    </div>
+
+    <div class="item">
+      <div class="item-header">
+        <div class="item-dot green"></div>
+        <div class="item-title">The 6-step accordion always shows where the buyer is and what is left.</div>
+      </div>
+      <div class="item-body">From Billing address to Confirm order, every step is listed and numbered, the current one is highlighted in red and finished ones are greyed. <b>A visible finish line lowers the urge to give up partway</b>, and the Back link on every step lets the buyer fix mistakes without starting again.</div>
+      <span class="screen-ref">04-billing to 08-confirm</span>
+      <div class="impact-bar"><span class="impact-tag completion">Completion</span></div>
+    </div>
+
+    <div class="item">
+      <div class="item-header">
+        <div class="item-dot green"></div>
+        <div class="item-title">The cart shows a full price breakdown before checkout starts.</div>
+      </div>
+      <div class="item-body">The cart lists Sub-Total, Shipping, Tax and Total, and has an "Estimate shipping" box (country, state, zip). <b>Showing shipping and tax up front means fewer cost surprises later</b>, and unexpected cost is a top cause of abandonment. Rec 3 explains why this good start is undone later.</div>
+      <span class="screen-ref">01-cart</span>
+      <div class="impact-bar"><span class="impact-tag cost">Cost clarity</span><span class="impact-tag trust">Trust</span></div>
+    </div>
+
+    <div class="item">
+      <div class="item-header">
+        <div class="item-dot green"></div>
+        <div class="item-title">The Confirm step is a complete, honest review.</div>
+      </div>
+      <div class="item-body">Confirm order lists the billing address, shipping method, payment method, the item, and a separate <b>"Payment method additional fee: 7.00"</b> line before the total. A buyer who reaches this step can see exactly what they are agreeing to, which builds trust in the final click.</div>
+      <span class="screen-ref">08-confirm</span>
+      <div class="impact-bar"><span class="impact-tag trust">Trust</span><span class="impact-tag cost">Cost clarity</span></div>
+    </div>
+
+    <div class="item">
+      <div class="item-header">
+        <div class="item-dot green"></div>
+        <div class="item-title">A free In-Store Pickup option is offered.</div>
+      </div>
+      <div class="item-body">The shipping-address step has an <b>In-Store Pickup</b> checkbox, and the Confirm step shows it at 0.00. A zero-cost way to get the item removes a reason to drop out for buyers who are near the store.</div>
+      <span class="screen-ref">05-shipping-address</span>
+      <div class="impact-bar"><span class="impact-tag cost">Cost clarity</span></div>
+    </div>
+
+    <div class="item">
+      <div class="item-header">
+        <div class="item-dot green"></div>
+        <div class="item-title">The Thank-you page gives a clear success state.</div>
+      </div>
+      <div class="item-body">"Your order has been successfully processed!" with an order number and a "Click here for order details" link. <b>It is a clear end point for the KR's "order placed" event</b>, and it reassures a guest who has no account to check later.</div>
+      <span class="screen-ref">09-thank-you</span>
+      <div class="impact-bar"><span class="impact-tag trust">Trust</span><span class="impact-tag measurement">Measurement</span></div>
+    </div>
+  </div>
+
+  <!-- What to Reconsider -->
+  <div class="section">
+    <div class="section-header amber">What to Reconsider</div>
+
+    <div class="item" id="rec-1">
+      <div class="item-header">
+        <div class="rec-num amber">1</div>
+        <div class="item-title">The terms-of-service checkbox blocks Checkout and then gives an error instead of letting the buyer through.</div>
+      </div>
+      <div class="item-body">On the cart, a small, unticked checkbox ("I agree with the terms of service and I adhere to them unconditionally") sits above the grey Checkout button. A buyer who clicks Checkout without ticking it gets a <b>blocking "Terms of service" modal</b>. The modal cannot be accepted from inside; it only says "Please accept the terms of service before the next step." <b>The first click on the most important button fails</b>, at the moment buying intent is highest.</div>
+      <span class="screen-ref">01-cart, 02-terms-popup</span>
+      <div class="impact-bar">
+        <span class="impact-level high">HIGH IMPACT</span>
+        <span class="impact-tag completion">Completion</span><span class="impact-tag conversion">Conversion</span>
+      </div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">The 02-terms-popup capture exists only because this error state happens in the flow: Checkout was clicked and the modal appeared. The modal has only a close button and no "Accept" action, so the buyer has to close it, find the checkbox and click Checkout again. Each failed click like this is a point where first-time buyers drop out. Removing the gate should raise the share of cart visitors who reach the sign-in step.</div>
+      </details>
+      <div class="telos-comments" data-rec="1"></div>
+    </div>
+
+    <div class="item" id="rec-2">
+      <div class="item-header">
+        <div class="rec-num amber">2</div>
+        <div class="item-title">The guest option looks secondary on the sign-in gate, which is set up for registering and logging in.</div>
+      </div>
+      <div class="item-body">The page title is <b>"Welcome, Please Sign In!"</b> and the cursor is already in the Returning Customer <b>Email</b> field. The guest box opens with "Register and save time!" and a list of reasons to register. "Checkout as Guest" is a small grey button with the same style as Register beside it. <b>A first-time buyer is the audience most likely to read this as "I need an account"</b> and leave.</div>
+      <span class="screen-ref">03-signin</span>
+      <div class="impact-bar">
+        <span class="impact-level high">HIGH IMPACT</span>
+        <span class="impact-tag conversion">Conversion</span><span class="impact-tag completion">Completion</span>
+      </div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">I looked at what the screen emphasises: the headline asks for sign-in, focus is on the login field, and the only bold copy sells registration. Nothing visually favours the guest button. The KR is about first-time guests, so they are exactly the people this screen pushes toward the account path. Expected effect of a fix: more clicks on "Checkout as Guest" and fewer exits from this step.</div>
+      </details>
+      <div class="telos-comments" data-rec="2"></div>
+    </div>
+
+    <div class="item" id="rec-3">
+      <div class="item-header">
+        <div class="rec-num amber">3</div>
+        <div class="item-title">Cash On Delivery, which costs 7.00 extra, is pre-selected, and the total jumps from 10.00 to 17.00 at the last step.</div>
+      </div>
+      <div class="item-body">On Payment method, <b>Cash On Delivery (COD) (7.00) is chosen by default</b>. Check / Money Order (5.00) also adds a fee, while Credit Card, which has no fee, is not chosen. The fee shows only as "(7.00)" in the option label, and no running total is visible. The buyer then sees <b>Total 17.00 on Confirm order, 70% more than the 10.00 shown in the cart</b>. A surprise extra cost on the final screen is the classic reason people abandon a cart.</div>
+      <span class="screen-ref">06-payment-method, 08-confirm</span>
+      <div class="impact-bar">
+        <span class="impact-level high">HIGH IMPACT</span>
+        <span class="impact-tag cost">Cost clarity</span><span class="impact-tag completion">Completion</span>
+      </div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">I compared the cart Total (10.00) with the Confirm Total (17.00). The difference is entirely the "Payment method additional fee", and that fee comes from the default selection, not from a choice the buyer made. Defaults strongly shape what people end up with, so most guests would carry the fee to the end. If the default had no fee and costs were shown as they change, I would expect fewer drop-offs between Confirm and Thank-you.</div>
+      </details>
+      <div class="telos-comments" data-rec="3"></div>
+    </div>
+
+    <div class="item" id="rec-4">
+      <div class="item-header">
+        <div class="rec-num amber">4</div>
+        <div class="item-title">A one-item order takes about 9 clicks over 8 screens, including a step with nothing to fill in.</div>
+      </div>
+      <div class="item-body">After the cart, the guest ticks the terms box, clicks Checkout, clicks Checkout as Guest, then clicks <b>Continue five times</b> (billing, shipping address, shipping method, payment method, payment information) and finally Confirm. The <b>Payment information step only says "You will pay by COD"</b> with a Continue button. It asks for nothing. Shipping address is its own step with no visible "same as billing" shortcut. <b>Every extra step is another chance to drop out</b>, and first-time buyers have the least commitment.</div>
+      <span class="screen-ref">04-billing to 08-confirm (Flow-level)</span>
+      <div class="impact-bar">
+        <span class="impact-level high">HIGH IMPACT</span>
+        <span class="impact-tag completion">Completion</span>
+      </div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">I counted the actions needed to place a single 10.00 book order: about 9 clicks across the cart, sign-in gate and 6 accordion steps. Payment information collects no data when COD is chosen, and the shipping address and method steps could be one screen. Completion rate falls with each step, so removing 2 or 3 steps directly improves the KR's ratio.</div>
+      </details>
+      <div class="telos-comments" data-rec="4"></div>
+    </div>
+
+    <div class="item" id="rec-5">
+      <div class="item-header">
+        <div class="rec-num amber">5</div>
+        <div class="item-title">Leftover placeholder copy makes the shop look unfinished.</div>
+      </div>
+      <div class="item-body">The sign-in gate shows <b>"Put your login / registration information here. You can edit this in the admin site."</b> In-Store Pickup says "(put your store address here)". The Ground shipping description reads "ground shipping is carried out closer to the earth". <b>A first-time buyer has no history with the shop</b>, and text like this suggests it may not be a real, trustworthy store, right before they hand over an address and payment.</div>
+      <span class="screen-ref">03-signin, 05-shipping-address, 05b-shipping-method</span>
+      <div class="impact-bar">
+        <span class="impact-level medium">MEDIUM IMPACT</span>
+        <span class="impact-tag trust">Trust</span>
+      </div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">All three strings are default text that was never replaced. Returning customers already trust the shop, so the trust gap mostly affects first-time guests, the KR's audience. It is MEDIUM rather than HIGH because none of it blocks progress. It only makes buyers more hesitant at the steps where they share personal details.</div>
+      </details>
+      <div class="telos-comments" data-rec="5"></div>
+    </div>
+
+    <div class="item" id="rec-6">
+      <div class="item-header">
+        <div class="rec-num amber">6</div>
+        <div class="item-title">The buttons that move the buyer forward look the same as minor buttons.</div>
+      </div>
+      <div class="item-body"><b>Checkout</b> is a grey bevelled button styled like "Update shopping cart", "Apply coupon" and "Add gift card". <b>Confirm</b> on the final step is a small grey button at the bottom left, below the totals, with no price on it. The only strong colour in the shop, the green "Add to cart" on Home, is never used in checkout. <b>The final action does not stand out from everything else on the page.</b></div>
+      <span class="screen-ref">01-cart, 04-billing to 08-confirm</span>
+      <div class="impact-bar">
+        <span class="impact-level medium">MEDIUM IMPACT</span>
+        <span class="impact-tag completion">Completion</span><span class="impact-tag conversion">Conversion</span>
+      </div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">On the cart I counted five grey buttons of similar weight, and Checkout is only slightly bigger. On Confirm the button is about 60px wide and placed far from the total. When the main action does not stand out, buyers hesitate and look around. MEDIUM because buyers who find the button can still complete. A clear primary style should mainly speed up the Cart&rarr;Checkout and Confirm&rarr;Thank-you steps.</div>
+      </details>
+      <div class="telos-comments" data-rec="6"></div>
+    </div>
+
+    <div class="item" id="rec-7">
+      <div class="item-header">
+        <div class="rec-num amber">7</div>
+        <div class="item-title">Checkout keeps every way out open: full store navigation and coupon fields.</div>
+      </div>
+      <div class="item-body">Every checkout step still shows the full category bar (Books, Computers, ... Gift Cards), store search, Register/Log in/Wishlist links and the four-column footer. The cart gives as much space to <b>Discount Code</b> and <b>Gift Cards</b> boxes as to the totals. <b>An empty coupon field invites buyers to go looking for a code elsewhere</b>, and the open navigation makes leaving one click away.</div>
+      <span class="screen-ref">01-cart, 04-billing to 08-confirm (Flow-level)</span>
+      <div class="impact-bar">
+        <span class="impact-level medium">MEDIUM IMPACT</span>
+        <span class="impact-tag completion">Completion</span>
+      </div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">I listed the links that lead out of the funnel on the Billing step: 7 category links, search, 4 header links and around 20 footer links, compared with one Continue button. A visible coupon box makes buyers without a code feel they are paying too much and sends them off to search. MEDIUM because these are leaks, not blockers. Removing them should cut exits on the cart and early checkout steps.</div>
+      </details>
+      <div class="telos-comments" data-rec="7"></div>
+    </div>
+  </div>
+
+  <!-- Suggestions -->
+  <div class="section">
+    <div class="section-header blue">Suggestions Tied to the KR</div>
+
+    <div class="item" id="rec-8">
+      <div class="item-header">
+        <div class="rec-num blue">8</div>
+        <div class="item-title">Remove the terms gate from the cart and use implied consent on Confirm.</div>
+      </div>
+      <div class="item-body">Drop the checkbox from the cart. On Confirm order, put one line next to the button: "By placing your order you agree to the <u>Terms of Service</u>." If the law requires a checkbox, put it directly next to Confirm and show an inline message in red under it. Never use a modal that cannot be accepted. <b>The buyer's first click on Checkout should always work.</b></div>
+      <div class="impact-bar"><span class="impact-tag completion">Completion</span><span class="impact-tag conversion">Conversion</span></div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">Fixes rec 1. Implied consent at the point of purchase keeps the legal cover and removes a failed click at peak intent. If a checkbox has to stay, an inline message next to it at least keeps the buyer on the same screen with the fix in view, instead of a dead-end modal. Measure the share of cart visitors who reach the sign-in step.</div>
+      </details>
+      <div class="telos-comments" data-rec="8"></div>
+    </div>
+
+    <div class="item" id="rec-9">
+      <div class="item-header">
+        <div class="rec-num blue">9</div>
+        <div class="item-title">Make guest checkout the main, first option and offer registration after the order.</div>
+      </div>
+      <div class="item-body">Rename the page to "How would you like to check out?" Make <b>"Continue as guest"</b> the first, green, full-width button, and put Returning Customer login below as a smaller option without auto-focus. Remove "Register and save time!" here. Move it to the Thank-you page as "Save your details for next time, just add a password."</div>
+      <div class="impact-bar"><span class="impact-tag conversion">Conversion</span><span class="impact-tag completion">Completion</span></div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">Fixes rec 2. Leading with the guest path tells first-time buyers that no account is needed. Moving the registration offer to after the purchase keeps account sign-ups without putting them in the way of the order. The 09-thank-you page currently has empty space where this offer would fit. Measure the guest-button click share and exits from this step.</div>
+      </details>
+      <div class="telos-comments" data-rec="9"></div>
+    </div>
+
+    <div class="item" id="rec-10">
+      <div class="item-header">
+        <div class="rec-num blue">10</div>
+        <div class="item-title">Default to the no-fee payment method and show a running order total at every step.</div>
+      </div>
+      <div class="item-body">Pre-select <b>Credit Card</b> (no fee) or select nothing. Write fees as "+7.00 fee" next to COD and Check. Add a small order summary beside the accordion (items, shipping, fees, <b>Total</b>) that updates as the buyer chooses, so the 10.00 &rarr; 17.00 change never comes as a surprise on Confirm.</div>
+      <div class="impact-bar"><span class="impact-tag cost">Cost clarity</span><span class="impact-tag completion">Completion</span></div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">Fixes rec 3. A fee-bearing default makes the buyer pay more without choosing to, and showing the total only at the end turns it into a surprise. A no-fee default plus a visible running total keeps the price at checkout start consistent with the price at confirm. Expect fewer drop-offs between Payment method and Thank-you.</div>
+      </details>
+      <div class="telos-comments" data-rec="10"></div>
+    </div>
+
+    <div class="item" id="rec-11">
+      <div class="item-header">
+        <div class="rec-num blue">11</div>
+        <div class="item-title">Shorten the guest checkout to three screens.</div>
+      </div>
+      <div class="item-body">Merge Billing address and Shipping address into one form, with <b>"Ship to this address" ticked by default</b> and In-Store Pickup as a clear option. Put Shipping method on the same screen with delivery dates. <b>Skip Payment information automatically</b> when the chosen method needs no input (COD, Check). Result: Address & delivery &rarr; Payment &rarr; Review, from about 9 clicks to about 4.</div>
+      <div class="impact-bar"><span class="impact-tag completion">Completion</span></div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">Fixes rec 4. Every Continue step loses some buyers. Merging steps that are usually filled with the same answer, and skipping steps that collect nothing, reduces the number of exits while asking for the same data. It is the most direct structural change for the cart-to-order ratio.</div>
+      </details>
+      <div class="telos-comments" data-rec="11"></div>
+    </div>
+
+    <div class="item" id="rec-12">
+      <div class="item-header">
+        <div class="rec-num blue">12</div>
+        <div class="item-title">Replace all default placeholder text before buyers see it.</div>
+      </div>
+      <div class="item-body">Remove the "About login / registration ... edit this in the admin site" block (or replace it with a privacy reassurance line). Put the real store address under In-Store Pickup. Rewrite the shipping options as <b>"Ground, arrives in 5&ndash;7 days"</b> and similar, instead of the filler descriptions.</div>
+      <div class="impact-bar"><span class="impact-tag trust">Trust</span></div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">Fixes rec 5. Each string is a one-line content change with no design work, and together they remove the clearest "is this shop real?" signals for a buyer with no history here. Showing delivery dates also gives the buyer the information they actually need to choose a shipping option.</div>
+      </details>
+      <div class="telos-comments" data-rec="12"></div>
+    </div>
+
+    <div class="item" id="rec-13">
+      <div class="item-header">
+        <div class="rec-num blue">13</div>
+        <div class="item-title">Give one primary button style to Checkout, Continue and Confirm, and put the total on the final button.</div>
+      </div>
+      <div class="item-body">Use the shop's green from "Add to cart" for the single forward action on each screen, aligned right and larger than the minor buttons. Change the last button to <b>"Place order &middot; 17.00"</b> and put it next to the Total, not below and to the left of it.</div>
+      <div class="impact-bar"><span class="impact-tag completion">Completion</span><span class="impact-tag conversion">Conversion</span></div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">Fixes rec 6. A single, consistent primary button makes the next step obvious, and showing the amount on the final button confirms exactly what the buyer is committing to. That reduces hesitation at the Confirm step. Measure time on step and drop-off on Cart and Confirm.</div>
+      </details>
+      <div class="telos-comments" data-rec="13"></div>
+    </div>
+
+    <div class="item" id="rec-14">
+      <div class="item-header">
+        <div class="rec-num blue">14</div>
+        <div class="item-title">Use a stripped-down checkout header and hide coupon fields behind a link.</div>
+      </div>
+      <div class="item-body">From the Checkout button onward, replace the category bar, search and footer with a minimal header: logo, "Secure checkout" and a link back to the cart. On the cart, collapse Discount Code and Gift Cards into one <b>"Have a code?"</b> link that opens the fields when clicked.</div>
+      <div class="impact-bar"><span class="impact-tag completion">Completion</span></div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">Fixes rec 7. Removing the ways out of checkout leaves Continue as the obvious action. Hiding coupon fields until asked for stops buyers without a code from leaving to search for one, while customers who have a code can still use it.</div>
+      </details>
+      <div class="telos-comments" data-rec="14"></div>
+    </div>
+
+    <div class="item" id="rec-15">
+      <div class="item-header">
+        <div class="rec-num blue">15</div>
+        <div class="item-title">Track drop-off at each step before shipping changes, so the baseline exists.</div>
+      </div>
+      <div class="item-body">The KR has no baseline yet. Log one event for each step: cart view, Checkout click, terms error shown, guest/login/register choice, each accordion step completed, Confirm click, Thank-you view. Filter to first-time guests. <b>That turns this critique's ranking into numbers</b> and shows which fix to ship first.</div>
+      <div class="impact-bar"><span class="impact-tag measurement">Measurement</span></div>
+      <details class="how">
+        <summary>How did I get this?</summary>
+        <div class="how-body">Supports recs 1&ndash;4. The KR is stated as cart &rarr; order placed, but without per-step data no one can tell whether the terms gate, the sign-in gate or the fee surprise loses the most guests. Two weeks of step-level data before the first change gives a baseline and a clear before/after comparison.</div>
+      </details>
+      <div class="telos-comments" data-rec="15"></div>
+    </div>
+  </div>
+
+  <!-- General Feedback -->
+  <div class="section">
+    <div class="section-header" style="color: #555;">Expert Feedback</div>
+    <div class="item-body" style="font-size: 12px; color: #999; margin-bottom: 10px;">
+      Share feedback the critique missed, add context from your domain expertise, or flag considerations for the next review.
+    </div>
+    <div class="telos-comments" data-rec="general"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="critique-footer">
+    Screens reviewed: Home, Cart, Terms popup, Sign-in gate, Billing address, Shipping address, Shipping method, Payment method, Payment info, Confirm order, Thank you<br>
+    Date: Nov 15, 2026
+  </div>
+
+</div>
+
+<link rel="stylesheet" href="comments.css">
+<script src="comments.js"></script>
+<script>initComments('demo-web-shop/guest-checkout');</script>
+
+</body>
+</html>

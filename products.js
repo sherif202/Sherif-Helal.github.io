@@ -8,6 +8,27 @@
 */
 window.PORTFOLIO = [
   {
+    group: "Demo Web Shop",
+    about: "A public demo store by Tricentis, reviewed as if I were its PM. Not affiliated with Tricentis.",
+    products: [
+      {
+        name: "Checkout for first-time buyers",
+        line: "A shop charged first-time buyers a 7.00 fee they never chose, and only showed it on the last page.",
+        detail:
+          "Maps the checkout, finds where a doubtful first-time buyer gives up, and benchmarks Amazon, Noon and Jumia. The findings become 7 improvements ranked with ICE, 10 user stories, 3 sprints and 3 releases behind feature flags with a rollback rule.",
+        role: "Product manager",
+        status: "Expert review, competitor teardown and an independent AI second opinion. No real users were interviewed and there were no analytics; money figures are examples.",
+        facts: ["26 findings on 11 screens", "7 improvements ranked with ICE", "10 user stories, rewritten after the evidence", "3 releases behind feature flags"],
+        cover: "covers/demo-web-shop-checkout.jpg",
+        pieces: [
+          { label: "Case study", url: "checkout-case-study/case-study.html" },
+          { label: "Full playbook", url: "checkout-case-study/index.html" },
+          { label: "Slides (PDF)", url: "checkout-case-study/Demo-Web-Shop-Checkout-Case-Study.pdf" }
+        ]
+      }
+    ]
+  },
+  {
     group: "OVARC",
     about:
       "Payroll and HR for Egyptian companies. Independent work, built from public sources and the OVARC case study. Names, dates and figures in the three delivery portfolios are illustrative examples.",
