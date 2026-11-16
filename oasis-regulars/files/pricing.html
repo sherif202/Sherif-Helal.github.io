@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oasis Rewards Pricing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a pricing and rewards sheet for a q-commerce team
+   IDEA a till receipt and loyalty card: every order prints who pays what
+   PICTURE a live receipt that splits one delivery between Oasis and the customer
+   COLOUR Oasis red field, white paper, ink, green for "kept", amber for "capped"
+   TYPE Poppins 800 for figures and titles, Poppins 400 for text
+   LAYOUT red band with title and four rules; calculator controls left, receipt right; sections below in two columns, stacked on a phone */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#141012);--ink:light-dark(#1d1a1c,#f3eeee);--mute:light-dark(#6c6266,#b4a9ad);--line:light-dark(#ece4e2,#33292d);--red:#e53935;--redd:light-dark(#c62828,#ff6b66);--paper:light-dark(#fff,#1e181b);--tint:light-dark(#fdf1ef,#2a1d20);--green:light-dark(#2e7d32,#6fcf75);--amber:light-dark(#b26a00,#ffb74d)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Poppins,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.top{background:#e53935;color:#fff}
+.top h1{font-size:clamp(32px,4.4vw,50px);line-height:1.05;letter-spacing:-.02em;margin:0;font-weight:800;text-wrap:balance;max-width:16ch}
+.top p{margin:12px 0 0;max-width:62ch;font-size:17px;opacity:.95}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(11em,1fr));gap:12px;margin-top:26px}
+.rule{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);border-radius:14px;padding:12px 14px}
+.rule b{display:block;font-size:clamp(24px,3vw,32px);font-weight:800;line-height:1.1;white-space:nowrap}
+.rule span{font-size:14px}
+h2{font-size:clamp(24px,2.6vw,32px);line-height:1.1;letter-spacing:-.02em;margin:0 0 6px;font-weight:800;text-wrap:balance}
+.lede{color:var(--mute);margin:0 0 20px;max-width:70ch}
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:28px;align-items:start}
+.ctl{display:grid;gap:18px}
+.ctl label,.lab{font-weight:600;font-size:15px;display:flex;justify-content:space-between;gap:10px}
+.ctl output{font-weight:800;color:var(--redd);white-space:nowrap}
+input[type=range]{width:100%;height:44px;accent-color:#e53935;cursor:pointer}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.seg button{font:500 15px Poppins,sans-serif;min-height:44px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed=true]{background:#e53935;border-color:#e53935;color:#fff}
+.seg button:focus-visible,input:focus-visible{outline:3px solid #ffb74d;outline-offset:2px}
+.chk{display:flex;gap:10px;align-items:center;font-weight:500;min-height:44px}
+.chk input{width:22px;height:22px;accent-color:#e53935}
+.rcpt{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:22px 22px 26px;position:relative;box-shadow:0 18px 40px -24px rgba(120,20,20,.35)}
+.rcpt:after{content:"";position:absolute;left:0;right:0;bottom:-10px;height:12px;background:radial-gradient(circle at 8px 0,transparent 7px,var(--paper) 8px) 0 0/16px 12px repeat-x}
+.rh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px dashed var(--line);padding-bottom:10px;margin-bottom:10px}
+.rh b{font-size:20px;font-weight:800}
+.ln{display:flex;justify-content:space-between;gap:12px;padding:4px 0;font-size:15px}
+.ln span:last-child{white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums}
+.split{display:flex;height:46px;border-radius:10px;overflow:hidden;margin:14px 0 6px;background:var(--tint)}
+.split div{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;transition:width .35s}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--mute)}
+.key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:0}
+.big{display:flex;justify-content:space-between;align-items:baseline;border-top:2px dashed var(--line);margin-top:12px;padding-top:12px}
+.big b{font-size:clamp(34px,4vw,48px);font-weight:800;line-height:1;color:var(--redd);white-space:nowrap}
+.pts{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;background:var(--tint);border-radius:12px;padding:12px;margin-top:14px}
+.badge{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:#e53935;transition:width .35s}
+.note{font-size:13px;color:var(--mute);margin-top:10px}
+.ok{color:var(--green);font-weight:700}.warn{color:var(--amber);font-weight:700}
+.alt{background:var(--tint)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel h3{margin:0 0 4px;font-size:19px;font-weight:700}
+.ladder{position:relative;height:120px;margin:22px 4px 8px}
+.ladder .trk{position:absolute;left:0;right:0;top:54px;height:14px;border-radius:8px;background:linear-gradient(90deg,#f3b8b5 0 33.3%,#ef7a74 33.3% 66.6%,#e53935 66.6%)}
+.stop{position:absolute;top:0;transform:translateX(-50%);text-align:center;font-size:13px;white-space:nowrap}
+.stop b{display:block;font-size:16px}
+.stop i{display:block;width:3px;height:32px;background:var(--ink);margin:4px auto 0}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:left;font-weight:600;background:#e53935;color:#fff;padding:8px 10px}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cost{display:grid;grid-template-columns:minmax(9em,auto) minmax(0,1fr) auto;gap:8px 12px;align-items:center;font-size:15px;margin-top:14px}
+.cost .t{height:22px;border-radius:6px;background:var(--line);position:relative}
+.cost .t i{position:absolute;inset:0 auto 0 0;border-radius:6px;background:#e53935}
+.cost b{white-space:nowrap}
+.ceil{font-size:13px;color:var(--mute);margin-top:8px}
+.ring{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:20px;align-items:center}
+.cell{border-radius:6px;text-align:center;font-weight:700;white-space:nowrap}
+.hb{display:grid;grid-template-columns:minmax(10em,14em) minmax(0,1fr) auto;gap:6px 12px;align-items:center;font-size:14px}
+.hb .z{position:relative;height:20px}
+.hb .z:before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;border-left:1.5px solid var(--mute)}
+.hb .z i{position:absolute;top:0;bottom:0;border-radius:4px}
+.src{font-size:14px;color:var(--mute)}
+.src a{color:var(--redd)}
+.db{display:grid;grid-template-columns:minmax(12em,17em) minmax(260px,1fr) minmax(11em,15em);gap:10px 16px;align-items:center;min-width:620px}
+.db .who b{display:block;font-size:15px}.db .who span{font-size:13px;color:var(--mute)}
+.db .tk{position:relative;height:34px}
+.db .tk .z0,.db .tk .z5{position:absolute;top:-6px;bottom:-6px;border-left:1.5px dashed var(--mute)}
+.db .tk .z5{border-left:2px solid var(--green)}
+.db .tk .lnk{position:absolute;top:16px;height:3px;background:var(--line)}
+.db .tk .dot{position:absolute;top:9px;width:17px;height:17px;border-radius:50%;transform:translateX(-50%);border:2px solid var(--paper)}
+.db .tk .v{position:absolute;top:-11px;background:var(--bg);padding:0 3px;border-radius:3px;z-index:1;font-size:12px;font-weight:700;transform:translateX(-50%);white-space:nowrap}
+.db .nud{font-size:13.5px}
+.dbk{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mute);margin-top:14px}
+.dbk i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.dbk i.ln0{border-radius:0;width:14px;height:0;border-top:2px dashed var(--mute)}
+.day{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.day div{border-radius:10px;padding:12px;color:#fff}
+.day b{display:block;font-size:15px}.day .x{font-size:26px;font-weight:800;line-height:1.2}.day span{font-size:13px;display:block}
+.ul{margin:6px 0 0;padding-left:18px}.ul li{margin:6px 0}
+.mk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.mk p{margin:8px 0 0;font-size:15px}
+.ifr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;font-size:15px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ifr b{white-space:nowrap}
+@media(max-width:860px){.mk,.day{grid-template-columns:minmax(0,1fr)}.day div{min-height:0}}
+@media(max-width:860px){.calc,.two,.ring{grid-template-columns:minmax(0,1fr)}.rcpt{position:sticky;top:8px;z-index:2}}
+@media(max-width:600px){table{font-size:13px}th,td{padding:6px 5px}.hb{grid-template-columns:minmax(7em,9em) minmax(0,1fr) auto;font-size:13px}.rcpt{position:static}}
+@media(prefers-reduced-motion:reduce){.split div,.bar i{transition:none}}
+.tz td,.tz th{text-align:center;white-space:nowrap}.tz td:first-child,.tz th:first-child{text-align:left}.tz small{font-weight:500;color:rgba(255,255,255,.9)}
+.dt{display:inline-flex;gap:4px;vertical-align:-2px;margin-right:4px}.dt i{width:14px;height:14px;border-radius:50%;background:#e53935}
+.dz{font-size:13px;color:var(--mute)}
+</style></head><body>
+
+<header class="band top"><div class="wrap">
+<h1>Oasis Regulars: how rewards and delivery pricing fit together</h1>
+<p>Customers earn status for free. Oasis pays for a reward only up to a hard limit. The customer's choices of basket, time and delivery type decide the rest of the delivery fee.</p>
+<div class="rules">
+<div class="rule"><b>AED 0</b><span>membership fee, ever</span></div>
+<div class="rule"><b>AED 9.18</b><span>max reward cost per redeemed order ($2.50)</span></div>
+<div class="rule"><b>$0.50</b><span>profit every order must keep</span></div>
+<div class="rule"><b>AED 12</b><span>delivery fee cap for the customer</span></div>
+</div></div></header>
+
+<section class="band"><div class="wrap">
+<h2>Price one order and see who pays for the delivery</h2>
+<p class="lede">Move the controls. The receipt uses the shared-cost rule: Oasis pays from the basket margin, up to AED 9.18, and the customer pays the rest as the fee.</p>
+<div class="calc">
+<div class="ctl">
+<div><label for="bk">Basket value <output id="bkO"></output></label><input id="bk" type="range" min="35" max="300" step="5" value="185"></div>
+<div><span class="lab">Distance from the dark store</span><div class="seg" id="ring"></div></div>
+<div><span class="lab">Time slot</span><div class="seg" id="slot"></div></div>
+<div><span class="lab">Delivery type</span><div class="seg" id="mode"></div></div>
+<div><label for="pt">Status points before this order (last 30 days) <output id="ptO"></output></label><input id="pt" type="range" min="0" max="120" step="1" value="62"></div>
+<label class="chk" for="late"><input id="late" type="checkbox"> The order arrives more than 10 min late</label>
+</div>
+<div class="rcpt" aria-live="polite">
+<div class="rh"><b>Oasis Express</b><span class="src" id="rDesc"></span></div>
+<div class="ln"><span>Basket</span><span id="rB"></span></div>
+<div class="ln"><span>Delivery cost to Oasis</span><span id="rC"></span></div>
+<div class="split" id="split"><div id="sO" style="background:#e53935"></div><div id="sX" style="background:#b26a00"></div><div id="sU" style="background:#5d5357"></div></div>
+<div class="key"><span><i style="background:#e53935"></i>Oasis share</span><span><i style="background:#b26a00"></i>Oasis covers above the cap</span><span><i style="background:#5d5357"></i>Customer fee</span></div>
+<div class="ln" style="margin-top:8px"><span>Oasis share (margin − $0.50, max AED 9.18)</span><span id="rS"></span></div>
+<div class="ln" id="rLate"><span>Make-Good credit</span><span></span></div>
+<div class="big"><span>Customer pays for delivery</span><b id="rF"></b></div>
+<div class="ln"><span>Profit Oasis keeps on this order</span><span id="rP"></span></div>
+<div class="pts"><div class="badge" id="tB"></div><div><div id="tT" style="font-weight:600"></div><div class="bar"><i id="tBar"></i></div><div class="src" id="tN"></div></div></div>
+<p class="note">Cost and margin figures are assumptions (6% margin, Dubai rings) until Operations and Finance share real data.</p>
+</div></div></div></section>
+
+<section class="band alt"><div class="wrap two">
+<div class="panel">
+<h3>Status is earned, never bought</h3>
+<p class="src">10 points per qualifying order + 1 point per AED 6. Orders from AED 35 count. Points roll over 30 days, with one grace month before any demotion.</p>
+<div class="ladder"><div class="trk"></div>
+<div class="stop" style="left:2%"><b>Member</b>0 pts<i></i></div>
+<div class="stop" style="left:33.3%"><b>Silver</b>40 pts<i></i></div>
+<div class="stop" style="left:66.6%"><b>Gold</b>80 pts<i></i></div></div>
+<div class="scroll"><table><thead><tr><th>Perk</th><th>Who</th><th>When</th></tr></thead><tbody>
+<tr><td>Progress bar, weekly streak with 1 shield a month</td><td>All members</td><td>Stage 1</td></tr>
+<tr><td>Priority support</td><td>Silver, Gold</td><td>Stage 1</td></tr>
+<tr><td>Protected pre-iftar slot, 1 a day (≤ 20% of capacity)</td><td>Gold</td><td>Stage 1, Ramadan</td></tr>
+<tr><td>AED 9 off a basket of AED 150+, max 2 a month</td><td>Gold</td><td>Stage 2, after Eid</td></tr>
+<tr><td>AED 5 Make-Good credit when late</td><td>Everyone in the zone</td><td>From launch</td></tr>
+</tbody></table></div>
+</div>
+<div class="panel">
+<h3>Every reward stays under the AED 9.18 limit</h3>
+<p class="src">Bar length shows the cost of one redeemed reward against the hard limit.</p>
+<div class="cost" id="costs"></div>
+<p class="ceil">Pilot reward budget: AED 60,000 cap. Expected spend AED 25,000–58,000 over about 16 weeks for 7,000–16,000 active users. Credits are non-cash, cannot be transferred, expire after 30 days and work with cash on delivery.</p>
+</div></div></section>
+
+<section class="band"><div class="wrap">
+<h2>Free deliveries depend on distance and time</h2>
+<p class="lede">Each 4-week cycle, a top-basket customer gets a number of free deliveries by ring. Off-peak slots are cheapest; events cost the most. After the limit, the customer picks partner delivery, pickup or the standard fee.</p>
+<div class="ring">
+<svg viewBox="0 0 260 260" role="img" aria-label="Three delivery rings around a dark store: R1 gets 4 free deliveries, R2 gets 3, R3 gets 2">
+<circle cx="130" cy="130" r="124" fill="#e53935" fill-opacity=".16"/><circle cx="130" cy="130" r="86" fill="#e53935" fill-opacity=".32"/><circle cx="130" cy="130" r="48" fill="#e53935"/>
+<rect x="114" y="116" width="32" height="26" rx="4" fill="#fff"/><path d="M110 118 l20 -14 l20 14z" fill="#fff"/>
+<text x="130" y="168" text-anchor="middle" fill="#fff" font-family="Poppins" font-weight="700" font-size="13">R1 · 4 free</text>
+<text x="130" y="72" text-anchor="middle" fill="currentColor" font-family="Poppins" font-weight="700" font-size="13">R2 · 3 free</text>
+<text x="130" y="28" text-anchor="middle" fill="currentColor" font-family="Poppins" font-weight="700" font-size="13">R3 · 2 free</text>
+</svg>
+<div class="scroll"><table id="slotT"></table><p class="note">Fee for a top basket (AED 150+) inside the free allowance. "Std" is the standard AED 8 fee. Partner delivery only in off-peak slots in R1 and R2, because it costs about $3.20 in R3.</p></div>
+</div></div></section>
+<section class="band alt" id="tierzone"><div class="wrap">
+<h2>One simple promise: free deliveries each month, near you</h2>
+<p class="lede">No credits and no maths for the customer. The app shows one number: "3 free deliveries left this month". Free deliveries work on baskets of AED 150+, within 4 km, in the green (off-peak) slots the app marks for you.</p>
+<div class="scroll"><table class="tz">
+<thead><tr><th>Tier</th><th>Near you · up to 4 km</th><th>Far · 4–6 km</th><th>Outside 6+ km</th></tr></thead>
+<tbody>
+<tr><td><b>Member</b></td><td><span class="dz">"1 more order to Silver"</span></td><td><span class="dz">pickup free</span></td><td><span class="dz">pickup free</span></td></tr>
+<tr><td><b>Silver</b></td><td><span class="dt"><i></i></span> 1 free a month</td><td><span class="dz">pickup free</span></td><td><span class="dz">pickup free</span></td></tr>
+<tr><td><b>Gold</b></td><td><span class="dt"><i></i><i></i><i></i><i></i></span> 4 free a month</td><td><span class="dz">pickup free</span></td><td><span class="dz">pickup free</span></td></tr>
+</tbody></table></div>
+<p class="note">Free deliveries replace the AED 9 Gold perk; they do not stack. When they run out, the customer sees two choices: free pickup or the standard AED 8 fee. Behind the screen, R1 drops cost $2.2 and R2 drops $2.8, so the average free drop is about $2.48, just under the $2.50 limit.</p>
+<div class="two" style="margin-top:22px">
+<div class="panel">
+<h3>Points everywhere; free delivery only near you</h3>
+<div class="scroll"><table><thead><tr><th>Drop is</th><th>Points</th><th>Free delivery</th><th>Make-Good</th></tr></thead><tbody>
+<tr><td>Up to 4 km</td><td class="ok">Yes</td><td class="ok">Yes</td><td class="ok">Yes</td></tr>
+<tr><td>Same store, 4+ km</td><td class="ok">Yes</td><td class="warn">No</td><td class="ok">Yes</td></tr>
+<tr><td>Another zone</td><td class="ok">Yes</td><td class="warn">No</td><td class="warn">No</td></tr>
+</tbody></table></div>
+<p class="note">Far orders: free pickup or the standard fee (plus an assumed AED 4 beyond 6 km). The address is fixed at payment, so a free delivery cannot be moved to a far drop.</p>
+</div>
+<div class="panel">
+<h3>Cost per 4 weeks, treatment group</h3>
+<p class="src">Fee Oasis does not collect: AED 8 per free delivery, below AED 9.18.</p>
+<div class="hb" id="tzb"></div>
+<p class="note">Assumed: 7,000 treated actives, tier mix 65/25/10. The PRD expects AED 2,400–5,500 a month for the Gold perk, so start with Gold and switch Silver's free delivery on only while spend is under the budget line.</p>
+</div></div>
+</div></section>
+
+<section class="band alt"><div class="wrap two">
+<div class="panel">
+<h3>The same rule priced for every choice</h3>
+<p class="src">Customer fee in AED, ring R2 (2–4 km), at four basket sizes.</p>
+<div class="scroll"><table id="matT"></table></div>
+<p class="note">Cells above AED 12 are capped; Oasis pays the difference.</p>
+</div>
+<div class="panel">
+<h3>Today the top 10% pay for the other 90%</h3>
+<p class="src">Profit per order by basket band, after delivery. Dubai, assumed data.</p>
+<div class="scroll"><table><thead><tr><th>Band</th><th class="n">Today (flat AED 7.3)</th><th class="n">Sweet spot</th></tr></thead><tbody>
+<tr><td>Under AED 50</td><td class="n warn">−$1.68</td><td class="n ok">+$0.52</td></tr>
+<tr><td>AED 50–149</td><td class="n warn">−$0.88</td><td class="n ok">+$0.59</td></tr>
+<tr><td>AED 150+ (top baskets)</td><td class="n ok">+$1.03</td><td class="n ok">+$0.42</td></tr>
+<tr><td><b>Month, after $0.50 per order</b></td><td class="n warn"><b>−$176,000</b></td><td class="n ok"><b>about +$4,000</b></td></tr>
+</tbody></table></div>
+<p class="note">Sweet spot: AED 40 minimum basket, two instant orders batched per trip (cost $4.2 → $3.0), free delivery on AED 150+ scheduled orders.</p>
+</div></div></section>
+
+<section class="band" id="behaviour"><div class="wrap">
+<h2>Each customer habit has a nudge that moves it into safe profit</h2>
+<p class="lede">Profit per order for seven common habits. The grey dot is today, with a flat AED 7.3 fee and current promos. The red or green dot is the same customer after one nudge under the shared-cost rule. The safe line is $0.50 kept per order.</p>
+<div class="scroll"><div class="db" id="db"></div></div>
+<div class="dbk"><span><i style="background:var(--mute)"></i>Today</span><span><i style="background:var(--green)"></i>After the nudge, safe</span><span><i style="background:#e53935"></i>After the nudge, still below safe</span><span><i class="ln0"></i>$0 and $0.50 lines</span></div>
+<p class="note">Cash handling for cash on delivery is assumed at $0.30 per order, and today's promo at AED 10 per coupon order. Neither number is in Oasis data yet.</p>
+</div></section>
+
+<section class="band alt"><div class="wrap">
+<h2>Status sets which lever we pull</h2>
+<div class="scroll"><table class="stack"><thead><tr><th>Status</th><th>Typical habit</th><th>Profit risk</th><th>Lever (no cash first)</th></tr></thead><tbody>
+<tr><td data-l="Status"><b>Member</b> (0–39 pts)</td><td data-l="Habit">Small top-ups at peak; chases coupons</td><td data-l="Risk" class="warn">Loses money on every small instant order today</td><td data-l="Lever">AED 40 minimum basket; "add AED X to cut your fee"; "1 more order to Silver"</td></tr>
+<tr><td data-l="Status"><b>Silver</b> (40–79 pts)</td><td data-l="Habit">Mid baskets, mixed instant and scheduled</td><td data-l="Risk" class="warn">Near break-even; peak and cash orders tip it negative</td><td data-l="Lever">Off-peak slot shows the saving; bonus points for card or wallet; streak shield</td></tr>
+<tr><td data-l="Status"><b>Gold</b> (80+ pts)</td><td data-l="Habit">Weekly AED 150+ restock, planned slots</td><td data-l="Risk" class="ok">Safe; the risk is iftar orders at 1.8× courier cost</td><td data-l="Lever">Free delivery off-peak; protected iftar slot instead of a discount; AED 9 perk only after Eid</td></tr>
+</tbody></table></div>
+</div></section>
+
+<section class="band"><div class="wrap">
+<h2>Ramadan: sell the slot, not a discount</h2>
+<p class="lede">Courier cost changes through a Ramadan day. Free delivery and cash perks stay in the cheap windows; the iftar window sells reliability at the standard fee.</p>
+<div class="day" id="day"></div>
+<div class="two" style="margin-top:24px">
+<div class="panel"><h3>Rules for Ramadan and Eid</h3><ul class="ul">
+<li>No free delivery and no cash perk in the iftar window; the cost is 1.8× and the fee would hit the cap.</li>
+<li>Gold gets a protected pre-iftar slot, 1 a day, capped at 20% of capacity; unused slots go back to everyone 60 min before.</li>
+<li>Pre-book before 16:00 for an off-peak drop and earn double streak credit, at no cash cost.</li>
+<li>The Stage 2 cash perk starts only after Eid, so Ramadan never carries a discount.</li>
+<li>Make-Good stays on for everyone: lateness at iftar is the moment trust breaks.</li></ul></div>
+<div class="panel"><h3>The same iftar order, two ways</h3><div id="iftar"></div>
+<p class="note">R2, AED 150 basket, instant delivery. Assumed costs.</p></div>
+</div></div></section>
+
+<section class="band alt"><div class="wrap">
+<h2>How the design answers the market</h2>
+<div class="mk">
+<div class="panel"><h3>Customers compare fees and chase promos</h3><p>Rivals sell free delivery inside paid plans: talabat Pro and Careem Plus at AED 29 a month, Amazon Prime free over AED 25. Keeta competes on low fees.</p><p><b>Answer:</b> no blanket coupons. Free delivery is earned with a basket of AED 185 or an off-peak slot, and the savings ledger shows the AED 29 a month the customer is not paying.</p></div>
+<div class="panel"><h3>Cash on delivery and mixed payment</h3><p>In Egypt, cash and bank transfer were 34% of e-commerce payment value in 2025, and 55–70% of shoppers prefer cash.</p><p><b>Answer:</b> cash orders still earn status and credits apply before the rider collects cash. Bonus status points, not money, nudge card and wallet payment.</p></div>
+<div class="panel"><h3>Ramadan and Eid spikes</h3><p>Grocery orders rise 33% at iftar and 81% at suhoor (Careem, Ramadan 2026). Courier cost in the event window is about 1.8× off-peak.</p><p><b>Answer:</b> discounts move out of the spike. The iftar window gets protection, not a price cut, and the cost-based fee keeps every order above $0.50.</p></div>
+</div></div></section>
+
+<section class="band"><div class="wrap">
+<h2>The time rule protects the money; a cost rise breaks fixed fees</h2>
+<p class="lede">Monthly result for about 2,900 top-basket customers in Dubai, after keeping $0.50 per order. Each row changes one condition or removes one rule.</p>
+<div class="hb" id="stress"></div>
+<p class="note">Fix for the cost rise: set each fee from the drop cost every week, which is what the shared-cost rule in the calculator does.</p>
+</div></section>
+
+<section class="band alt"><div class="wrap two">
+<div class="panel"><h3>What is decided and what is explored</h3>
+<p><b>Decided in PRD v0.2:</b> tiers, points, Make-Good, Gold perk, AED 9.18 limit, AED 60k budget, no fee. The PRD lists "no free-delivery perk" as a non-goal.</p>
+<p><b>Explored on the assumed-data branch:</b> delivery fees, rings, time slots and the shared-cost rule. These keep free delivery under AED 9.18, so PRD v0.3 can revisit that non-goal once real cost data arrives.</p></div>
+<div class="panel"><h3>Sources</h3>
+<p class="src">PRD v0.2 (sections 5–8, 14) · Discovery v2b assumed data · Sweet spot triangle · Delivery zones stress test · Shared responsibility model · Stakeholder Q&amp;A (redemption ceiling, churn, frequency). <a href="https://claude.ai/artifact/G6TeVJtQL6HWdVsZd6Qcmb">Financial model</a></p></div>
+</div></section>
+
+<script>
+{
+const FX=3.6725,M=0.06,CEIL=2.5,CAP=12;
+const RING={R1:{c:2.2,p:2.0,f:4,l:'R1 · 0–2 km'},R2:{c:2.8,p:2.4,f:3,l:'R2 · 2–4 km'},R3:{c:3.8,p:3.2,f:2,l:'R3 · 4–6 km'}};
+const SLOT={green:{m:1,l:'Off-peak'},peak:{m:1.35,l:'Evening peak'},night:{m:1.5,l:'Night'},event:{m:1.8,l:'Event / iftar'}};
+const MODE={instant:'Instant',scheduled:'Scheduled',partner:'Partner 60–90 min',pickup:'Pickup'};
+const st={ring:'R2',slot:'green',mode:'scheduled'};
+const $=id=>document.getElementById(id);
+const aed=v=>'AED '+v.toFixed(v%1?2:0);
+function cost(r,s,m){const R=RING[r],S=SLOT[s].m;if(m==='pickup')return 0.3;if(m==='partner')return R.p*(s==='green'?1:1.2);return R.c*S*(m==='instant'?1.29:1)}
+function share(b){return Math.max(0,Math.min(CEIL,b/FX*M-0.5))}
+function fee(b,c){const raw=Math.max(0,c-share(b))*FX;return{raw,fee:Math.min(CAP,raw)}}
+function seg(id,obj,key){$(id).innerHTML=Object.entries(obj).map(([k,v])=>`<button type="button" data-k="${k}" aria-pressed="${st[key]===k}">${typeof v==='string'?v:v.l}</button>`).join('');$(id).onclick=e=>{const b=e.target.closest('button');if(!b)return;st[key]=b.dataset.k;seg(id,obj,key);draw()}}
+function tier(p){return p>=80?['Gold','#e53935',80,null]:p>=40?['Silver','#7d8a96',40,80]:['Member','#b0a4a8',0,40]}
+function draw(){
+ const b=+$('bk').value,p0=+$('pt').value,late=$('late').checked;
+ $('bkO').textContent=aed(b);$('ptO').textContent=p0+' pts';
+ const c=cost(st.ring,st.slot,st.mode),sh=Math.min(share(b),c),f=fee(b,c),over=(f.raw-f.fee)/FX,cust=f.fee/FX;
+ $('rDesc').textContent=`${RING[st.ring].l} · ${SLOT[st.slot].l} · ${MODE[st.mode]}`;
+ $('rB').textContent=aed(b);$('rC').textContent=aed(c*FX);
+ const tot=sh+over+cust||1;
+ [['sO',sh],['sX',over],['sU',cust]].forEach(([id,v])=>{const w=v/tot*100;$(id).style.width=w+'%';$(id).textContent=w>14?aed(v*FX):''});
+ $('rS').textContent=aed(sh*FX);
+ $('rLate').lastElementChild.textContent=late?'+ AED 5 to wallet':'none';
+ $('rF').textContent=f.fee<0.05?'Free':aed(f.fee);
+ const prof=b/FX*M+cust-c-(late?5/FX:0);
+ $('rP').innerHTML=`<span class="${prof>=0.5-0.01?'ok':'warn'}">$${prof.toFixed(2)}</span>`;
+ const earn=b>=35?10+Math.floor(b/6):0,p1=p0+earn,[n,col,lo,hi]=tier(p1);
+ $('tB').textContent=n;$('tB').style.background=col;
+ $('tT').textContent=`+${earn} pts this order → ${p1} pts`;
+ $('tBar').style.width=(hi?Math.min(100,(p1-lo)/(hi-lo)*100):100)+'%';
+ $('tN').textContent=hi?`${hi-p1} pts to ${hi===40?'Silver':'Gold'}`:'Top tier. Gold perk on AED 150+ baskets after Eid';
+}
+seg('ring',RING,'ring');seg('slot',SLOT,'slot');seg('mode',MODE,'mode');
+['bk','pt','late'].forEach(id=>$(id).addEventListener('input',draw));draw();
+
+const C=[['Make-Good, late order',5,'max 1 per order, 4 a month'],['Missing item credit',5,'plus refund; >2 claims a month reviewed'],['Gold perk, AED 150+',9,'max 2 a month, Stage 2'],['Free delivery, top basket',9.18,'only when the Oasis share covers it']];
+$('costs').innerHTML=C.map(([l,v,n])=>`<span>${l}<br><span class="src">${n}</span></span><div class="t"><i style="width:${v/9.18*100}%"></i></div><b>${aed(v)}</b>`).join('');
+
+const F={R1:[0,4,4,null],R2:[2,6,7,null],R3:[5,null,null,null]};
+const shade=v=>v===null?'background:var(--line);color:var(--mute)':v===0?'background:#2e7d32;color:#fff':`background:rgba(229,57,53,${0.18+v/10});color:${v>4?'#fff':'var(--ink)'}`;
+$('slotT').innerHTML='<thead><tr><th>Ring</th>'+Object.values(SLOT).map(s=>`<th class="n">${s.l}</th>`).join('')+'</tr></thead><tbody>'+Object.entries(F).map(([r,a])=>`<tr><td>${RING[r].l}</td>${a.map(v=>`<td class="n"><div class="cell" style="${shade(v)}">${v===null?'Std':v===0?'Free':'AED '+v}</div></td>`).join('')}</tr>`).join('')+'</tbody>';
+
+const rows=[['Instant, peak','R2','peak','instant'],['Instant, off-peak','R2','green','instant'],['Scheduled, peak','R2','peak','scheduled'],['Scheduled, off-peak','R2','green','scheduled'],['Scheduled, off-peak, R1','R1','green','scheduled'],['Partner, off-peak','R2','green','partner'],['Pickup','R2','green','pickup']],B=[45,80,150,185];
+$('matT').innerHTML='<thead><tr><th>Choice</th>'+B.map(b=>`<th class="n">AED ${b}</th>`).join('')+'</tr></thead><tbody>'+rows.map(([l,r,s,m])=>`<tr><td>${l}</td>${B.map(b=>{const f=fee(b,cost(r,s,m));return `<td class="n">${f.fee<0.05?'<span class="ok">Free</span>':(f.raw>CAP?'<span class="warn">12 cap</span>':f.fee.toFixed(1))}</td>`}).join('')}</tr>`).join('')+'</tbody>';
+
+const S=[['Base: customers move off-peak',4997],['Customers stay at peak',5015],['Ramadan month',3702],['More far customers',4357],['Partner misses 30% of jobs',4870],['Nobody uses pickup',4299],['Delivery cost +20%',-1644],['Worst case, all together',-5425],['No rules: free any time, no limit',-9736],['Free any slot, ring limits kept',-4255],['Slot fees kept, no limit',3236],['Same limit in all rings',3984]],mx=10000;
+$('stress').innerHTML=S.map(([l,v])=>{const w=Math.abs(v)/mx*50,left=v>=0?50:50-w;return `<span>${l}</span><div class="z"><i style="left:${left}%;width:${w}%;background:${v>=0?'var(--green)':'#e53935'}"></i></div><b class="${v>=0?'ok':'warn'}" style="white-space:nowrap">${v>=0?'+':'−'}$${Math.abs(v).toLocaleString()}</b>`}).join('');
+
+const mg=b=>b/FX*(b>=150?0.06:0.065);
+const today=(b,r,s,m,promo,cod)=>mg(b)+(b>=150?3.7:7.3)/FX-cost(r,s,m)-(promo?10/FX:0)-(cod?0.3:0);
+const after=(b,r,s,m,cod)=>{const c=cost(r,s,m);return mg(b)+fee(b,c).fee/FX-c-(cod?0.3:0)};
+const H=[
+['Evening top-up','Member · AED 45 · instant · peak',today(45,'R2','peak','instant'),'Adds items to AED 55 and takes a 2-hour off-peak window',after(55,'R2','green','scheduled')],
+['Promo hopper','Member · AED 60 · AED 10 coupon · instant · peak',today(60,'R2','peak','instant',1),'No coupon; double points on an off-peak scheduled slot, basket AED 80',after(80,'R2','green','scheduled')],
+['Cash on delivery','Silver · AED 80 · instant · off-peak · cash',today(80,'R2','green','instant',0,1),'Pays by wallet for bonus status points',after(80,'R2','green','instant')],
+['Far customer','Silver · AED 120 · instant · peak · R3',today(120,'R3','peak','instant'),'Picks up from the dark store or a partner store',after(120,'R3','green','pickup')],
+['Weekly restock','Gold · AED 185 · scheduled · off-peak · R1',today(185,'R1','green','scheduled'),'Already safe. Free delivery is the reward, so profit falls but stays above $0.50',after(185,'R1','green','scheduled')],
+['Iftar host','Gold · AED 150 · instant · iftar window',today(150,'R2','event','instant'),'Pre-books a 14:00–16:00 drop for double streak credit',after(150,'R2','green','scheduled')],
+['Eid party basket','Silver · AED 250 · instant · Eid peak',today(250,'R2','event','instant'),'Schedules it the day before, off-peak',after(250,'R2','green','scheduled')]];
+const lo=-4,hi=2,X=v=>(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*100,usd=v=>(v<0?'−$':'+$')+Math.abs(v).toFixed(2);
+$('db').innerHTML=H.map(([n,d,a,nu,b])=>{const ca=X(a),cb=X(b),ok=b>=0.495;return `<div class="who"><b>${n}</b><span>${d}</span></div><div class="tk"><i class="z0" style="left:${X(0)}%"></i><i class="z5" style="left:${X(0.5)}%"></i><i class="lnk" style="left:${Math.min(ca,cb)}%;width:${Math.abs(cb-ca)}%"></i><i class="dot" style="left:${ca}%;background:var(--mute)"></i><i class="dot" style="left:${cb}%;background:${ok?'var(--green)':'#e53935'}"></i><span class="v" style="left:${ca}%;color:var(--mute)">${usd(a)}</span><span class="v" style="left:${cb}%;color:${ok?'var(--green)':'#e53935'}">${usd(b)}</span></div><div class="nud">${nu}</div>`}).join('');
+
+const D=[['Suhoor','03:00–05:00','×1.5','#6a4c93','Orders +81%. Standard fee; status points only.'],['Daytime','09:00–16:00','×1.0','#2e7d32','Cheapest window. Free delivery and perks live here.'],['Pre-iftar','16:00–17:00','×1.35','#c77700','Reduced fees for Gold; no free delivery.'],['Iftar','17:00–18:30','×1.8','#e53935','Orders +33%. Protected slots, standard fee, no discount.'],['After iftar','20:00–00:00','×1.35','#c77700','Peak fees; nudge to next-day off-peak.']];
+$('day').innerHTML=D.map(([n,t,x,c,s])=>`<div style="background:${c}"><b>${n}</b><span>${t}</span><div class="x">${x}</div><span>courier cost</span><span style="margin-top:6px">${s}</span></div>`).join('');
+
+const ci=cost('R2','event','instant'),m150=mg(150),fi=fee(150,ci);
+const I=[['Free delivery as a Ramadan promo',m150-ci],["Today's flat AED 3.7 fee",m150+3.7/FX-ci],['Cost-based fee, capped at AED 12',m150+fi.fee/FX-ci],['Pre-booked 14:00–16:00 drop',after(150,'R2','green','scheduled')]];
+$('iftar').innerHTML=I.map(([l,v])=>`<div class="ifr"><span>${l}</span><b class="${v>=0.495?'ok':'warn'}">${usd(v)} per order</b></div>`).join('');
+}
+(function(){const B=[['Gold only',6300],['Gold + Silver (base)',9700],['Worst case combined',22100]],mx=22100,el=document.getElementById('tzb');el.innerHTML=B.map(([l,v])=>`<span>${l}</span><div class="t" style="height:18px;border-radius:6px;background:var(--line);position:relative"><i style="position:absolute;inset:0 auto 0 0;width:${v/mx*100}%;border-radius:6px;background:${v>9700?'var(--amber)':'#e53935'}"></i></div><b>AED ${v.toLocaleString('en')}</b>`).join('')})();
+</script>
+<script>document.addEventListener("click",e=>{const a=e.target.closest("a[data-doc]");if(a){e.preventDefault();parent.postMessage({doc:a.dataset.doc},"*")}});</script></body></html>
