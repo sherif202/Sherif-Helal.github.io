@@ -137,14 +137,20 @@ window.PORTFOLIO = [
         name: "Oasis Regulars",
         line: "Loyalty you earn, not loyalty you pay for.",
         detail:
-          "A free, earned-status programme for weekly households in one Dubai zone. It rewards order frequency and basket value equally, and pays an automatic credit when an order is late.",
+          "A free, earned-status programme for weekly households in one Dubai zone. It rewards order frequency and basket value equally, pays an automatic credit when an order is late, and gives Gold customers 4 free deliveries a month within 4 km. Every document, from the brief to the validation audit, is traced and readable in the browser.",
         role: "Product manager",
-        status: "PRD v0.2, a clickable demo on simulated data, and a three-stage pilot plan. No surveys run and no results yet.",
-        facts: ["Target: +0.2 repeat orders per active user a month", "Reward cost capped at AED 9.18 per redeemed order", "15 ideas, 1 pilot"],
+        status: "Fictional course case. PRD v0.2, cost models on assumed data, app screens with 21 edge cases, and a Test & Learn validation audit. No surveys run and no results yet.",
+        facts: ["19 documents traced from brief to test card", "Reward cost capped at AED 9.18 per redeemed order", "Gold 4, Silver 1 free deliveries a month", "Validation audit: 22/40, 36/40 with three fixes"],
         cover: "covers/oasis-regulars.jpg",
         pieces: [
-          { label: "Case study (PDF)", url: "case-studies/oasis-regulars.pdf" },
-          { label: "Financial model", url: "https://claude.ai/artifact/G6TeVJtQL6HWdVsZd6Qcmb" },
+          { label: "Project map (all documents)", url: "oasis-regulars/index.html" },
+          { label: "PRD v0.2", url: "oasis-regulars/index.html#prd" },
+          { label: "Rewards and pricing", url: "oasis-regulars/index.html#pricing" },
+          { label: "App screens", url: "oasis-regulars/index.html#screens" },
+          { label: "Area selection", url: "oasis-regulars/index.html#areas" },
+          { label: "Validation audit", url: "oasis-regulars/index.html#audit" },
+          { label: "Case study deck", url: "oasis-regulars/index.html#deck" },
+          { label: "Slides (PDF)", url: "case-studies/oasis-regulars.pdf" },
           { label: "Demo code on GitHub", url: "https://github.com/sherif202/oasis-rewards-demo" }
         ]
       }

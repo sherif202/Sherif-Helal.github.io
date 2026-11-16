@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oasis Regulars Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a product spec shown to the team
+   IDEA the real Oasis app screens, as shipped
+   PICTURE five phones in a row, each one moment of the programme
+   COLOUR white ground, Oasis red #e53935 leads, green for free/safe, warm grey
+   TYPE Poppins + Noto Sans Arabic
+   LAYOUT title and rule line on top, phones across, why-it-works under each; phone: phones stack */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#141012);--ink:light-dark(#1d1a1c,#f3eeee);--mute:light-dark(#6c6266,#b4a9ad);--line:light-dark(#ece4e2,#33292d);--tint:light-dark(#fdf1ef,#2a1d20);--red:#e53935;--redd:light-dark(#c62828,#ff6b66);--green:light-dark(#2e7d32,#6fcf75)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Poppins,system-ui,sans-serif;overflow-x:clip}
+.band{padding-block:clamp(28px,4vw,56px);padding-left:max(5vw,16px);padding-right:max(5vw,16px)}
+.wrap{max-width:1320px;margin:0 auto}
+h1{font-size:clamp(30px,4vw,46px);line-height:1.05;letter-spacing:-.02em;margin:0 0 10px;font-weight:800;max-width:22ch}
+.lede{color:var(--mute);margin:0;max-width:68ch}
+.rule{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.rule span{background:var(--tint);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:600}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(218px,1fr));gap:22px;margin-top:30px;align-items:start}
+.cell h2{font-size:17px;margin:14px 0 2px;font-weight:700}
+.cell p{margin:0;font-size:14px;color:var(--mute)}
+.cell p b{color:var(--ink);font-weight:600}
+/* phone */
+.ph{background:#0f0c0d;border-radius:36px;padding:9px;box-shadow:0 20px 40px -28px rgba(80,10,10,.6);max-width:300px;margin:0 auto}
+.sc{background:#fff;color:#1d1a1c;border-radius:28px;overflow:hidden;height:612px;display:flex;flex-direction:column;font-size:14px}
+.sb{display:flex;justify-content:space-between;padding:10px 20px 4px;font-size:12px;font-weight:600}
+.ap{padding:6px 16px 10px;display:flex;justify-content:space-between;align-items:center}
+.ap b{font-size:18px;font-weight:800}
+.ap i{font-style:normal;font-size:12px;color:#6c6266}
+.bd{padding:0 14px;display:flex;flex-direction:column;gap:10px;flex:1}
+.hero{background:#e53935;color:#fff;border-radius:20px;padding:16px}
+.hero small{font-size:12px;opacity:.9;display:block}
+.hero .n{font-size:40px;font-weight:800;line-height:1;display:flex;align-items:center;gap:8px}
+.hero .n span{font-size:15px;font-weight:600;line-height:1.25}
+.dots{display:flex;gap:7px;margin:10px 0 4px}
+.dots i{width:22px;height:22px;border-radius:50%;background:#fff}
+.dots i.u{background:rgba(255,255,255,.3)}
+.card{border:1px solid #ece4e2;border-radius:16px;padding:12px}
+.card h4{margin:0 0 2px;font-size:14px}
+.card p{margin:0;font-size:12.5px;color:#6c6266}
+.track{height:8px;border-radius:5px;background:#f3e3e1;margin-top:8px;overflow:hidden}
+.track i{display:block;height:100%;background:#e53935;border-radius:5px}
+.save{display:flex;gap:8px;justify-content:space-between;align-items:center;background:#eef7ee;border-radius:16px;padding:12px}
+.save b{color:#2e7d32;font-size:18px;white-space:nowrap}
+.save span{font-size:12.5px;color:#3c5a3d;flex:1 1 0}.save b{flex:none}
+.nav{display:flex;justify-content:space-around;border-top:1px solid #ece4e2;padding:10px 0 14px;font-size:11px;color:#6c6266}
+.nav b{color:#e53935}
+.bar{background:#fdf1ef;border-radius:14px;padding:10px 12px}
+.bar p{margin:0;font-size:13px}
+.bar .track{background:#f6d4d1}
+.it{display:flex;justify-content:space-between;font-size:13px;padding:4px 2px}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.sl{border:1.5px solid #ece4e2;border-radius:12px;padding:8px;font-size:12px}
+.sl b{display:block;font-size:13px}
+.sl.g{border-color:#2e7d32;background:#eef7ee}
+.sl.g em{color:#2e7d32}
+.sl.on{outline:2.5px solid #2e7d32}
+.sl.p{border-color:#e53935;background:#fdf1ef}
+.sl em{font-style:normal;font-weight:700}
+.cta{margin-top:auto;background:#e53935;color:#fff;border-radius:14px;padding:13px;text-align:center;font-weight:700}
+.tot{display:flex;justify-content:space-between;font-weight:700;padding:0 2px}
+.tot s{color:#a09296;font-weight:500;margin-right:6px}
+.big{text-align:center;padding:18px 6px 4px}
+.ok{width:64px;height:64px;border-radius:50%;background:#eef7ee;color:#2e7d32;display:grid;place-items:center;margin:0 auto 10px;font-size:30px;font-weight:800}
+.big h3{margin:0;font-size:19px;line-height:1.25}
+.big p{margin:6px 0 0;font-size:13px;color:#6c6266}
+.chip{display:inline-block;background:#2e7d32;color:#fff;border-radius:999px;padding:4px 12px;font-weight:700;font-size:13px;margin-top:10px}
+.opt{display:flex;justify-content:space-between;align-items:center;border:1.5px solid #ece4e2;border-radius:14px;padding:12px}
+.opt.on{border-color:#2e7d32;background:#eef7ee}
+.opt b{font-size:14px}
+.opt span{font-size:12px;color:#6c6266;display:block}
+.opt em{font-style:normal;font-weight:800;white-space:nowrap}
+.rtl{direction:rtl;font-family:"Noto Sans Arabic",Poppins,sans-serif}
+.rtl .hero .n span{margin:0 6px 0 0}
+/* rules */
+.alt{background:var(--tint)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px}
+.two h3{font-size:20px;margin:0 0 10px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:left;font-size:13px;color:var(--mute);font-weight:600;padding:6px 10px;border-bottom:2px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:600}
+ol{margin:0;padding-left:1.2em}
+ol li{margin-bottom:8px}
+.note{font-size:13px;color:var(--mute);margin-top:12px}
+@media(max-width:600px){table{font-size:13px}th,td{padding:6px 4px}}
+.h2{font-size:clamp(26px,3vw,36px);line-height:1.1;letter-spacing:-.02em;margin:0 0 8px;font-weight:800}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:22px;margin-top:24px}
+.grp h3{font-size:17px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.grp h3 i{width:12px;height:12px;border-radius:50%;background:var(--red)}
+.cs{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:12px 0;border-top:1px solid var(--line)}
+.cs b{font-size:14px}
+.msg{background:var(--tint);border-radius:14px 14px 14px 4px;padding:9px 12px;font-size:14.5px;font-weight:500}
+.msg.g{background:color-mix(in srgb,var(--green) 14%,var(--bg))}
+.cs small{font-size:13px;color:var(--mute)}
+</style>
+</head>
+<body>
+<section class="band"><div class="wrap">
+<h1>Five screens carry the whole programme</h1>
+<p class="lede">The customer never sees points, credits, rings or multipliers. Each screen shows one number in orders or dirhams and one next step. The maths stays behind the screen.</p>
+<div class="rule"><span>One number per screen</span><span>Orders and AED, never points</span><span>Free is shown, not explained</span><span>Nothing is taken away by surprise</span><span>Arabic first, same layout</span></div>
+
+<div class="row">
+<div class="cell">
+<div class="ph"><div class="sc">
+<div class="sb"><span>9:41</span><span>5G ▮</span></div>
+<div class="ap"><b>Oasis</b><i>Al Barsha · near you</i></div>
+<div class="bd">
+<div class="hero"><small>Gold this month</small><div class="n">3<span>free deliveries left</span></div>
+<div class="dots"><i></i><i></i><i></i><i class="u"></i></div><small>On baskets of AED 150+ in green slots</small></div>
+<div class="card"><h4>You keep Gold</h4><p>2 orders by 30 Nov keeps Gold for December.</p><div class="track"><i style="width:60%"></i></div></div>
+<div class="save"><span>Saved with Oasis this month</span><b>AED 41</b></div>
+<div class="card"><h4>Your usual basket</h4><p>Milk, bread, eggs, rice and 9 more. AED 168</p></div>
+</div>
+<div class="nav"><b>Home</b><span>Search</span><span>Orders</span><span>Account</span></div>
+</div></div>
+<h2>1 · Home</h2>
+<p><b>Says:</b> how many free deliveries are left, and what keeps Gold. <b>Why:</b> four dots read in half a second. "You keep" frames the next step as protection, not a test.</p>
+</div>
+
+<div class="cell">
+<div class="ph"><div class="sc">
+<div class="sb"><span>9:42</span><span>5G ▮</span></div>
+<div class="ap"><b>Basket</b><i>4 items</i></div>
+<div class="bd">
+<div class="it"><span>Weekly staples</span><span>AED 128</span></div>
+<div class="bar"><p><b>Add AED 22</b> and this delivery is free</p><div class="track"><i style="width:85%"></i></div></div>
+<div><div class="it" style="font-weight:600"><span>Pick a time</span><span style="color:#2e7d32">Green = free</span></div>
+<div class="slots">
+<div class="sl g on"><b>Today 14:00</b><em>Free</em></div>
+<div class="sl g"><b>Today 15:00</b><em>Free</em></div>
+<div class="sl"><b>Now · 25 min</b>AED 8</div>
+<div class="sl p"><b>Iftar 17:30</b><em>Kept for you</em></div>
+</div></div>
+<div class="tot"><span>Delivery</span><span><s>AED 8</s>Free</span></div>
+<div class="cta">Add AED 22 of usuals</div>
+</div>
+<div style="height:14px"></div>
+</div></div>
+<h2>2 · Basket and time</h2>
+<p><b>Says:</b> the gap to free, and which slots are free. <b>Why:</b> a nearly full bar pulls the last step (goal gradient). Colour does the explaining, so no rule text is needed. Iftar shows a kept slot, not a discount.</p>
+</div>
+
+<div class="cell">
+<div class="ph"><div class="sc">
+<div class="sb"><span>18:05</span><span>5G ▮</span></div>
+<div class="ap"><b>Order delivered</b><i></i></div>
+<div class="bd">
+<div class="big"><div class="ok">✓</div><h3>Your order came 12 minutes late</h3><p>We added AED 5 to your wallet. You don't need to ask.</p><span class="chip">+ AED 5</span></div>
+<div class="card"><h4>Counts towards Gold</h4><p>1 of 2 orders done for December.</p><div class="track"><i style="width:80%"></i></div></div>
+<div class="card"><h4>Missing an item?</h4><p>Tap it and get a refund now.</p></div>
+</div>
+<div class="nav"><span>Home</span><span>Search</span><b>Orders</b><span>Account</span></div>
+</div></div>
+<h2>3 · After delivery</h2>
+<p><b>Says:</b> we noticed, we fixed it. <b>Why:</b> the apology comes before the complaint. It rebuilds trust at the moment it breaks, and it is the same for every customer in the zone.</p>
+</div>
+
+<div class="cell">
+<div class="ph"><div class="sc">
+<div class="sb"><span>10:15</span><span>5G ▮</span></div>
+<div class="ap"><b>Checkout</b><i>AED 172</i></div>
+<div class="bd">
+<div class="card" style="background:#fdf1ef;border-color:#fdf1ef"><h4>You used this month's 4 free deliveries</h4><p>4 new ones on 1 December. Pick what suits you today.</p></div>
+<div class="opt on"><div><b>Pick up at Oasis Al Barsha</b><span>600 m · ready in 20 min</span></div><em style="color:#2e7d32">Free</em></div>
+<div class="opt"><div><b>Deliver today 14:00</b><span>Green slot</span></div><em>AED 8</em></div>
+<div class="save" style="margin-top:4px"><span>Gold saved you this month</span><b>AED 32</b></div>
+<div class="cta">Pay AED 172</div>
+</div>
+<div style="height:14px"></div>
+</div></div>
+<h2>4 · Free ones used</h2>
+<p><b>Says:</b> two plain choices, one of them free. <b>Why:</b> no red warning and no lost-status language. The refill date and the money saved soften the stop, so the limit reads as fair.</p>
+</div>
+
+<div class="cell">
+<div class="ph"><div class="sc rtl" lang="ar">
+<div class="sb"><span>٩:٤١</span><span>5G ▮</span></div>
+<div class="ap"><b>واحة</b><i>البرشاء · قريب منك</i></div>
+<div class="bd">
+<div class="hero"><small>ذهبي هذا الشهر</small><div class="n">٣<span>توصيلات مجانية متبقية</span></div>
+<div class="dots"><i></i><i></i><i></i><i class="u"></i></div><small>على سلال ١٥٠ درهم أو أكثر في الأوقات الخضراء</small></div>
+<div class="card"><h4>حافظ على الذهبي</h4><p>طلبان قبل ٣٠ نوفمبر للبقاء ذهبي في ديسمبر.</p><div class="track"><i style="width:60%;margin-right:0;margin-left:auto"></i></div></div>
+<div class="save"><span>وفّرت مع واحة هذا الشهر</span><b>٤١ درهم</b></div>
+<div class="card"><h4>سلتك المعتادة</h4><p>حليب، خبز، بيض، أرز و٩ أخرى. ١٦٨ درهم</p></div>
+</div>
+<div class="nav"><b>الرئيسية</b><span>بحث</span><span>طلباتي</span><span>حسابي</span></div>
+</div></div>
+<h2>5 · Same home, in Arabic</h2>
+<p><b>Says:</b> the same message, mirrored right to left. <b>Why:</b> Arabic-first customers get the same simplicity, not a translated afterthought. Copy to test with native speakers.</p>
+</div>
+</div>
+<p class="note">Sample screens with example numbers. Prices and slots follow the simple free-delivery promise: Gold 4 a month, Silver 1, baskets AED 150+, within 4 km.</p>
+</div></section>
+
+<section class="band" id="cases"><div class="wrap">
+<h2 class="h2">Every other moment, in one line</h2>
+<p class="lede">The same rules hold in every situation: one plain sentence, a free way out, and nothing taken away by surprise. Each case shows the exact in-app message and the rule behind it.</p>
+<div class="groups" id="groups"></div>
+</div></section>
+<section class="band alt"><div class="wrap two">
+<div>
+<h3>What we hide, and what the customer sees instead</h3>
+<div class="scroll"><table><thead><tr><th>Behind the screen</th><th>On the screen</th></tr></thead><tbody>
+<tr><td>40 / 80 status points</td><td>"2 orders keeps Gold"</td></tr>
+<tr><td>Rings R1, R2, R3</td><td>"Near you", or pickup is offered</td></tr>
+<tr><td>Slot cost multipliers</td><td>Green slots marked "Free"</td></tr>
+<tr><td>Shared-cost rule and fee cap</td><td>One delivery price, shown before checkout</td></tr>
+<tr><td>Hold-out group</td><td>Nothing. Make-Good still works for them</td></tr>
+<tr><td>Rolling 30 days, grace month</td><td>"You keep Gold until 31 Dec"</td></tr>
+</tbody></table></div>
+</div>
+<div>
+<h3>Psychology rules for every screen</h3>
+<ol>
+<li><b>Progress, not pressure.</b> Show how close the next step is. Never show a countdown clock.</li>
+<li><b>Protect, don't threaten.</b> Say "keep Gold", not "you will lose Gold". The grace month means no one drops without warning.</li>
+<li><b>Show the money saved.</b> The monthly savings line answers "is talabat Pro at AED 29 cheaper?" without naming it.</li>
+<li><b>Fix before they ask.</b> Late and missing-item credits appear on their own.</li>
+<li><b>Always a free way out.</b> When free deliveries run out, free pickup is the first choice.</li>
+<li><b>Respect Ramadan.</b> Iftar slots say "kept for you", never "discount".</li>
+</ol>
+</div>
+</div></section>
+<script>{const G=[
+['Status changes',[
+['First order, new customer','You\'re in Oasis Regulars. About 2 more orders to Silver.','Everyone is enrolled on their own; the first screen is the enrolment notice the PRD requires.'],
+['Member, no free deliveries yet','1 more order to Silver, and 1 free delivery every month.','Show the next prize in deliveries, not points.'],
+['Moves up to Gold','You\'re Gold. 4 free deliveries every month, starting now.','Celebrate once, in full screen, then never again that month.',1],
+['Month ends, short of orders','You keep Gold for December. 2 orders in December keeps it after that.','The grace month: no one drops without a warning month.'],
+['Drops to Silver after grace','You\'re Silver this month. 2 orders brings Gold back.','Never the word "lost". The way back is always one line.']]],
+['Where the order goes',[
+['Address 4–6 km away','Free pickup at Oasis Al Barsha, 2.1 km. Or delivery for AED 8.','Free pickup is offered first; the screen never says "outside your zone".'],
+['Order to another area or city','Your orders here still count towards Gold. Free deliveries work in Al Barsha.','Status follows the person; free delivery follows the location.'],
+['Address changed after payment','This address is farther away, so this delivery costs AED 8. Keep the first address?','The price is fixed at payment; a change shows the new price before it applies.']]],
+['Time, Ramadan and Eid',[
+['No green slot left today','Free slots are full today. Tomorrow 10:00 is free.','Show the next free slot; never hide the paid ones.'],
+['Gold books an iftar slot','Your 17:30 slot is kept until 16:30.','At most 1 a day, up to 20% of capacity; unused slots go back to everyone 60 min before.',1],
+['Eid day or big event','Free deliveries pause today and come back tomorrow. Your count stays at 3.','Event slots cost 1.8x; pausing is honest, and nothing is used up.']]],
+['Payment and basket',[
+['Pays cash on delivery','Pay by card or wallet and this order counts extra towards Gold.','Cash still works and still gets free delivery; card is rewarded, cash is not punished.'],
+['Our substitution drops the basket under AED 150','Your delivery stays free. The change was ours.','The customer is never charged for an Oasis stock problem.',1],
+['Basket under AED 150 with free deliveries left','Add AED 22 and this delivery is free.','The gap in dirhams, with "add your usuals" one tap away.']]],
+['When something goes wrong',[
+['Order late','Your order came 12 minutes late. We added AED 5.','Same for everyone in the zone, including the hold-out group.',1],
+['Item missing','Refund sent for the missing yoghurt, and AED 5 for the trouble.','More than 2 claims a month goes to a person for review.'],
+['Oasis cancels the order','Sorry, we cancelled your order. Your free delivery is back: 4 left.','A free delivery is never used up by our failure.',1],
+['Customer cancels before packing','Order cancelled. Your free delivery is back.','After packing starts, the delivery counts as used.']]],
+['Programme states',[
+['Customer in the hold-out group','(No tier screens. Late and missing-item credits still appear.)','They see today\'s app, so the test stays clean.'],
+['Budget cap reached, perk switched off','Your free deliveries for this month still work. We\'ll tell you before anything changes.','Honour what was promised for the current month; stop only new months.'],
+['Wallet credit about to expire','AED 5 in your wallet ends on 12 December.','One reminder, 3 days before. Credits last 30 days and cannot be moved.']]]];
+document.getElementById('groups').innerHTML=G.map(([t,cs])=>`<div class="grp"><h3><i></i>${t}</h3>${cs.map(([w,m,r,g])=>`<div class="cs"><b>${w}</b><div class="msg${g?' g':''}">${m}</div><small>${r}</small></div>`).join('')}</div>`).join('')}</script>
+
+<script>document.addEventListener("click",e=>{const a=e.target.closest("a[data-doc]");if(a){e.preventDefault();parent.postMessage({doc:a.dataset.doc},"*")}});</script></body>
+</html>
