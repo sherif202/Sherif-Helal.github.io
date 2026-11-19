@@ -29,7 +29,7 @@ I focused on one buyer: a doubtful first-time buyer (example persona "Nour"). Sh
 |---|---|
 | Expert review (Nielsen heuristics + a 1–5 "does this screen serve the goal" score per screen) | 24 findings on 11 real screenshots |
 | Competitor teardown: Amazon.eg, Noon, Jumia (screens + help pages) | Benchmark: delivery dates, returns promises, no guest checkout |
-| Independent AI second opinion (Telos review tool, run blind to my notes, then double-checked by a second AI) | Checkout scored 2/5; review rated 26/30 for accuracy; agreed on 7 of 7 problems and added 2 I missed |
+| Independent AI second opinion (AI design-review tool, run blind to my notes, then double-checked by a second AI) | Checkout scored 2/5; review rated 26/30 for accuracy; agreed on 7 of 7 problems and added 2 I missed |
 
 **Critical note:** all of this is expert or AI opinion. No real users were interviewed (none were reachable), and I had no analytics. The plan treats every finding as a hypothesis until sprint-1 data and a 5–10 buyer test confirm it.
 
@@ -61,7 +61,7 @@ Problem framing · persona and JTBD · user-flow mapping · heuristic evaluation
 | [flow-diagram.html](flow-diagram.html) | User flow, today vs improved |
 | [evidence.html](evidence.html) | Evidence log (26 findings) |
 | [annotated-walkthrough.html](annotated-walkthrough.html) | 11 real screenshots with pins (personal data blurred) |
-| [telos-check.html](telos-check.html) + `telos/` | Independent AI second opinion |
+| [ai-review.html](ai-review.html) + `ai-review/` | Independent AI second opinion |
 | [system-view.html](system-view.html) | Which system parts each change touches |
 | [ux-report.html](ux-report.html) | UX evaluation report |
 | [improvements.html](improvements.html) | 7 improvements with evidence, metric and target |
