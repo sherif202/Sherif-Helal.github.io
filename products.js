@@ -29,18 +29,18 @@ window.PORTFOLIO = [
     ]
   },
   {
-    group: "OVARC",
+    group: "Egyptian HR-tech",
     about:
-      "Payroll and HR for Egyptian companies. Independent work, built from public sources and the OVARC case study. Names, dates and figures in the three delivery portfolios are illustrative examples.",
+      "Payroll and HR software for Egyptian companies. Independent work on an Egyptian HR-tech company, built from public sources and a case study. Names, dates and figures in the three delivery portfolios are illustrative examples.",
     products: [
       {
-        name: "Rule Watch",
+        name: "Rule Watch: payroll-law compliance for Egyptian HR-tech",
         line: "One decree changes every client's payroll at once. Rule Watch turns each legal change into one versioned rule pack.",
         detail:
-          "Every January, Egypt's insured salary band resets. OVARC's compliance engine drafts the rule pack, legal counsel confirms it, and payroll sees the impact on each client before approving, with source, version and undo kept.",
+          "Every January, Egypt's insured salary band resets. The company's compliance engine drafts the rule pack, legal counsel confirms it, and payroll sees the impact on each client before approving, with source, version and undo kept.",
         role: "Product manager, self-initiated",
-        status: "Research to PRD, prototype and roadmap, plus a clickable demo on simulated data. Not tested with OVARC.",
-        cover: "covers/ovarc-rule-watch.jpg",
+        status: "Research to PRD, prototype and roadmap, plus a clickable demo on simulated data. Not tested with the company.",
+        cover: "covers/hrtech-rule-watch.jpg",
         facts: ["19 must-have requirements", "Given / When / Then acceptance criteria", "Rule feed to impact report to approval"],
         pieces: [
           { label: "One-page PRD", url: "https://claude.ai/artifact/FU4A79tkD8ikWRGD2KmyKD" },
@@ -50,37 +50,37 @@ window.PORTFOLIO = [
         ]
       },
       {
-        name: "Payroll",
+        name: "HR-tech platform: payroll",
         line: "A monthly run that lands right the first time, in a country where the law changes under you.",
         detail:
           "Seven pages that trace one product from vision and strategy through build-vs-buy, roadmap, PRD, wireframe, user stories and a requirements matrix. The rules engine and a finance-signed golden test suite are built; PDF rendering and SMS are bought.",
         role: "Product manager",
         status: "Illustrative delivery portfolio. Figures are examples, not live results.",
         facts: ["Rules as versioned data", "Golden test suite signed off by finance", "5 user stories for release 1"],
-        cover: "covers/ovarc-payroll.jpg",
-        pieces: [{ label: "Case study (PDF)", url: "case-studies/ovarc-payroll.pdf" }]
+        cover: "covers/hrtech-payroll.jpg",
+        pieces: [{ label: "Case study (PDF)", url: "case-studies/hrtech-payroll.pdf" }]
       },
       {
-        name: "Leave Management",
+        name: "HR-tech platform: leave",
         line: "Leave requested, approved and paid correctly, with no email threads and no Excel balance sheet to dispute.",
         detail:
           "Follows one story, Request leave, from the customer problem to the screen an employee opens on his phone. Includes the written decision to split the feature across two releases and what that cut costs HR.",
         role: "Product manager",
         status: "Illustrative delivery portfolio. Figures are examples, not live results.",
         facts: ["Arabic-first, phone-first", "One story split into 5 slices", "Decision record for the release split"],
-        cover: "covers/ovarc-leave-management.jpg",
-        pieces: [{ label: "Case study (PDF)", url: "case-studies/ovarc-leave-management.pdf" }]
+        cover: "covers/hrtech-leave-management.jpg",
+        pieces: [{ label: "Case study (PDF)", url: "case-studies/hrtech-leave-management.pdf" }]
       },
       {
-        name: "Platform, Portal and Trust",
+        name: "HR-tech platform: access control",
         line: "Sign-in, roles, tenant isolation and an audit trail: the product nobody sees and everybody depends on.",
         detail:
           "Identity and penetration testing are bought; tenant isolation and the audit log are built, with a leak test that blocks every merge. Legal counsel is in the room from refinement, not at the end.",
         role: "Product manager",
         status: "Illustrative delivery portfolio. Figures are examples, not live results.",
         facts: ["Leak test on every build", "MFA for every payroll role", "Arabic right-to-left on every screen"],
-        cover: "covers/ovarc-platform-trust.jpg",
-        pieces: [{ label: "Case study (PDF)", url: "case-studies/ovarc-platform-trust.pdf" }]
+        cover: "covers/hrtech-platform-trust.jpg",
+        pieces: [{ label: "Case study (PDF)", url: "case-studies/hrtech-platform-trust.pdf" }]
       }
     ]
   },
