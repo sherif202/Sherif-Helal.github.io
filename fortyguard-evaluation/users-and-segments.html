@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FortyGuard users map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a research brief for a product evaluation, read before testing
+   IDEA a thermal survey sheet: every block of content is a cell on a heat ramp
+   PICTURE persona x product heat matrix (who uses what, how strongly), then a 20 m vs 1 km grid and a seasonal demand chart
+   COLOUR white / deep night, heat ramp from cool blue #2a6fdb through #ffc93c to hot #e8451e, ink #15171c
+   TYPE Archivo 800 display + Inter text
+   LAYOUT title across top, matrix full width under it; below, bands in two columns that stack under 600px */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#111318);--ink:light-dark(#15171c,#eef0f4);--mut:light-dark(#596070,#a3aab8);--line:light-dark(#e3e6ec,#2a2e38);--panel:light-dark(#f6f7f9,#191c23);--hot:#e8451e;--warm:#f28c28;--mid:#ffc93c;--cool:#2a6fdb;--cold:light-dark(#dfe7f5,#22304a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Archivo,Inter,sans-serif;letter-spacing:-.02em;line-height:1.08;text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,4.6vw,50px);font-weight:800;max-width:22ch}
+h2{font-size:clamp(24px,3vw,34px);font-weight:800;margin-bottom:12px}
+h3{font-size:18px;font-weight:600}
+p{margin:.4em 0;max-width:70ch}
+a{color:inherit}
+.band{padding:clamp(28px,4vw,60px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.heat{height:10px;background:linear-gradient(90deg,var(--cool),var(--mid),var(--warm),var(--hot))}
+.lede{font-size:18px;color:var(--mut);margin-top:14px;max-width:62ch}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.src{background:color-mix(in srgb,var(--cool) 18%,transparent);color:light-dark(#1b4fa8,#9cc0ff)}
+.inf{background:color-mix(in srgb,var(--warm) 22%,transparent);color:light-dark(#9a4a00,#ffc184)}
+.key{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--mut);margin:16px 0 6px}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:14px;border-radius:3px;display:inline-block}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+.mx{margin-top:10px;min-width:560px}
+.mx th{font:600 14px Inter,sans-serif;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:bottom}
+.mx td{padding:3px;vertical-align:middle}
+.mx td.p{padding:10px 10px 10px 0;border-bottom:1px solid var(--line)}
+.mx .t{font-weight:600}
+.mx .s{font-size:13px;color:var(--mut)}
+.cell{height:52px;border-radius:6px;display:flex;align-items:center;padding:0 12px;font-size:14px;font-weight:600}
+.c3{background:var(--hot);color:#fff}.c2{background:var(--warm);color:#1a1000}.c1{background:var(--mid);color:#1a1300}.c0{background:var(--cold);color:var(--mut);font-weight:400}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,44px);align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.vs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.tiles{display:grid;gap:1px;aspect-ratio:1;border-radius:6px;overflow:hidden}
+.tiles i{display:block}
+.one{aspect-ratio:1;border-radius:6px;display:grid;place-items:center;color:#1a1000;font:800 clamp(22px,4vw,34px) Archivo,sans-serif}
+.cap{font-size:14px;color:var(--mut);margin-top:6px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:12px;margin-top:18px}
+.facts div{border-top:3px solid var(--hot);padding-top:6px}
+.facts b{display:block;font:800 clamp(22px,2.6vw,30px) Archivo,sans-serif;white-space:nowrap}
+.facts span{font-size:14px;color:var(--mut)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),1fr));gap:16px;margin-top:18px}
+.card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+.card header{padding:14px 16px 10px;border-top:6px solid var(--hot)}
+.card header .who{font-size:14px;color:var(--mut)}
+.card ol{list-style:none;margin:0;padding:0 16px 14px;display:grid;gap:8px;flex:1}
+.card li{display:grid;grid-template-columns:5.6em minmax(0,1fr);gap:8px;font-size:15px;line-height:1.45}
+.card li b{font-size:13px;color:var(--mut);font-weight:600;padding-top:2px}
+.card footer{padding:10px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px;font-size:13px}
+.prod{background:var(--panel);border:1px solid var(--line)}
+.fig{position:relative;min-height:320px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+svg text{font:13px Inter,sans-serif;fill:var(--mut);paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+.rows{display:grid;gap:8px;margin-top:8px}
+.row{display:grid;grid-template-columns:7.5em minmax(0,1fr) 3em;gap:10px;align-items:center;font-size:14px}
+.bar{height:16px;border-radius:3px;background:var(--warm)}
+.row .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--mut)}
+.mode th,.mode td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
+.mode th{font-size:14px;color:var(--mut);font-weight:600}
+.verdict{border-left:6px solid var(--hot);padding:4px 0 4px 16px;font-size:18px;max-width:70ch}
+ul.tight{margin:6px 0;padding-left:20px}ul.tight li{margin:4px 0}
+.srcs{columns:2 320px;font-size:14px;padding-left:20px}.srcs li{margin:0 0 6px;break-inside:avoid;overflow-wrap:anywhere}
+.nav{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;margin-top:18px}
+.nav a{color:var(--mut)}
+@media(max-width:600px){.grid2,.vs{grid-template-columns:minmax(0,1fr)}table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7em}.stack td::before{content:attr(data-l);float:inline-start;width:6.5em;margin-inline-start:-7em;font-weight:600;color:var(--mut)}}
+</style>
+</head>
+<body>
+<div class="heat"></div>
+
+<section class="band">
+<div class="wrap">
+<h1>FortyGuard sells street-level heat as a decision input. Here is who buys it, when, and why.</h1>
+<p class="lede">Weather apps give one temperature for a whole area. FortyGuard models air temperature block by block (marketed as 20 m cells back to 2019 with forecasts up to 2 weeks; testing found 100 m tiles, history from 2021 and forecasts of hours, not weeks; US only) and packages it three ways: a Dashboard for people who look, an API for software that pulls, and an MCP for AI agents that ask. The map below shows which job titles lean on which product.</p><div role="note" style="margin:14px 0;padding:10px 14px;border-left:4px solid #c8371e;background:rgba(200,55,30,.08);font-size:15px;line-height:1.5"><b>What hands-on testing found (21–22 Nov 2026).</b> This page was written from FortyGuard's own materials before testing. Where testing disagreed: cells are 100 m (20 m jobs fail with no reason); history starts 2021-01-01, not 2019; forecasts of +3 h and +13 h are served, but nothing near 2 weeks; the MCP has 11 tools, not 9; the free key is 1,000,000 one-time credits for one month, and the dashboard covers one chosen state. Full evidence: the evaluation report and evidence log.</div>
+<div class="key">
+<span><i class="sw c3"></i>Main tool</span><span><i class="sw c2"></i>Often used</span><span><i class="sw c1"></i>Occasional</span><span><i class="sw c0"></i>Rare</span>
+<span><span class="tag src">Source</span> stated by FortyGuard or press</span><span><span class="tag inf">Inferred</span> my estimate</span>
+</div>
+<div class="scroll"><table class="mx" id="mx"><thead><tr><th>Who (segment)</th><th>Temperature Dashboard</th><th>Temperature API</th><th>Temperature MCP</th></tr></thead><tbody></tbody></table></div>
+<nav class="nav scroll"><a href="#why">Why it exists</a><a href="#scenarios">Scenarios</a><a href="#traffic">Traffic patterns</a><a href="#niche">Competitors and niche</a><a href="#sources">Sources</a></nav>
+</div>
+</section>
+
+<section class="band" id="why" style="background:var(--panel)">
+<div class="wrap grid2">
+<div>
+<h2>Why it exists: the forecast and the sidewalk disagree</h2>
+<p>Founded in Abu Dhabi in 2020, the team started on cooling materials and found they could not answer the first question: <em>where, when and why does temperature become a problem?</em> So they built their own data and models instead. <span class="tag src">Source</span></p>
+<p>The pitch is that two points on the same site can differ by several degrees because of pavement, shade, buildings and airflow, and those differences drive cost, capacity, comfort and risk. A weather API "describes the atmosphere around a place"; FortyGuard adds geometry, materials and land cover to estimate the local thermal state of a site, asset or route. <span class="tag src">Source</span></p>
+<p>What is different, in one line: the unit of analysis is a polygon, a building or a route, not a city. The outputs (heatmaps, hours above a threshold, ranked sites, a written "why is it hot" report, cooler routes) are shaped for a decision, not for a forecast screen. <span class="tag inf">Inferred</span></p>
+<div class="facts">
+<div><b>100 m</b><span>tiles delivered in testing; 20 m is marketed but failed</span></div>
+<div><b>$79 / $289</b><span>API Basic / Pro per month</span></div>
+<div><b>9</b><span>MCP tools</span></div>
+<div><b>30–60 s</b><span>typical async job</span></div>
+</div>
+</div>
+<div class="panel">
+<h3>Same neighbourhood, two answers</h3>
+<div class="vs" style="margin-top:12px">
+<div><div class="one" style="background:var(--warm)">36°C</div><p class="cap">A weather API: one value for the area</p></div>
+<div><div class="tiles" id="tiles"></div><p class="cap">FortyGuard: a value per cell (20 m marketed, 100 m delivered in testing), roughly 31 to 41°C</p></div>
+</div>
+<p class="cap">Illustration with made-up values, to show the idea. The spread FortyGuard reports in case studies is up to 5–8°C between shaded and exposed areas (Masdar City).</p>
+</div>
+</div>
+</section>
+
+<section class="band" id="scenarios">
+<div class="wrap">
+<h2>Ten realistic scenarios: trigger, action, decision, value</h2>
+<p>Segments come from FortyGuard's own industry pages; the step-by-step stories are my reconstruction of how each title would actually use it. Use these as test scripts when you open the products.</p>
+<div class="cards" id="cards"></div>
+</div>
+</section>
+
+<section class="band" id="traffic" style="background:var(--panel)">
+<div class="wrap">
+<h2>Traffic follows the sun, but planning work keeps a floor under it</h2>
+<p><span class="tag inf">Inferred</span> Every number in this section is my estimate from how the segments work, not FortyGuard data. Relative demand, peak month = 100.</p>
+<div class="grid2" style="margin-top:14px">
+<div class="panel"><h3>Seasonal demand by type of use</h3><div class="fig" id="season"></div></div>
+<div class="panel">
+<h3>A heat-wave week (operational API calls)</h3>
+<div class="rows" id="wave"></div>
+<p class="cap">Forecast, conditions and routing calls jump when a heat advisory is issued (roughly 3 to 10 times a normal summer day), then fall back. Dashboard sign-ups also spike after news coverage of heat.</p>
+<h3 style="margin-top:18px">A summer day (local time)</h3>
+<div class="rows" id="day"></div>
+</div>
+</div>
+<div class="scroll" style="margin-top:22px"><table class="mode stack"><thead><tr><th>Product</th><th>How it is called</th><th>Pattern</th><th>What it means when you test</th></tr></thead><tbody id="modes"></tbody></table></div>
+</div>
+</section>
+
+<section class="band" id="niche">
+<div class="wrap">
+<h2>The niche is real but narrow: few buyers, high stakes per decision</h2>
+<div class="grid2" style="margin-top:10px">
+<div>
+<h3>Who else sells something close</h3>
+<div class="scroll"><table class="mode stack"><thead><tr><th>Group</th><th>Examples</th><th>Overlap with FortyGuard</th></tr></thead><tbody id="comp"></tbody></table></div>
+<p class="cap">Names in the first two rows are well known in the market; I did not verify their current resolution or pricing for this page.</p>
+</div>
+<div>
+<h3>Is there a niche?</h3>
+<p class="verdict">Yes, where a heat difference between two nearby spots changes a decision worth real money: data-center and plant siting, masterplan and plaza design, portfolio risk, and heat-safe routing. <span class="tag inf">Inferred</span></p>
+<p><b>Signs it is real.</b> Paid project work for named clients (DATS: 36 US AI data-center campuses; Ecopia: 40,110 features enriched in 6 days; TomTom route comparisons; Masdar City; MODON 100 layouts). NVIDIA Earth-2 collaboration and Microsoft Marketplace listing. CEO says US users grew 50% month over month, mostly through the free Dashboard. <span class="tag src">Source</span></p>
+<p><b>Why it is hard.</b> <span class="tag inf">Inferred</span></p>
+<ul class="tight">
+<li>Free substitutes: Landsat surface temperature, NWS HeatRisk and city heat-mapping campaigns cover the "where is it hot" question for many cities.</li>
+<li>Usage is seasonal, so monthly self-serve plans risk churn every autumn.</li>
+<li>Accuracy claims (115x, 2 m) need independent validation before risk teams trust them.</li>
+<li>Free Dashboard users include homebuyers and parents: good for growth, little revenue.</li>
+<li>US-only coverage today limits global logistics and insurance buyers.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+
+<section class="band" id="sources" style="background:var(--panel)">
+<div class="wrap">
+<h2>Sources</h2>
+<p class="cap">Read on 19 November 2026. I found no public funding round or investor names for FortyGuard; the company lists accelerator and partner programmes instead.</p>
+<ol class="srcs">
+<li><a href="https://www.fortyguard.com/">FortyGuard home page</a>: products, 20 m, 52B data points, MODON, Ecopia, DATS</li>
+<li><a href="https://www.fortyguard.com/about-fortyguard">About FortyGuard</a>: founded 2020 in Abu Dhabi, mission, origin story</li>
+<li><a href="https://www.fortyguard.com/api-pricing">API pricing and FAQ</a>: $79 / $289 plans, credits, "how is this different from a weather API"</li>
+<li><a href="https://www.fortyguard.com/product-temperature-mcp">Temperature MCP page</a>: 9 tools (testing found 11), example prompts, US coverage from 2019 (the API enforces 2021)</li>
+<li><a href="https://www.fortyguard.com/enterprise">Enterprise and Mobility</a>: Ecopia, TomTom, insurance, logistics, risk</li>
+<li><a href="https://www.fortyguard.com/energy">Energy and Critical Infrastructure</a>: DATS 36 campuses, utilities, grid, HSE</li>
+<li><a href="https://docs-api.fortyguard.com/docs/introduction">API docs introduction</a>: capabilities and listed use cases</li>
+<li><a href="https://docs-api.fortyguard.com/docs/mcp-overview">MCP docs overview</a>: async create/read tools, validated clients</li>
+<li><a href="https://refreshmiami.com/news/climate-tech-startup-fortyguard-wants-to-make-weather-personal/">Refresh Miami, July 2026</a>: 26 staff in 9 countries, 50% MoM US growth, homebuyers and parents as users</li>
+<li><a href="https://business.meteoblue.com/products/weather-apis/city-climate-api">meteoblue City Climate API</a>: closest urban-heat API competitor found</li>
+<li><a href="https://www.wri.org/research/modeling-hyperlocal-heat-exposure-open-source-data">WRI, hyperlocal heat from open data</a>: free alternative approach</li>
+<li><a href="https://marketplace.microsoft.com/product/web-apps/fortyguard.fg-api-v1">Microsoft Marketplace listing</a></li>
+</ol>
+</div>
+</section>
+<div class="heat"></div>
+
+<script>
+{
+const P=[
+{t:"City heat & resilience planners",s:"Chief heat officer, urban planner, sustainability lead",f:[3,1,1],n:["Map blocks, compare years","Rarely","Ad hoc questions"],k:"src"},
+{t:"Architects & landscape designers",s:"Masterplan designer, landscape architect",f:[3,1,2],n:["Site heatmaps, reports","Into design tools","Ask in Cursor/Claude"],k:"src"},
+{t:"Data center & energy site teams",s:"Site selection lead, infrastructure engineer",f:[2,3,1],n:["Spot checks","Batch site screening","Rare"],k:"src"},
+{t:"Utilities & grid operations",s:"Load forecaster, grid ops analyst",f:[1,3,0],n:["Occasional","Daily forecast pulls",""],k:"src"},
+{t:"Insurance, finance, real estate",s:"Underwriter, climate risk analyst, acquisitions analyst",f:[2,3,1],n:["One-off due diligence","Portfolio scoring","Analyst questions"],k:"src"},
+{t:"Logistics, cold chain, field HSE",s:"Ops manager, fleet planner, HSE manager",f:[1,3,1],n:["Planning","Routing + forecasts","Rare"],k:"src"},
+{t:"Public health & emergency mgmt",s:"Heat program manager, emergency planner",f:[3,1,1],n:["Find exposed areas","Alert systems","Rare"],k:"inf"},
+{t:"Developers & GIS platforms",s:"Backend dev, proptech or civic-tech builder",f:[1,3,2],n:["Explore first","Core integration","Prototyping"],k:"src"},
+{t:"AI agent builders & consultants",s:"AI engineer, analyst, consultant",f:[1,2,3],n:["Check results","Behind agents","Main way in"],k:"src"},
+{t:"Event & venue operators",s:"Stadium ops, event safety lead",f:[2,1,2],n:["Plan shade, water","Rare","Cooler routes"],k:"inf"}
+];
+const L=["Rare","Occasional","Often used","Main tool"];
+document.querySelector('#mx tbody').innerHTML=P.map(p=>`<tr><td class="p"><div class="t">${p.t}</div><div class="s">${p.s}</div></td>${p.f.map((v,i)=>`<td><div class="cell c${v}" title="${L[v]}">${p.n[i]||L[v]}</div></td>`).join('')}</tr>`).join('');
+
+let sd=7;const r=()=>(sd=sd*16807%2147483647)/2147483647;
+const ramp=["#2a6fdb","#6f9be0","#ffc93c","#f9a43a","#f28c28","#e8451e"];
+let h='';for(let y=0;y<10;y++)for(let x=0;x<10;x++){const park=(x-2)**2+(y-7)**2<6,road=y===4||x===6;let v=r()*0.5+0.35+(road?0.35:0)-(park?0.6:0);v=Math.max(0,Math.min(.999,v));h+=`<i style="background:${ramp[Math.floor(v*ramp.length)]}"></i>`}
+const T=document.getElementById('tiles');T.style.gridTemplateColumns='repeat(10,1fr)';T.innerHTML=h;
+
+const S=[
+{w:"Chief heat officer, Phoenix-type city",p:["Dashboard","Heat report"],k:"inf",tr:"Summer heat action plan and a tree-planting grant deadline.",do:"Draws polygons over neighbourhoods, maps hours above 40°C last July, checks paved share with satellite analysis.",de:"Which 20 blocks get shade structures and trees first.",va:"Evidence for the grant in days instead of a consultant study taking months."},
+{w:"Landscape architect, plaza redesign",p:["Dashboard","Heat report"],k:"src",tr:"Design review next week; client asks if the plaza will be usable at 3 pm in August.",do:"Heatmap of the site, compares design options, exports a Heat Intelligence report.",de:"Where shading and planting go.",va:"Masdar City case: up to 5°C cooler with trees and softscape, shown with numbers in the review."},
+{w:"Data center site selection lead",p:["API","Enterprise"],k:"src",tr:"Shortlist of 12 candidate parcels for an AI campus.",do:"Script calls heatmaps and environmental parameters (wet bulb, humidity) for every parcel; ranks exposure.",de:"Which sites move to due diligence; cooling assumptions in the model.",va:"Hotter sites need more cooling energy for decades. DATS compared 36 campuses and found a 45-point spread within one operator."},
+{w:"Utility load forecaster",p:["API"],k:"inf",tr:"Forecast shows a 4-day heat dome starting Thursday.",do:"Nightly job pulls short-range (hours-ahead) temperature forecasts for each feeder area and feeds the load model.",de:"Call a demand-response event, pre-stage crews at hot substations.",va:"Fewer outages, cheaper peak power purchases."},
+{w:"Climate risk analyst at an insurer",p:["API","Dashboard"],k:"src",tr:"Portfolio renewal or a new building acquisition.",do:"Batch scores thousands of addresses for heat exposure; opens the Dashboard for the few outliers.",de:"Price, flag or require mitigation for high-exposure assets.",va:"Block-level risk instead of county-level averages."},
+{w:"Last-mile delivery ops manager",p:["API","Routing"],k:"src",tr:"Tomorrow forecast above the company's heat-safety threshold.",do:"Calls temperature routing for drivers' routes; checks hourly forecast by zone.",de:"Shift start times earlier, choose cooler routes, add breaks.",va:"Worker safety, fewer spoiled cold-chain loads. TomTom ran route heat comparisons."},
+{w:"County heat program manager",p:["Dashboard"],k:"inf",tr:"National Weather Service issues an excessive heat warning.",do:"Checks apparent temperature and air quality by district; overlays hottest blocks.",de:"Where to open cooling centres and send outreach teams.",va:"Help reaches the hottest blocks first."},
+{w:"Proptech developer",p:["API Basic"],k:"src",tr:"Product wants a 'heat score' on every property listing.",do:"Integrates the API, joins results to its own property IDs (like Ecopia did for 40,110 features).",de:"Ship the feature without building a climate model.",va:"New feature for $79–289/month instead of a data science team."},
+{w:"Consultant using Claude or Cursor",p:["MCP"],k:"src",tr:"Client asks: compare peak afternoon heat at our three candidate sites on August 12.",do:"Asks the agent in plain language; it calls heatmap.create three times, then heatmap.read.",de:"Recommends a site in the same meeting.",va:"Minutes, no code, with model and time attached to the answer."},
+{w:"Stadium event safety lead",p:["MCP","Dashboard"],k:"inf",tr:"Afternoon summer game with 40,000 fans.",do:"Asks for the coolest walking route from stadium to train at 4 pm (FortyGuard's own example prompt).",de:"Where to put water, shade tents and ingress signage.",va:"Fewer heat-illness calls on game day."}
+];
+document.getElementById('cards').innerHTML=S.map(c=>`<article class="card"><header><h3>${c.w}</h3></header><ol><li><b>Trigger</b><span>${c.tr}</span></li><li><b>In product</b><span>${c.do}</span></li><li><b>Decision</b><span>${c.de}</span></li><li><b>Value</b><span>${c.va}</span></li></ol><footer>${c.p.map(x=>`<span class="tag prod">${x}</span>`).join('')}<span class="tag ${c.k}">${c.k==='src'?'Segment or example from source':'Inferred'}</span></footer></article>`).join('');
+
+const M=["J","F","M","A","M","J","J","A","S","O","N","D"];
+const ops=[15,15,22,38,62,88,100,98,72,40,22,16],plan=[45,50,62,72,70,62,58,60,66,64,55,42];
+const fig=document.getElementById('season');
+fig.innerHTML='<svg role="img" aria-label="Estimated monthly demand"></svg>';const sv=fig.firstChild;
+const draw=()=>{const W=sv.clientWidth,H=sv.clientHeight,l=34,rt=W<520?70:110,t=16,b=28,cw=W-l-rt,ch=H-t-b;
+const X=i=>l+i*cw/11,Y=v=>t+ch-v/100*ch;
+let g='';[0,50,100].forEach(v=>g+=`<line x1="${l}" x2="${l+cw}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${l-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`);
+M.forEach((m,i)=>{if(W>=420||i%2===0)g+=`<text x="${X(i)}" y="${H-8}" text-anchor="middle">${m}</text>`});
+const path=a=>a.map((v,i)=>`${i?'L':'M'}${X(i)},${Y(v)}`).join('');
+g+=`<path d="${path(ops)}" fill="none" stroke="var(--hot)" stroke-width="3.5"/><path d="${path(plan)}" fill="none" stroke="var(--cool)" stroke-width="2.5"/>`;
+g+=`<text x="${X(11)+8}" y="${Y(ops[11])+4}" style="fill:var(--hot)">${W<520?'Ops':'Operational'}</text><text x="${X(11)+8}" y="${Y(plan[11])+4}" style="fill:var(--cool)">${W<520?'Plan':'Planning'}</text>`;
+g+=`<text x="${X(6)}" y="${Y(100)-4}" text-anchor="middle" style="fill:var(--ink)">July peak</text>`;
+sv.innerHTML=g};
+const ro=new ResizeObserver(draw);ro.observe(sv);
+
+const bars=(id,a)=>{const mx=Math.max(...a.map(x=>x[1]));document.getElementById(id).innerHTML=a.map(([k,v])=>`<div class="row"><span>${k}</span><div><div class="bar" style="width:${v/mx*100}%;background:${v/mx>.7?'var(--hot)':v/mx>.35?'var(--warm)':'var(--mid)'}"></div></div><span class="v">${v}</span></div>`).join('')};
+bars('wave',[["Normal day",10],["Advisory issued",35],["Day 1 of wave",80],["Day 2 (peak)",100],["Day 3",70],["After",15]]);
+bars('day',[["5–8 am",80],["9 am–1 pm",60],["2–5 pm",100],["6–9 pm",40],["Night batch",55]]);
+
+const MO=[
+["Dashboard","People clicking, one area at a time","Business hours, ET to PT; heavy May to September; spikes after heat news","Is the first heatmap fast enough to keep a curious first-time visitor? Are 30–60 s jobs explained while waiting?"],
+["API","Scheduled jobs and bursts of many sites","Nightly batches (portfolios, forecasts), early-morning forecast pulls, big bursts during site screening","Do rate limits, credits per call, pagination and async job polling hold up under bulk use?"],
+["MCP","An agent chaining several calls per question","Conversational bursts; each question can mean 2 to 6 calls (create, then read until done)","Does the agent pick the right tool, wait for async jobs, and explain units and model limits?"]
+];
+document.getElementById('modes').innerHTML=MO.map(r=>`<tr>${r.map((c,i)=>`<td>${i?c:'<b>'+c+'</b>'}</td>`).join('')}</tr>`).join('');
+
+const C=[
+["General weather APIs","Tomorrow.io, OpenWeather, Google weather APIs","Same buyers for forecasts; they are coarser and not built around a site polygon"],
+["Climate-risk analytics","First Street, Jupiter Intelligence, XDI","Insurers and investors; they focus on decades-long risk scores, not today's block-level heat"],
+["Urban climate APIs","meteoblue City Climate API","Closest direct rival: city-scale heat data for smart cities and health"],
+["Free public data","Landsat surface temperature, NWS HeatRisk, WRI hyperlocal heat model, city heat-mapping campaigns","Free answers to 'where is it hot'; FortyGuard must beat them on air temperature, forecast and ease"],
+["Microclimate simulation and consultants","Engineering consultancies running CFD or microclimate models","FortyGuard claims months and tens of thousands of dollars become seconds"]
+];
+document.getElementById('comp').innerHTML=C.map(r=>`<tr>${r.map((c,i)=>`<td>${i?c:'<b>'+c+'</b>'}</td>`).join('')}</tr>`).join('');
+}
+</script>
+<script>{for(const c of document.querySelectorAll('.stack td')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}</script>
+</body>
+</html>

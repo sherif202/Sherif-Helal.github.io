@@ -8,6 +8,28 @@
 */
 window.PORTFOLIO = [
   {
+    group: "FortyGuard",
+    about: "Street-level temperature data sold as a dashboard, an API and an MCP server for AI agents. Independent evaluation for my FortyGuard Product Internship application. Not affiliated with FortyGuard.",
+    products: [
+      {
+        name: "FortyGuard product evaluation: Dashboard, API and MCP",
+        line: "The data and the AI assistant are ready. The dashboard isn't yet: it makes a 0.3 °C difference look like a heat emergency.",
+        detail:
+          "Tested all three products the way a new customer would, over two days, against a written plan and hypotheses. Every check went into an evidence log. The findings are traced to four root causes through a data-systems lens, turned into ten prioritised fixes, and end with one product idea: ring navigation for the reports customers generate.",
+        role: "Product evaluator, hiring assessment",
+        status: "Hands-on testing on a free trial account. No access to real customers or usage data; segment and timing views are my own reading.",
+        facts: ["159 checks and findings logged", "32 serious issues, 21 in the dashboard", "13 places where docs and product disagree", "10 fixes in priority order"],
+        cover: "covers/fortyguard-evaluation.jpg",
+        pieces: [
+          { label: "Overview", url: "fortyguard-evaluation/index.html" },
+          { label: "Executive report (PDF)", url: "fortyguard-evaluation/executive-report.pdf" },
+          { label: "Full article", url: "fortyguard-evaluation/article.html" },
+          { label: "Evidence log", url: "fortyguard-evaluation/evidence/evidence-log.xlsx" }
+        ]
+      }
+    ]
+  },
+  {
     group: "Demo Web Shop",
     about: "A public demo store by Tricentis, reviewed as if I were its PM. Not affiliated with Tricentis.",
     products: [
