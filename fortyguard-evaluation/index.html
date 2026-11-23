@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FortyGuard product evaluation · Sherif Hilal</title>
+<meta name="description" content="An independent, hands-on evaluation of FortyGuard's Temperature Dashboard, Temperature API and Temperature MCP, by Sherif Hilal.">
+<style>
+  :root{--ink:#0B1F33;--muted:#4f5d6b;--line:#d9e1e8;--accent:#1769B0;--soft:#eef4f8}
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.6 Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:#fff}
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px}
+  header{padding:44px 0 26px;border-bottom:1px solid var(--line)}
+  .back{font-size:14px;color:var(--accent);text-decoration:none}
+  .kick{margin:22px 0 6px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+  h1{margin:0 0 12px;font-size:34px;line-height:1.2}
+  h2{margin:40px 0 12px;font-size:22px}
+  p{margin:0 0 14px}
+  .lead{font-size:18px;color:#24384c}
+  .note{font-size:14px;color:var(--muted)}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:26px 0 6px}
+  .stats div{border-top:3px solid var(--accent);padding-top:8px}
+  .stats b{display:block;font-size:26px}
+  .stats span{font-size:13.5px;color:var(--muted)}
+  ol.find{padding-left:20px} ol.find li{margin-bottom:8px}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{display:block;border:1px solid var(--line);border-radius:10px;padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .15s}
+  .card:hover{border-color:var(--accent)}
+  .card b{display:block;color:var(--accent);margin-bottom:4px}
+  .card span{font-size:14.5px;color:var(--muted)}
+  .card.main{background:var(--soft);grid-column:1/-1}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  td:first-child{white-space:nowrap;font-weight:600}
+  footer{margin:48px 0 40px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+  a{color:var(--accent)}
+  @media (max-width:700px){.stats{grid-template-columns:1fr 1fr}.cards{grid-template-columns:1fr}h1{font-size:27px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="back" href="../">← All case studies</a>
+    <div class="kick">Product evaluation · 21–22 November 2026</div>
+    <h1>FortyGuard: the data and the AI assistant are ready. The dashboard isn't yet.</h1>
+    <p class="lead">FortyGuard models street-level air temperature, tile by tile and hour by hour, and sells it three ways: a Temperature Dashboard for people, a Temperature API for software and a Temperature MCP for AI agents. As part of my application for the FortyGuard Product Internship, I tested all three the way a new customer would, logged every check, and turned what I found into root causes, ten prioritised fixes and one product idea.</p>
+    <div class="stats">
+      <div><b>159</b><span>checks and findings logged</span></div>
+      <div><b>32</b><span>serious issues (High or Critical)</span></div>
+      <div><b>21 of 32</b><span>of them in the dashboard</span></div>
+      <div><b>0</b><span>serious issues in the AI assistant</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h2>What I found</h2>
+  <p>The numbers underneath are sound: the API, the MCP and the dashboard return the same temperature for the same place and hour. Trust breaks in the dashboard, which draws, labels and reports those numbers in ways that look wrong.</p>
+  <ol class="find">
+    <li><b>Small differences look dramatic.</b> A 0.3 °C spread is painted from deep red to deep blue.</li>
+    <li><b>The first demo shows an impossible number.</b> Los Angeles in January at 101.9 °F, which FortyGuard's own generated report calls implausible.</li>
+    <li><b>The app doesn't say what is happening or what it costs.</b> Progress freezes at 30%, finished reports look missing, and no price appears before paid actions.</li>
+    <li><b>Docs and product disagree in 13 places</b> on limits, plans and tools, and the API key only exists in an email.</li>
+  </ol>
+
+  <h2>Open the work</h2>
+  <div class="cards">
+    <a class="card main" href="executive-report.pdf"><b>Executive report (PDF, 15 pages)</b><span>The short version for a Head of Product: summary, method, eight findings with annotated screenshots, who uses the product and when, root causes through a data-systems lens, ten fixes, a product idea and the numbers.</span></a>
+    <a class="card" href="article.html"><b>Full evaluation article</b><span>The long, interactive version: my plan and hypotheses, the tests, every piece of evidence, the cause map and all the numbers.</span></a>
+    <a class="card" href="evidence/evidence-log.xlsx"><b>Evidence log (Excel)</b><span>Every check, with what I expected, what happened, response times, credits used and severity. A CSV copy sits next to it.</span></a>
+    <a class="card" href="how-fortyguard-works.html"><b>How FortyGuard works</b><span>My map of the system before testing: the pipeline, data layers, automation and weak points, with a banner noting where testing disagreed.</span></a>
+    <a class="card" href="users-and-segments.html"><b>Users and segments</b><span>Who buys FortyGuard, which product each role leans on, ten usage scenarios and when demand peaks.</span></a>
+    <a class="card" href="context-sheet.html"><b>Context sheet</b><span>What I learned before testing from FortyGuard's videos, docs and hackathon demos, and the test ideas that came from it.</span></a>
+    <a class="card" href="evaluation-plan.html"><b>Evaluation plan</b><span>The plan I worked from: stations, timing, tools and frameworks, and who did what.</span></a>
+    <a class="card" href="evidence/evidence-log.csv"><b>Evidence log (CSV)</b><span>The same log as plain text, for any tool.</span></a>
+    <a class="card" href="evidence/heat-intelligence-report-marina-del-rey.pdf"><b>A report I generated in FortyGuard</b><span>The Heat Intelligence report for Marina del Rey, 14 Nov 2026, used as evidence for the report findings.</span></a>
+  </div>
+
+  <h2>How I worked</h2>
+  <table>
+    <tr><td>Scope</td><td>Temperature Dashboard, Temperature API and Temperature MCP, on a free trial account (US coverage).</td></tr>
+    <tr><td>Method</td><td>A written plan with hypotheses, then 67 planned steps (64 run), 16 recorded dashboard walkthroughs, 27 timed API calls and MCP prompts in Claude Code. Every result went into the evidence log.</td></tr>
+    <tr><td>Lenses</td><td>Nielsen's 10 usability heuristics, a documentation scorecard, Lighthouse for speed, and reliability, scalability and maintainability from <i>Designing Data-Intensive Applications</i>.</td></tr>
+    <tr><td>Cost</td><td>67,480 trial credits, spent only where a test needed it.</td></tr>
+    <tr><td>Limits</td><td>Two days, one trial account and no access to real customers or usage data. Usage patterns and segment mappings are my own reading, and are marked as such.</td></tr>
+  </table>
+
+  <footer>
+    Independent work by Sherif Hilal. Not affiliated with or endorsed by FortyGuard. FortyGuard's name and logo belong to FortyGuard and are used only to identify the product reviewed. My API key was kept out of every file here.
+  </footer>
+</main>
+</body>
+</html>

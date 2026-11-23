@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How FortyGuard works, end to end</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#fff,#111318);--ink:light-dark(#15171c,#eef0f4);--mut:light-dark(#596070,#a3aab8);--line:light-dark(#e3e6ec,#2a2e38);--panel:light-dark(#f6f7f9,#191c23);--hot:#e8451e;--warm:#f28c28;--mid:#ffc93c;--cool:#2a6fdb;--ok:#2f9e6b;
+--docb:color-mix(in srgb,var(--cool) 16%,transparent);--doct:light-dark(#1b4fa8,#9cc0ff);
+--asb:color-mix(in srgb,var(--warm) 20%,transparent);--ast:light-dark(#9a4a00,#ffc184);
+--crb:color-mix(in srgb,var(--hot) 18%,transparent);--crt:light-dark(#a3260b,#ffab96)}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{line-height:1.12;letter-spacing:-.015em;margin:0;text-wrap:balance}
+h1{font-size:clamp(28px,4.4vw,46px);font-weight:800;max-width:22ch}
+h2{font-size:clamp(21px,2.6vw,29px);font-weight:800;margin-bottom:6px}
+h3{font-size:15.5px;font-weight:750;margin:0 0 6px}
+p{margin:.35em 0;max-width:72ch}
+code{font:12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:0 4px;overflow-wrap:anywhere}
+.band{padding:clamp(26px,4vw,52px) max(5vw,16px);border-top:1px solid var(--line)}
+.wrap{max-width:1200px;margin:0 auto}
+.heat{height:8px;background:linear-gradient(90deg,var(--cool),var(--mid),var(--warm),var(--hot))}
+.lede{font-size:17px;color:var(--mut);max-width:66ch;margin-top:10px}
+.sub{color:var(--mut);margin-bottom:18px}
+.num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--bg);font-weight:800;font-size:14px;margin-right:8px;vertical-align:3px}
+/* tags */
+.t{display:inline-block;font-size:11px;font-weight:750;padding:0 6px;border-radius:99px;white-space:nowrap;vertical-align:1px;letter-spacing:.01em}
+.doc{background:var(--docb);color:var(--doct)}.as{background:var(--asb);color:var(--ast)}.cr{background:var(--crb);color:var(--crt)}
+.key{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:var(--mut);margin-top:16px;align-items:center}
+.nav{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px;margin-top:14px}.nav a{color:var(--mut)}
+.assumed{border-style:dashed!important;border-color:var(--warm)!important}
+/* hero picture */
+.idea{display:grid;grid-template-columns:1fr auto 1.25fr;gap:18px;align-items:center;margin-top:26px}
+.one{border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center;background:var(--panel)}
+.one .big{font-size:54px;font-weight:850;color:var(--warm);line-height:1}
+.grid10{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;border-radius:8px;overflow:hidden}
+.grid10 i{aspect-ratio:1;display:block}
+.cap{font-size:13px;color:var(--mut);margin-top:8px}
+.vs{font-weight:850;color:var(--mut);font-size:20px}
+/* value chain */
+.chain{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-top:26px}
+.chain div{position:relative;padding:14px 18px 14px 26px;color:#fff;font-weight:750;font-size:15px;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%,14px 50%)}
+.chain div:first-child{clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%);padding-left:16px}
+.chain small{display:block;font-weight:500;font-size:12px;opacity:.92}
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:26px;position:relative}
+.col{position:relative}
+.col:not(:last-child)::after{content:"";position:absolute;right:-21px;top:44px;border:8px solid transparent;border-left:12px solid var(--mut);opacity:.6}
+.colh{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);margin-bottom:8px}
+.box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--bg);font-size:14px;line-height:1.35}
+.box b{display:block;font-size:14.5px}
+.box span{color:var(--mut);font-size:12.5px}
+.box.hl{border-left:5px solid var(--hot)}
+.chip{display:flex;gap:8px;align-items:center;padding:7px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;font-size:13.5px;background:var(--bg)}
+.chip .ic{font-size:17px;width:22px;text-align:center}
+/* layers */
+.layers{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:18px}
+.stack{display:flex;flex-direction:column;gap:6px}
+.L{display:grid;grid-template-columns:52px minmax(0,1fr) 150px;align-items:stretch;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.L .id{display:grid;place-items:center;font-weight:850;color:#fff;font-size:15px}
+.L .body{padding:9px 12px;font-size:13.5px;line-height:1.35}
+.L .body b{font-size:14.5px}
+.L .who{display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;padding:6px;background:var(--panel);font-size:12px;color:var(--mut);text-align:center}
+.pill{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:99px;font-weight:800;font-size:12px;color:#fff}
+.pD{background:#7b4fd6}.pA{background:var(--cool)}.pM{background:#0f9d8a}
+.boundary{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:800;color:var(--hot);text-transform:uppercase;letter-spacing:.06em;margin:4px 0}
+.boundary::before,.boundary::after{content:"";flex:1;border-top:2px dashed var(--hot)}
+.side{border:2px dashed var(--mut);border-radius:12px;padding:12px;font-size:13px;align-self:start}
+.side ul{margin:6px 0 0;padding-left:16px}
+/* automation */
+.lanes{display:grid;gap:14px}
+.lane{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.lane>header{padding:10px 14px;font-weight:800;display:flex;gap:10px;align-items:center;background:var(--panel)}
+.flowrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;padding:12px}
+.auto{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--bg);font-size:13.5px;line-height:1.35}
+.auto .trig{font-size:11.5px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.auto .arrow{color:var(--mut);margin:2px 0}
+.clock{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px}
+.clock div{border-top:4px solid var(--warm);padding:6px 4px;font-size:12.5px;line-height:1.3}
+.clock b{display:block;font-size:13.5px}
+/* interfaces hub */
+.hub{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto auto;gap:14px}
+.core{grid-column:2;grid-row:2;display:grid;place-items:center;text-align:center;border-radius:50%;aspect-ratio:1;max-width:260px;justify-self:center;align-self:center;width:100%;background:radial-gradient(circle,var(--hot),var(--warm) 60%,var(--mid));color:#fff;padding:24px;font-weight:800;font-size:17px;box-shadow:0 0 0 10px color-mix(in srgb,var(--warm) 18%,transparent),0 0 0 22px color-mix(in srgb,var(--warm) 8%,transparent)}
+.core small{display:block;font-weight:500;font-size:12px}
+.spoke{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg);font-size:13.5px;line-height:1.4}
+.spoke h3{display:flex;align-items:center;gap:8px}
+.spoke ul{margin:4px 0 0;padding-left:16px}
+.spoke li{margin:2px 0}
+.ep{display:grid;grid-template-columns:auto 1fr;gap:3px 8px;font-size:12.5px;margin-top:6px}
+.ep code{font-size:11.5px}
+.m{font:700 10.5px ui-monospace,monospace;padding:1px 5px;border-radius:4px;color:#fff;align-self:start;margin-top:2px}
+.post{background:var(--ok)}.get{background:var(--cool)}
+/* worked example */
+.we{display:grid;grid-template-columns:270px minmax(0,1fr);gap:22px;align-items:start}
+.mini{display:flex;flex-direction:column;gap:4px;position:sticky;top:12px}
+.mini div{padding:7px 10px;border-radius:8px;border:1px solid var(--line);font-size:12.5px;font-weight:650;color:var(--mut);transition:all .25s;display:flex;justify-content:space-between;gap:6px}
+.mini div.on{color:#fff;border-color:transparent;transform:translateX(6px);box-shadow:0 4px 14px color-mix(in srgb,var(--hot) 35%,transparent)}
+.mini div.broken{outline:3px solid var(--hot);outline-offset:1px}
+.mini .bd{font-size:11px;font-weight:800;color:var(--hot);text-transform:uppercase;letter-spacing:.06em;text-align:center;border:0;padding:2px;justify-content:center}
+.stepcard{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:var(--panel);min-height:300px}
+.stephead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.stephead .who{font-size:12.5px;color:var(--mut)}
+.travel{margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.travel .lbl{font:800 11px Inter,system-ui,sans-serif;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px}
+.ctrls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0 0}
+button{font:inherit;font-size:14px;font-weight:700;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:7px 14px;cursor:pointer}
+button.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible{outline:3px solid var(--cool);outline-offset:2px}
+.dots{display:flex;gap:5px;flex-wrap:wrap}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--line);display:block;cursor:pointer}
+.dots i.on{background:var(--hot)}
+.toggle{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:650;margin-left:auto}
+.warnbox{margin-top:12px;border-left:5px solid var(--hot);background:var(--crb);padding:9px 12px;border-radius:0 8px 8px 0;font-size:14px}
+.okbox{margin-top:12px;border-left:5px solid var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent);padding:9px 12px;border-radius:0 8px 8px 0;font-size:14px}
+/* product map */
+.pm{display:grid;grid-template-columns:150px repeat(3,minmax(0,1fr));gap:6px;font-size:13px}
+.pm .h{font-weight:800;text-align:center;padding:10px;border-radius:10px;color:#fff;font-size:14.5px}
+.pm .rl{font-weight:700;font-size:12.5px;color:var(--mut);display:flex;align-items:center;padding:4px}
+.pm .c{border:1px solid var(--line);border-radius:8px;padding:7px 9px;line-height:1.35;min-height:44px;background:var(--bg)}
+.pm .c.no{background:var(--panel);color:var(--mut);border-style:dotted}
+.pin{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--hot);color:#fff;font-weight:800;font-size:11px;margin-right:4px;vertical-align:1px}
+.weak{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:12px;margin-top:20px}
+.wk{border:1px solid var(--line);border-left:6px solid var(--hot);border-radius:10px;padding:12px 14px;font-size:13.5px;line-height:1.4;background:var(--bg)}
+.wk.med{border-left-color:var(--warm)}
+.wk h3{display:flex;gap:6px;align-items:center}
+.wk .ev{color:var(--mut);font-size:12.5px;margin-top:6px}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:6px 0 2px}
+.bar i{display:block;height:100%}
+/* aha */
+.aha{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:14px;margin-top:16px}
+.aha div{border-radius:12px;padding:16px;background:var(--panel);border-top:5px solid var(--hot);font-size:14.5px}
+.aha b{display:block;font-size:17px;margin-bottom:4px}
+.src{font-size:13px;color:var(--mut)}.src li{margin:3px 0}
+/* zoom section */
+.zoomwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start}
+.zmap{position:relative;aspect-ratio:16/10;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--panel)}
+.zgrid{position:absolute;inset:0;display:grid;gap:1px;transition:all .35s}
+.zgrid i{display:block}
+.zlabel{position:absolute;left:10px;bottom:10px;background:color-mix(in srgb,var(--bg) 88%,transparent);border-radius:8px;padding:5px 9px;font-size:12.5px;font-weight:700}
+.zscale{position:absolute;right:10px;top:10px;background:color-mix(in srgb,var(--bg) 88%,transparent);border-radius:8px;padding:4px 8px;font-size:12px;font-weight:700}
+.zpin{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);font-size:34px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.zsel{outline:4px solid var(--ink);outline-offset:-4px;position:relative;z-index:2}
+.zslider{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.zslider button{flex:1;min-width:92px;padding:8px 6px;font-size:12.5px;line-height:1.2}
+.zslider button.on{background:var(--hot);color:#fff;border-color:var(--hot)}
+.zbtns{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:13px;color:var(--mut)}
+.zpanel{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--panel)}
+.zpanel .zrow{display:grid;grid-template-columns:96px minmax(0,1fr);gap:4px 12px;font-size:14px;margin-top:8px;align-items:start}
+.zpanel .zrow>span:nth-child(odd){font-size:11.5px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;padding-top:3px}
+.rep{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:3px 8px;margin:2px 3px 2px 0;font-size:13px;font-weight:650}
+.ladder{margin-top:28px;border:1px solid var(--line);border-radius:12px;overflow:auto}
+.ladder table{border-collapse:collapse;width:100%;min-width:1150px;font-size:13px;line-height:1.38}
+.ladder th{background:var(--panel);text-align:left;padding:9px 10px;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+.ladder td{padding:9px 10px;border-top:1px solid var(--line);vertical-align:top}
+.ladder td:first-child{font-weight:800;white-space:nowrap}
+.ladder td:nth-child(4){min-width:170px}.ladder td code{overflow-wrap:normal;word-break:normal;background:none;border:0;padding:0}
+.ladder tr.cur td{background:color-mix(in srgb,var(--hot) 9%,transparent)}
+.sq{display:inline-block;border:2px solid var(--hot);vertical-align:middle;margin-right:6px}
+.journey{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;margin-top:28px;position:relative}
+.journey>div{position:relative;padding:34px 8px 0;text-align:center;font-size:12.5px;line-height:1.35}
+.journey>div::before{content:"";position:absolute;top:13px;left:0;right:0;height:4px;background:var(--line)}
+.journey>div:first-child::before{left:50%}.journey>div:last-child::before{right:50%}
+.journey .dot{position:absolute;top:4px;left:50%;transform:translateX(-50%);width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:11px;font-weight:800;z-index:1}
+.journey .dot.r{background:var(--hot);color:#fff}
+.journey b{display:block;font-size:13.5px;margin-bottom:2px}
+.journey .out{display:inline-block;margin-top:5px;font-size:11.5px;font-weight:750;padding:2px 7px;border-radius:6px;background:var(--crb);color:var(--crt)}
+.truth{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+.truth div{border-radius:12px;padding:14px;border:1px solid var(--line);font-size:13.5px;line-height:1.4}
+.truth b{display:block;font-size:15px;margin-bottom:4px}
+.g2c{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:10px}
+.panel2{border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.cbar{display:grid;grid-template-columns:190px minmax(0,1fr) 110px;gap:8px;align-items:center;font-size:12.5px;margin-top:8px}
+.cbar i{display:block;height:14px;border-radius:4px;background:var(--hot)}
+.cbar em{font-style:normal;font-weight:800;font-size:12.5px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:end;height:200px;margin-top:12px}
+.tiles>div{display:flex;flex-direction:column;justify-content:flex-end;height:100%;text-align:center;font-size:12px}
+.tbar{background:var(--hot);border-radius:6px 6px 0 0;margin-bottom:4px}
+.tiles span{color:var(--mut)}.tiles .pt{color:var(--ink);font-weight:800}
+.tline{display:flex;margin-top:16px;border-radius:10px;overflow:hidden;color:#fff;font-weight:800;font-size:13px}
+.tline div{padding:8px 8px;line-height:1.2}.tline small{display:block;font-weight:500;font-size:11px}
+@media (max-width:900px){.g2c{grid-template-columns:1fr}.cbar{grid-template-columns:1fr 1fr}.cbar i{grid-column:1/-1;order:3}.tline{flex-direction:column}.tline div{flex:auto!important}}
+@media (max-width:900px){.zoomwrap{grid-template-columns:1fr}.journey{grid-template-columns:1fr 1fr;gap:10px}.journey>div::before{display:none}.truth{grid-template-columns:1fr}}
+/* fusion section */
+.scene{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.scene svg{display:block;width:100%;height:auto}
+.tod{display:flex;gap:12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.tod input{flex:1;min-width:180px;accent-color:var(--hot)}
+.tod b{font-variant-numeric:tabular-nums;min-width:52px;font-size:18px}
+.todtxt{padding:0 14px 12px;font-size:14px;min-height:44px}
+.proc{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:10px;margin-top:14px}
+.pr{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.38;background:var(--bg);cursor:pointer;transition:all .2s}
+.pr:hover,.pr.hi{border-color:var(--hot);box-shadow:0 3px 12px color-mix(in srgb,var(--hot) 22%,transparent)}
+.pr.dim{opacity:.45}
+.pr h3{font-size:14px;display:flex;gap:7px;align-items:center;margin-bottom:3px}
+.pr .src{display:block;margin-top:5px;font-size:12px;color:var(--mut)}
+.pn{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--hot);color:#fff;font-weight:800;font-size:11.5px;flex:none}
+.fuse{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:14px}
+.fs{border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13px;line-height:1.38;background:var(--bg);position:relative}
+.fs:not(:last-child)::after{content:"➜";position:absolute;right:-12px;top:42%;color:var(--mut);font-size:14px}
+.fs .vis{height:70px;display:grid;place-items:center;margin-bottom:8px}
+.fs b{display:block;font-size:14px;margin-bottom:3px}
+.mg{display:grid;gap:1px;width:64px;height:64px}
+.mg i{display:block}
+.cube{font:11.5px/1.45 ui-monospace,Menlo,monospace;background:var(--panel);border-radius:6px;padding:4px 6px;width:100%}
+.resbar{margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.rrow{display:grid;grid-template-columns:200px minmax(0,1fr) 120px;gap:10px;align-items:center;font-size:13px;margin-top:7px}
+.rtrack{position:relative;height:16px;background:var(--panel);border-radius:99px}
+.rtrack i{position:absolute;top:0;bottom:0;border-radius:99px}
+.raxis{display:grid;grid-template-columns:200px minmax(0,1fr) 120px;gap:10px;font-size:11px;color:var(--mut);margin-top:4px}
+.raxis div{display:flex;justify-content:space-between}
+.tileband{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--hot);border-right:2px dashed var(--hot);background:color-mix(in srgb,var(--hot) 10%,transparent)}
+@keyframes drift{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
+@keyframes rise{0%{transform:translateY(0);opacity:0}30%{opacity:1}100%{transform:translateY(-34px);opacity:0}}
+.wind{animation:drift 3s ease-in-out infinite alternate}
+.risey{animation:rise 2.4s linear infinite}
+@media (max-width:900px){.fuse{grid-template-columns:1fr 1fr}.fs::after{display:none}.rrow,.raxis{grid-template-columns:1fr}.raxis>span{display:none}}
+@media (prefers-reduced-motion:reduce){.wind,.risey{animation:none}}
+/* customers section */
+.ptabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.ptabs button{font-size:13px;padding:7px 11px;display:flex;gap:6px;align-items:center}
+.ptabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pmeta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;font-size:13px}
+.pmeta span{border:1px solid var(--line);border-radius:99px;padding:3px 10px;background:var(--panel)}
+.pmeta b{color:var(--mut);font-weight:700;margin-right:4px}
+.jr{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+.jb{border-radius:12px;padding:11px 12px 12px;font-size:13px;line-height:1.4;position:relative;border:1px solid var(--line);background:var(--bg)}
+.jb:not(:last-child)::after{content:"➜";position:absolute;right:-11px;top:14px;color:var(--mut);font-size:13px;z-index:1}
+.jb .h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:flex;gap:6px;align-items:center}
+.jb ul{margin:0;padding-left:15px}.jb li{margin:2px 0}
+.jb.fg{border-top:5px solid var(--hot)}
+.jb.out{border:2px dashed #7b4fd6;background:color-mix(in srgb,#7b4fd6 7%,var(--bg))}
+.jb.dec{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.jb.dec .h{color:color-mix(in srgb,var(--bg) 70%,transparent)}
+.jb.pain{border-top:5px solid #9b1f0a}
+.gapline{margin-top:12px;border-left:5px solid var(--warm);background:var(--asb);border-radius:0 8px 8px 0;padding:9px 12px;font-size:13.5px}
+.omx{margin-top:26px;border:1px solid var(--line);border-radius:12px;overflow:auto}
+.omx table{border-collapse:collapse;width:100%;min-width:980px;font-size:12.5px}
+.omx th{background:var(--panel);padding:8px 6px;font-size:11px;text-align:center;color:var(--mut);vertical-align:bottom;line-height:1.25}
+.omx th:first-child,.omx td:first-child{text-align:left;padding-left:12px;white-space:nowrap;font-weight:700}
+.omx td{border-top:1px solid var(--line);text-align:center;padding:7px 4px}
+.omx th.fgc,.omx td.fgc{background:color-mix(in srgb,var(--hot) 10%,transparent)}
+.d3{display:inline-block;width:14px;height:14px;border-radius:50%;background:#7b4fd6}
+.d2{display:inline-block;width:10px;height:10px;border-radius:50%;background:color-mix(in srgb,#7b4fd6 55%,transparent)}
+.dF{display:inline-block;width:14px;height:14px;border-radius:3px;background:var(--hot)}
+.gaps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:20px}
+.gb{display:grid;grid-template-columns:200px minmax(0,1fr) 34px;gap:8px;align-items:center;font-size:13px;margin-top:7px}
+.gb i{display:block;height:14px;border-radius:4px;background:#7b4fd6}
+@media (max-width:1000px){.jr{grid-template-columns:1fr 1fr}.jb::after{display:none}.gaps{grid-template-columns:1fr}.gb{grid-template-columns:1fr 1fr 30px}}
+@media (max-width:900px){
+ .pipe{grid-template-columns:1fr}.col:not(:last-child)::after{right:auto;left:50%;top:auto;bottom:-20px;border:8px solid transparent;border-top:12px solid var(--mut);transform:translateX(-50%)}
+ .chain{grid-template-columns:repeat(2,1fr);gap:6px}.chain div,.chain div:first-child{clip-path:none;border-radius:8px;padding-left:14px}
+ .idea{grid-template-columns:1fr}.vs{text-align:center}
+ .layers{grid-template-columns:1fr}.L{grid-template-columns:44px minmax(0,1fr)}.L .who{grid-column:1/-1}
+ .hub{grid-template-columns:1fr}.core{grid-column:auto;grid-row:auto;max-width:220px}
+ .we{grid-template-columns:1fr}.mini{position:static}
+ .pm{grid-template-columns:100px repeat(3,minmax(0,1fr));font-size:12px}
+ .clock{grid-template-columns:repeat(2,1fr)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="heat"></div>
+
+<!-- HERO -->
+<section class="band" style="border-top:0">
+<div class="wrap">
+ <div style="font-size:13px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.08em">FortyGuard evaluation · explainer · 20 Nov 2026</div>
+ <h1 style="margin-top:8px">How FortyGuard turns heat into decisions, end to end</h1><div role="note" style="margin:14px 0;padding:10px 14px;border-left:4px solid #c8371e;background:rgba(200,55,30,.08);font-size:15px;line-height:1.5"><b>What hands-on testing found (21–22 Nov 2026).</b> This page was written from FortyGuard's own materials before testing. Where testing disagreed: the free key had 1,000,000 one-time credits for one month, not 5M a month; the MCP worked in testing (11 tools, numbers identical to the API) despite the status page; cells are 100 m and 20 m fails; history starts 2021 and forecasts reach +13 h. The flow diagrams below still describe the design as documented. Full evidence: the evaluation report and evidence log.</div>
+ <p class="lede">FortyGuard's bet: <b>temperature changes block by block, and those differences drive money, health and safety.</b> Weather data gives you one number per area. FortyGuard models air temperature for each small tile, every hour, then sells it through three products: the Dashboard, the API and the MCP.</p>
+
+ <div class="idea" aria-label="One number versus a grid of numbers">
+  <div class="one"><div style="font-size:13px;font-weight:700;color:var(--mut);margin-bottom:6px">A weather app</div><div class="big">36°C</div><div class="cap">One value for the whole neighbourhood</div></div>
+  <div class="vs">vs</div>
+  <div><div style="font-size:13px;font-weight:700;color:var(--mut);margin-bottom:6px">FortyGuard: one value per tile, every hour</div><div class="grid10" id="g10"></div><div class="cap">Made-up values (31–41 °C) to show the idea. Real tiles are 60, 80 or 100 m across. <span class="t doc">documented</span></div></div>
+ </div>
+
+ <div class="chain" aria-label="Value chain">
+  <div style="background:#5b6475">1 · Sense<small>satellite, stations, sensors</small></div>
+  <div style="background:#2a6fdb">2 · Model<small>Large Temperature Models</small></div>
+  <div style="background:#1f9fb0">3 · Grid<small>2 m air temp per tile, hourly</small></div>
+  <div style="background:#f2a028">4 · Deliver<small>Dashboard · API · MCP</small></div>
+  <div style="background:#e8451e">5 · Decide<small>shift, site, route, cool</small></div>
+  <div style="background:#9b1f0a">6 · Value<small>$, health, safety</small></div>
+ </div>
+
+ <div class="key">
+  <span><span class="t doc">documented</span> said in FortyGuard docs, videos, site or status page</span>
+  <span><span class="t as">assumed</span> my inference about how it works inside, shown with <span style="border:1.5px dashed var(--warm);padding:0 5px;border-radius:4px">dashed borders</span></span>
+  <span><span class="t cr">conflict</span> FortyGuard sources disagree, or a claim fails</span>
+ </div>
+ <nav class="nav"><a href="#pipeline">1 Pipeline</a><a href="#fusion">2 Physics & fusion</a><a href="#layers">3 Layers</a><a href="#automation">4 Automation</a><a href="#interfaces">5 Interfaces</a><a href="#example">6 Worked example</a><a href="#products">7 Products & weak points</a><a href="#zoom">8 Zoom, reports & credits</a><a href="#customers">9 Customers & outside needs</a><a href="#aha">10 The aha</a></nav>
+</div>
+</section>
+
+<!-- 1 PIPELINE -->
+<section class="band" id="pipeline">
+<div class="wrap">
+ <h2><span class="num">1</span>The pipeline: from raw signals to a decision</h2>
+ <p class="sub">Read left to right. Each column feeds the next.</p>
+ <div class="pipe">
+  <div class="col">
+   <div class="colh">Inputs</div>
+   <div class="chip"><span class="ic">🛰️</span><div>Satellite imagery and remote sensing <span class="t doc">doc</span></div></div>
+   <div class="chip"><span class="ic">🌐</span><div>Reanalysis, ERA5-type (about 25 km) <span class="t doc">doc</span></div></div>
+   <div class="chip"><span class="ic">📡</span><div>Weather stations <span class="t doc">doc</span></div></div>
+   <div class="chip"><span class="ic">🌡️</span><div>Their own ground-truth sensors and IoT <span class="t doc">doc</span></div></div>
+   <div class="chip"><span class="ic">🏙️</span><div>Urban form: buildings, materials, terrain <span class="t doc">doc</span></div></div>
+   <div class="chip"><span class="ic">🌳</span><div>Land cover: built-up, roads, greenery <span class="t doc">doc</span></div></div>
+   <div class="chip"><span class="ic">🏭</span><div>Atmospheric layers and customer data <span class="t doc">doc</span></div></div>
+  </div>
+  <div class="col">
+   <div class="colh">Modelling</div>
+   <div class="box hl"><b>Large Temperature Models (LTM)</b><span>A family of foundation models they call a "temperature operating system". <span class="t doc">doc</span></span></div>
+   <div class="box assumed"><b>Fuse and align</b><span>Put all inputs on one grid and clock (UTC, hour start or end). <span class="t as">assumed</span></span></div>
+   <div class="box assumed"><b>Downscale</b><span>Turn a coarse 25 km field into street-scale tiles using urban form. <span class="t as">assumed</span></span></div>
+   <div class="box assumed"><b>Calibrate</b><span>Correct against stations and sensors. They say it is validated, but publish no error figure. <span class="t as">assumed</span></span></div>
+   <div class="box"><b>NVIDIA Earth-2 work</b><span>"Accelerated temperature modelling" <span class="t doc">doc</span></span></div>
+  </div>
+  <div class="col">
+   <div class="colh">Outputs</div>
+   <div class="box hl"><b>2 m air temperature</b><span>"What a person feels". Not ground or surface temperature. <span class="t doc">doc</span></span></div>
+   <div class="box"><b>Tiles 60, 80 or 100 m</b><span>The marketing says 20 m, and the home page says "2 m". Testing: 100 m delivered, 20 m jobs fail. <span class="t cr">conflict</span></span></div>
+   <div class="box"><b>Hourly time steps</b><span>History back to 2021 (V8) or 2019 (docs). Forecast up to 12 h (V8) or 2 weeks (site). Testing: history from 2021; +13 h served, +7 days refused. <span class="t cr">conflict</span></span></div>
+   <div class="box"><b>4 data domains</b><span>Temperature · comfort (wet bulb) · air quality (AQI, CO₂) · land cover <span class="t doc">doc</span></span></div>
+   <div class="box"><b>Derived products</b><span>Street View and satellite segmentation, Heat Intelligence text reports, cool routes <span class="t doc">doc</span></span></div>
+  </div>
+  <div class="col">
+   <div class="colh">Delivery</div>
+   <div class="box" style="border-left:5px solid #7b4fd6"><b>Temperature Dashboard</b><span>For people who look. Maps, stats, reports, export. <span class="t doc">doc</span></span></div>
+   <div class="box" style="border-left:5px solid var(--cool)"><b>Temperature API</b><span>For software that pulls. REST, async jobs, credits. <span class="t doc">doc</span></span></div>
+   <div class="box" style="border-left:5px solid #0f9d8a"><b>Temperature MCP</b><span>For AI agents that ask. 9 tools in the docs; testing found 11. <span class="t doc">doc</span></span></div>
+   <div class="box"><b>Heat Monitoring & Alerts</b><span>Push when a threshold is crossed. It is on the status page but was never demoed. <span class="t doc">doc</span></span></div>
+   <div class="box"><b>Temperature Enterprise</b><span>Project work, such as DATS, Ecopia, TomTom and Masdar (all claimed on the site) <span class="t doc">doc</span></span></div>
+  </div>
+  <div class="col">
+   <div class="colh">Decisions</div>
+   <div class="chip"><span class="ic">👷</span><div>Safe work hours for outdoor crews</div></div>
+   <div class="chip"><span class="ic">🚚</span><div>Cooler delivery routes and windows</div></div>
+   <div class="chip"><span class="ic">⚡</span><div>Grid peak and transformer load</div></div>
+   <div class="chip"><span class="ic">🏢</span><div>Site selection and real estate due diligence</div></div>
+   <div class="chip"><span class="ic">🌳</span><div>Where to plant trees and shade bus stops</div></div>
+   <div class="chip"><span class="ic">🚑</span><div>Where to put cooling centres</div></div>
+   <div class="chip"><span class="ic">🛡️</span><div>Insurance heat-risk scores</div></div>
+   <p class="cap">These are FortyGuard's six demo segments (V8), plus what hackathon teams built. No paying customer has been named. <span class="t doc">doc</span></p>
+  </div>
+ </div>
+</div>
+</section>
+
+<!-- FUSION -->
+<section class="band" id="fusion">
+<div class="wrap">
+ <h2><span class="num">2</span>How many inputs become one number: the physics, then the fusion</h2>
+ <p class="sub">The air 2 m above a street gets warmer or cooler through a handful of physical processes. No single dataset sees them all. FortyGuard's job is to line the datasets up so a model can learn what the air temperature is, tile by tile. Move the clock to see which processes matter when.</p>
+
+ <div class="scene">
+  <svg id="city" viewBox="0 0 900 400" role="img" aria-label="Street scene showing sun, reflection, absorption, heat release, shade, wind and anthropogenic heat">
+   <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop id="sk1" offset="0" stop-color="#8ec5ff"/><stop id="sk2" offset="1" stop-color="#e6f2ff"/></linearGradient>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f5a623"/></marker>
+    <marker id="ahb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2a6fdb"/></marker>
+    <marker id="ahr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#e8451e"/></marker>
+   </defs>
+   <rect width="900" height="400" fill="url(#sky)"/>
+   <g id="sunG"><circle id="sun" r="24" fill="#ffc93c" stroke="#f5a623" stroke-width="4"/></g>
+   <circle id="moon" cx="800" cy="60" r="16" fill="#e9edf5" opacity="0"/>
+   <!-- rays -->
+   <g id="rays" stroke="#f5a623" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#ah)" fill="none">
+    <line id="r1"/><line id="r2"/><line id="r3"/><line id="r4"/>
+   </g>
+   <!-- reflected from white roof -->
+   <g id="refl" stroke="#f5a623" stroke-width="2.5" marker-end="url(#ah)" fill="none"><line x1="150" y1="170" x2="120" y2="95"/><line x1="185" y1="170" x2="215" y2="95"/></g>
+   <!-- wind -->
+   <g id="windG" class="wind" stroke="#2a6fdb" stroke-width="3" marker-end="url(#ahb)" fill="none"><path d="M40 60 h120"/><path d="M300 45 h120"/><path d="M560 70 h120"/></g>
+   <g id="windC" stroke="#2a6fdb" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#ahb)" fill="none" opacity=".6"><path d="M235 260 h50"/></g>
+   <!-- buildings -->
+   <rect x="80" y="170" width="140" height="190" fill="#d9dde4"/><rect x="80" y="166" width="140" height="8" fill="#ffffff" stroke="#c4cad4"/>
+   <g fill="#aab3c2"><rect x="98" y="195" width="22" height="26"/><rect x="138" y="195" width="22" height="26"/><rect x="178" y="195" width="22" height="26"/><rect x="98" y="245" width="22" height="26"/><rect x="138" y="245" width="22" height="26"/><rect x="178" y="245" width="22" height="26"/></g>
+   <rect id="glass" x="400" y="90" width="120" height="270" fill="#46536a"/>
+   <g fill="#6e7f9a"><rect x="414" y="110" width="92" height="10"/><rect x="414" y="140" width="92" height="10"/><rect x="414" y="170" width="92" height="10"/><rect x="414" y="200" width="92" height="10"/><rect x="414" y="230" width="92" height="10"/><rect x="414" y="260" width="92" height="10"/></g>
+   <!-- road -->
+   <rect id="asphalt" x="220" y="352" width="180" height="22" fill="#2b2f36"/>
+   <rect x="0" y="360" width="900" height="40" fill="#8a7f6e"/>
+   <rect id="asphalt2" x="220" y="356" width="180" height="20" fill="#2b2f36"/>
+   <rect x="250" y="364" width="24" height="3" fill="#ddd"/><rect x="300" y="364" width="24" height="3" fill="#ddd"/><rect x="350" y="364" width="24" height="3" fill="#ddd"/>
+   <!-- car -->
+   <g id="car"><rect x="300" y="336" width="54" height="18" rx="5" fill="#c2410c"/><circle cx="312" cy="356" r="5" fill="#222"/><circle cx="342" cy="356" r="5" fill="#222"/></g>
+   <!-- park -->
+   <rect x="540" y="352" width="190" height="10" fill="#4e9a55"/>
+   <rect x="622" y="270" width="12" height="84" fill="#7a5537"/>
+   <circle cx="628" cy="250" r="52" fill="#3c8a45"/><circle cx="596" cy="270" r="30" fill="#4ea257"/><circle cx="662" cy="268" r="30" fill="#4ea257"/>
+   <ellipse id="shade" cx="640" cy="356" rx="70" ry="6" fill="#1d3b22" opacity=".45"/>
+   <g id="evap" fill="#6fb3ff"><circle class="risey" cx="600" cy="200" r="3.5"/><circle class="risey" cx="630" cy="190" r="3.5" style="animation-delay:.8s"/><circle class="risey" cx="660" cy="205" r="3.5" style="animation-delay:1.6s"/></g>
+   <!-- house + AC -->
+   <rect x="760" y="280" width="110" height="80" fill="#c9b79c"/><path d="M750 282 L815 236 L880 282 Z" fill="#7d4a2c"/>
+   <rect x="738" y="318" width="22" height="20" fill="#9aa3ae" stroke="#6b7480"/>
+   <g id="acheat" stroke="#e8451e" stroke-width="2.5" fill="none"><path class="risey" d="M742 312 q4 -6 0 -12 q-4 -6 0 -12"/><path class="risey" style="animation-delay:1.2s" d="M752 312 q4 -6 0 -12 q-4 -6 0 -12"/></g>
+   <g id="carheat" stroke="#e8451e" stroke-width="2" fill="none"><path class="risey" d="M296 344 q-4 -6 0 -12 q4 -6 0 -12"/></g>
+   <!-- longwave release -->
+   <g id="lw" stroke="#e8451e" stroke-width="2.5" fill="none" marker-end="url(#ahr)">
+    <path d="M250 350 q8 -12 0 -24 q-8 -12 0 -24 q8 -12 0 -24"/><path d="M330 330 q8 -12 0 -24 q-8 -12 0 -24 q8 -12 0 -24"/><path d="M380 350 q8 -12 0 -24 q-8 -12 0 -24"/>
+    <path d="M396 230 q-12 -6 -24 0 q-12 6 -24 0"/><path d="M224 250 q12 -6 24 0 q12 6 24 0"/>
+   </g>
+   <!-- thermometer -->
+   <g id="thermo"><line x1="370" y1="352" x2="370" y2="300" stroke="#15171c" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <rect x="356" y="268" width="28" height="34" rx="6" fill="#fff" stroke="#15171c"/><text id="ttext" x="370" y="290" text-anchor="middle" font-size="12" font-weight="800" fill="#15171c">38°</text>
+    <text x="388" y="330" font-size="11" font-weight="700" fill="#15171c">2 m</text></g>
+   <!-- markers -->
+   <g font-size="12" font-weight="800" text-anchor="middle" id="marks">
+    <g data-p="1"><circle r="11" fill="#e8451e"/><text y="4" fill="#fff">1</text></g>
+    <g data-p="2" transform="translate(150 120)"><circle r="11" fill="#e8451e"/><text y="4" fill="#fff">2</text></g>
+    <g data-p="3" transform="translate(240 335)"><circle r="11" fill="#e8451e"/><text y="4" fill="#fff">3</text></g>
+    <g data-p="4" transform="translate(275 285)"><circle r="11" fill="#e8451e"/><text y="4" fill="#fff">4</text></g>
+    <g data-p="5" transform="translate(700 215)"><circle r="11" fill="#e8451e"/><text y="4" fill="#fff">5</text></g>
+    <g data-p="6" transform="translate(30 60)"><circle r="11" fill="#e8451e"/><text y="4" fill="#fff">6</text></g>
+    <g data-p="7" transform="translate(560 200)"><circle r="11" fill="#e8451e"/><text y="4" fill="#fff">7</text></g>
+    <g data-p="8" transform="translate(725 305)"><circle r="11" fill="#e8451e"/><text y="4" fill="#fff">8</text></g>
+    <g data-p="9" transform="translate(340 268)"><circle r="11" fill="#15171c"/><text y="4" fill="#fff">9</text></g>
+   </g>
+  </svg>
+  <div class="tod"><span>🕐</span><b id="todv">15:00</b><input type="range" id="tod" min="5" max="23" step="0.5" value="15" aria-label="Time of day"><span class="cap" style="margin:0">Drag the clock: sunrise → noon → night</span></div>
+  <div class="todtxt" id="todtxt"></div>
+ </div>
+ <p class="cap">The scene shows textbook urban-heat physics, not FortyGuard's model. How each process maps to FortyGuard's inputs is on the cards: the input list is <span class="t doc">documented</span>, and the mapping is <span class="t as">assumed</span>. The thermometer reading is illustrative.</p>
+
+ <div class="proc" id="proc">
+  <div class="pr" data-p="1"><h3><span class="pn">1</span>Sunlight arrives</h3>The energy that drives everything, set by sun angle, season and cloud.<span class="src">Seen by: sun position (calculated), cloud from satellite and reanalysis. Solar radiation is also an API field. <span class="t doc">doc</span></span></div>
+  <div class="pr" data-p="2"><h3><span class="pn">2</span>Light surfaces reflect it</h3>A white roof sends much of the light back to the sky (high albedo), so less turns into heat.<span class="src">Seen by: satellite imagery (surface colour) and "materials" in their input list. <span class="t doc">doc</span> <span class="t as">mapping</span></span></div>
+  <div class="pr" data-p="3"><h3><span class="pn">3</span>Dark surfaces absorb and store it</h3>Asphalt and concrete soak up heat all day, like a battery.<span class="src">Seen by: land-cover share (built-up, roads, greenery) from the satellite endpoint. <span class="t doc">doc</span></span></div>
+  <div class="pr" data-p="4"><h3><span class="pn">4</span>Stored heat comes back at night</h3>Streets and walls give the heat back as infrared. Narrow streets between tall buildings trap it, so cities stay warm after sunset.<span class="src">Seen by: urban form, building height and street geometry. <span class="t doc">doc</span> <span class="t as">mapping</span></span></div>
+  <div class="pr" data-p="5"><h3><span class="pn">5</span>Trees shade</h3>Shade stops sunlight before it reaches the ground. FortyGuard cites up to 5 to 8 °C between shaded and exposed spots (Masdar).<span class="src">Seen by: greenery % from satellite and Street View segmentation. <span class="t doc">doc</span></span></div>
+  <div class="pr" data-p="6"><h3><span class="pn">6</span>Wind carries heat away</h3>Moving air mixes hot air out. Buildings slow it down, so a sheltered courtyard stays hotter.<span class="src">Seen by: weather stations and reanalysis (km scale). "Airflow" is part of their pitch. <span class="t doc">doc</span> <span class="t as">mapping</span></span></div>
+  <div class="pr" data-p="7"><h3><span class="pn">7</span>Plants sweat and cool the air</h3>Evapotranspiration turns heat into water vapour. It cools the air but raises humidity, which is why wet bulb matters.<span class="src">Seen by: greenery %, plus humidity from stations. Wet bulb is an output. <span class="t doc">doc</span></span></div>
+  <div class="pr" data-p="8"><h3><span class="pn">8</span>People add heat</h3>AC exhaust, traffic and industry. "Anthropogenic" is one of Heat Intelligence's 5 areas.<span class="src">Seen by: not stated. Possibly land use or traffic proxies. <span class="t as">assumed</span></span></div>
+  <div class="pr" data-p="9"><h3><span class="pn" style="background:#15171c">9</span>The answer key: 2 m air temperature</h3>Their own ground sensors and weather stations measure the real air temperature. This is what the model learns to predict.<span class="src">"Proprietary ground-truth sensor data" <span class="t doc">doc</span>. How it is used for training is <span class="t as">assumed</span></span></div>
+ </div>
+
+ <h3 style="margin-top:28px">How they line it up: from many inputs to one value per tile and hour <span class="t as">steps 2–6 assumed</span></h3>
+ <div class="fuse">
+  <div class="fs"><div class="vis" style="font-size:34px">🕐</div><b>1 · Same clock</b>Convert every source to UTC and agree whether "14:00" is the start or end of the hour. <span class="t doc">their own warning (V3)</span></div>
+  <div class="fs"><div class="vis"><div style="display:flex;gap:4px;align-items:center"><div class="mg" style="grid-template-columns:repeat(2,1fr);width:30px;height:30px"><i style="background:#f28c28"></i><i style="background:#ffc93c"></i><i style="background:#ffc93c"></i><i style="background:#f9a83a"></i></div>→<div class="mg" style="grid-template-columns:repeat(6,1fr);width:48px;height:48px" id="mgfine"></div></div></div><b>2 · Same grid</b>Cut coarse data (25 km reanalysis) down, and sharp data (satellite pixels) up, to the tile grid. Pin stations to their tile.</div>
+  <div class="fs"><div class="vis"><div class="cube">built-up 72%<br>green 3%<br>wind 2 m/s<br>sun 61°</div></div><b>3 · One row per tile per hour</b>Each tile gets a "recipe card" of features: surface, shape, weather and time.</div>
+  <div class="fs"><div class="vis" style="font-size:34px">🧠</div><b>4 · Model learns</b>The LTM learns how recipes map to measured 2 m air temperature, across many cities, seasons and hours.</div>
+  <div class="fs"><div class="vis" style="font-size:34px">✅</div><b>5 · Check and fill</b>Test against stations it didn't train on. Fill gaps by interpolation (they told teams to do the same, V8). Water tiles came back empty (V4).</div>
+  <div class="fs"><div class="vis"><div class="mg" style="grid-template-columns:repeat(4,1fr)" id="mgout"></div></div><b>6 · One number</b>2 m air temperature per tile and hour, plus wet bulb and comfort derived from it. This is what the API serves.</div>
+ </div>
+
+ <div class="resbar">
+  <b>Why the fine detail is harder than it sounds</b> <span class="cap">How sharp each input is, on a log scale. The red band marks FortyGuard's tile size (60–100 m). The input sizes are typical values for these data types, <span class="t as">assumed</span>.</span>
+  <div class="rrow"><span>🏢 Building footprints and heights</span><div class="rtrack"><span class="tileband" style="left:35.6%;width:4.4%"></span><i style="left:0;width:5%;background:#7b4fd6"></i></div><span>~1 m</span></div>
+  <div class="rrow"><span>🛰️ Satellite imagery (land cover)</span><div class="rtrack"><span class="tileband" style="left:35.6%;width:4.4%"></span><i style="left:20%;width:9.5%;background:#1f9fb0"></i></div><span>10–30 m</span></div>
+  <div class="rrow"><span>📷 Street View segmentation</span><div class="rtrack"><span class="tileband" style="left:35.6%;width:4.4%"></span><i style="left:2%;width:16%;background:#1f9fb0"></i></div><span>street photos</span></div>
+  <div class="rrow"><span>📡 Weather stations, own sensors</span><div class="rtrack"><span class="tileband" style="left:35.6%;width:4.4%"></span><i style="left:60%;width:29%;background:#f28c28"></i></div><span>points, km apart</span></div>
+  <div class="rrow"><span>🌐 Reanalysis: wind, humidity, regional temperature</span><div class="rtrack"><span class="tileband" style="left:35.6%;width:4.4%"></span><i style="left:84%;width:10%;background:#e8451e"></i></div><span>~25 km <span class="t doc">doc</span></span></div>
+  <div class="raxis"><span></span><div><span>1 m</span><span>10 m</span><span>100 m</span><span>1 km</span><span>10 km</span><span>100 km</span></div><span></span></div>
+  <p class="cap" style="margin-top:10px"><b>The aha:</b> surfaces and shapes are known sharper than a tile, but the weather (wind, humidity, the regional temperature) is known only at the km scale. So the block-by-block differences come mostly from surface and geometry features. That may explain two things a real user saw (V4): the field seemed to "resolve near 1 km", and tripling trees moved the temperature by only hundredths of a degree. <span class="t as">inference</span></p>
+ </div>
+</div>
+</section>
+
+<!-- 2 LAYERS -->
+<section class="band" id="layers">
+<div class="wrap">
+ <h2><span class="num">3</span>The layers: what customers touch, and what stays hidden</h2>
+ <p class="sub">The red dashed line is the customer boundary. Customers never see anything below it. They see only what the API returns.</p>
+ <div class="layers">
+  <div class="stack">
+   <div class="L"><div class="id" style="background:#9b1f0a">L7</div><div class="body"><b>Decisions</b><br>Move a shift, buy a plot, reroute a truck, place a cooling unit</div><div class="who">Customer's own</div></div>
+   <div class="L"><div class="id" style="background:#c2410c">L6</div><div class="body"><b>Customer apps and agents</b><br>Hackathon apps, Claude or Cursor, Autodesk Forma extensions, scripts, BI <span class="t doc">doc</span></div><div class="who">Customer builds</div></div>
+   <div class="L"><div class="id" style="background:#e8451e">L5</div><div class="body"><b>Product surfaces</b><br>Dashboard UI · MCP server · Heat Monitoring & Alerts <span class="t doc">doc</span></div><div class="who"><span class="pill pD">D</span><span class="pill pM">M</span> Customer touches</div></div>
+   <div class="L"><div class="id" style="background:#f28c28">L4</div><div class="body"><b>API gateway</b><br>Key auth, credit metering, input checks, async jobs and <code>/status</code> <span class="t doc">doc</span></div><div class="who"><span class="pill pA">A</span> Customer touches</div></div>
+   <div class="boundary">customer boundary</div>
+   <div class="L assumed"><div class="id" style="background:#8a8f99">L3</div><div class="body"><b>Job and tile services</b><br>A queue and workers that cut the grid to a polygon, compute stats and write reports. "Queueing" is documented (V2). The design behind it is not. <span class="t as">assumed</span></div><div class="who">Internal</div></div>
+   <div class="L assumed"><div class="id" style="background:#6b7280">L2</div><div class="body"><b>Model output store</b><br>Precomputed hourly grids, from history up to the +12 h forecast, served on request <span class="t as">assumed</span></div><div class="who">Internal</div></div>
+   <div class="L"><div class="id" style="background:#2a6fdb">L1</div><div class="body"><b>Large Temperature Models</b><br>That they exist is documented. How they work inside is assumed. <span class="t doc">doc</span> <span class="t as">internals assumed</span></div><div class="who">Internal</div></div>
+   <div class="L"><div class="id" style="background:#5b6475">L0</div><div class="body"><b>Data inputs and ingestion</b><br>Satellite, reanalysis, stations, their own sensors, urban form, land cover <span class="t doc">doc</span></div><div class="who">Internal</div></div>
+  </div>
+  <div class="side">
+   <b>👁️ Status page watches L4 and L5</b>
+   <ul>
+    <li>Temperature API: Heatmap, Satellite, Street View, Heat Intelligence, Environmental Parameters, MCP Server</li>
+    <li>Platform: Dashboard, Heat Monitoring & Alerts, Authentication & Accounts</li>
+   </ul>
+   <p class="cap">It shows 9 components and nothing below the boundary, so a model or data delay would not show up. <span class="t doc">doc</span></p>
+   <hr style="border:0;border-top:1px solid var(--line)">
+   <b>Products</b><br>
+   <span class="pill pD">D</span> Dashboard<br><span class="pill pA">A</span> API<br><span class="pill pM">M</span> MCP
+   <p class="cap">The MCP's <code>_read</code> tools match the API's submit-then-check pattern. That suggests the MCP is a thin wrapper on the API. <span class="t as">assumed</span></p>
+  </div>
+ </div>
+</div>
+</section>
+
+<!-- 3 AUTOMATION -->
+<section class="band" id="automation">
+<div class="wrap">
+ <h2><span class="num">4</span>Where the automation happens</h2>
+ <p class="sub">Some of it FortyGuard runs. The rest customers build on top. Each card reads <b>trigger → action</b>.</p>
+ <div class="lanes">
+  <div class="lane">
+   <header><span class="pill" style="background:var(--hot)">⚙</span>FortyGuard runs it</header>
+   <div class="flowrow">
+    <div class="auto assumed"><div class="trig">Every hour</div>New observations come in<div class="arrow">↓</div><b>Scheduled model run</b> refreshes the grid <span class="t as">assumed</span></div>
+    <div class="auto"><div class="trig">Every hour</div>The forecast rolls forward<div class="arrow">↓</div><b>+12 h forecast updated</b>, "refreshed hourly" (V8) <span class="t doc">doc</span></div>
+    <div class="auto"><div class="trig">On request</div>A job is submitted<div class="arrow">↓</div><b>Queue → worker → Completed</b>, typically 30 to 60 s <span class="t doc">doc</span></div>
+    <div class="auto"><div class="trig">On Completed</div>The job finishes<div class="arrow">↓</div><b>Credits deducted</b>. Failed jobs are free, they say <span class="t doc">doc</span></div>
+    <div class="auto"><div class="trig">Threshold crossed</div>A monitor rule fires<div class="arrow">↓</div><b>Heat alert sent</b> <span class="t doc">component exists</span> <span class="t as">behaviour assumed</span></div>
+    <div class="auto"><div class="trig">Every 60 s</div>Health check<div class="arrow">↓</div><b>Status page refresh</b>. In practice the banner reads "Status unavailable" <span class="t cr">conflict</span></div>
+   </div>
+  </div>
+  <div class="lane">
+   <header><span class="pill" style="background:var(--cool)">🔌</span>Customers build on top</header>
+   <div class="flowrow">
+    <div class="auto"><div class="trig">A question in chat</div>A user asks Claude or Cursor<div class="arrow">↓</div><b>The agent picks MCP tools</b> and calls them on its own <span class="t doc">doc</span></div>
+    <div class="auto"><div class="trig">A cron job or app event</div>A script submits jobs<div class="arrow">↓</div><b>Polls <code>/status</code></b> until done, then stores the result</div>
+    <div class="auto"><div class="trig">Forecast over a limit</div>Rules engine<div class="arrow">↓</div><b>Stop work, phone a supervisor</b>, write OSHA certificates (hackathon teams)</div>
+    <div class="auto"><div class="trig">FortyGuard is down</div>Gateway checks health<div class="arrow">↓</div><b>Falls back to OpenMeteo or a cache</b> (4 of 18 teams)</div>
+    <div class="auto"><div class="trig">A design change in Forma</div>Extension pulls data<div class="arrow">↓</div><b>Heat shown on the site model</b> (Autodesk trial at the hackathon) <span class="t doc">doc</span></div>
+   </div>
+  </div>
+ </div>
+ <h3 style="margin-top:22px">One hour inside FortyGuard <span class="t as">mostly assumed</span></h3>
+ <div class="clock">
+  <div><b>:00</b>The new hour of satellite and station data lands</div>
+  <div><b>:05</b>LTM run produces the hour's grid and a new +12 h forecast</div>
+  <div><b>:10</b>Grids saved to the store, so the "previous hour" is now available (V2)</div>
+  <div><b>any time</b>Customer jobs queue, run and complete</div>
+  <div><b>any time</b>Monitors compare the new grid to thresholds and send alerts</div>
+  <div><b>every 60 s</b>Status checks ping each API component</div>
+ </div>
+</div>
+</section>
+
+<!-- 4 INTERFACES -->
+<section class="band" id="interfaces">
+<div class="wrap">
+ <h2><span class="num">5</span>System interfaces: every way in and out</h2>
+ <p class="sub">The same core, reached through five kinds of connection.</p>
+ <div class="hub">
+  <div class="spoke" style="grid-column:1;grid-row:1">
+   <h3><span class="pill pA">A</span>REST API <span class="t doc">doc</span></h3>
+   Base <code>api.fortyguard.com/v1</code> · header <code>api-key</code>
+   <div class="ep">
+    <span class="m post">POST</span><code>/heatmap</code>
+    <span class="m post">POST</span><code>/env_params</code>
+    <span class="m post">POST</span><code>/satellite</code>
+    <span class="m post">POST</span><span>Street View, Heat Intelligence <span style="color:var(--mut)">(paths not checked)</span></span>
+    <span class="m get">GET</span><code>/status/{activity_id}</code>
+   </div>
+   <p class="cap">Submit, get an <code>activity_id</code>, poll until Completed. A heatmap costs 4,220 credits on Premium. The area limit is 50 mi². The plans are $79 and $289.</p>
+  </div>
+  <div class="spoke" style="grid-column:2;grid-row:1">
+   <h3><span class="pill pM">M</span>MCP server <span class="t doc">doc</span></h3>
+   <code>tos-mcp.app.fortyguard.com/mcp</code> · HTTP · <code>Authorization: Bearer</code>
+   <div class="ep" style="grid-template-columns:1fr 1fr">
+    <code>env_params</code><code>satellite</code>
+    <code>heatmap</code><code>heatmap_read</code>
+    <code>report</code><code>report_read</code>
+    <code>temperature_routing</code><code>…_routing_read</code>
+    <code>streetview</code><span></span>
+   </div>
+   <p class="cap">The clients they validated are Claude Code and Cursor. It is <b style="color:var(--hot)">down since 14 Oct</b>.</p>
+  </div>
+  <div class="spoke" style="grid-column:3;grid-row:1">
+   <h3><span class="pill pD">D</span>Dashboard <span class="t doc">doc</span></h3>
+   <code>dashboard.fortyguard.com</code>
+   <ul><li>Area: polygon upload, city search, draw, circle</li><li>Time: an hour, an hour range or a day · tile size 60, 80 or 100 m</li><li>Queue → Activity History</li><li>Stats, segmentation, Heat Intelligence, export</li><li>Chatbot, patch notes, feedback form</li></ul>
+  </div>
+  <div class="core" style="grid-column:2;grid-row:2">FortyGuard core<small>LTM grids + job services<br><span style="opacity:.85">(inside: assumed)</span></small></div>
+  <div class="spoke" style="grid-column:1;grid-row:2;align-self:center">
+   <h3>🔑 Accounts and credits <span class="t doc">doc</span></h3>
+   <ul><li>A free key by email. Docs say 5M credits a month; the key actually issued had 1,000,000 one-time credits for one month (testing, S-03)</li><li>One key, two formats: <code>api-key</code> (REST) and <code>Bearer</code> (MCP) <span class="t cr">inconsistent</span></li><li>Rate limits are "documented" but missing <span class="t cr">conflict</span></li></ul>
+  </div>
+  <div class="spoke" style="grid-column:3;grid-row:2;align-self:center">
+   <h3>👁️ Status page <span class="t doc">doc</span></h3>
+   <code>status.fortyguard.com</code>
+   <ul><li>9 components, 90-day bars, incidents, subscribe</li><li>Every API component shows the same 98.24% uptime</li><li>MCP 78% "No data", with an open incident</li></ul>
+  </div>
+  <div class="spoke" style="grid-column:1 / span 3;grid-row:3">
+   <h3>🤝 Partners and outside systems</h3>
+   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:6px">
+    <div class="chip">🏗️ <div><b>Autodesk Forma</b><br><span class="cap">Extension platform at the hackathon <span class="t doc">doc</span></span></div></div>
+    <div class="chip">🟩 <div><b>NVIDIA Earth-2</b><br><span class="cap">Modelling work, hackathon mentor <span class="t doc">doc</span></span></div></div>
+    <div class="chip">🪟 <div><b>Microsoft Marketplace</b><br><span class="cap">Listing <span class="t doc">doc</span></span></div></div>
+    <div class="chip">🚀 <div><b>Google, Presight (G42)</b><br><span class="cap">Accelerators <span class="t doc">doc</span></span></div></div>
+    <div class="chip">🗺️ <div><b>Mapbox, Google Maps, census, EPA</b><br><span class="cap">Joined in by customers, not by FortyGuard</span></div></div>
+    <div class="chip">🌦️ <div><b>OpenMeteo</b><br><span class="cap">The fallback customers chose</span></div></div>
+   </div>
+  </div>
+ </div>
+</div>
+</section>
+
+<!-- 5 WORKED EXAMPLE -->
+<section class="band" id="example">
+<div class="wrap">
+ <h2><span class="num">6</span>Worked example: one question through every layer</h2>
+ <p class="sub">On a July morning at 9:00, a Phoenix warehouse manager asks: <b>"Which of my 3 sites will be hottest at 3 pm today, and should I move loading?"</b> 3 pm is 6 hours ahead, inside the 12 h forecast. Step through it, or switch on <b>today's reality</b>.</p>
+ <div class="we">
+  <div class="mini" id="mini" aria-hidden="true"></div>
+  <div>
+   <div class="stepcard" id="card" aria-live="polite"></div>
+   <div class="ctrls">
+    <button id="prev">← Back</button><button id="next" class="pri">Next →</button><button id="play">▶ Play</button>
+    <div class="dots" id="dots"></div>
+    <label class="toggle"><input type="checkbox" id="real"> Status-page view (MCP listed as down)</label>
+   </div>
+  </div>
+ </div>
+</div>
+</section>
+
+<!-- 6 PRODUCTS & WEAK POINTS -->
+<section class="band" id="products">
+<div class="wrap">
+ <h2><span class="num">7</span>Where each product sits, and where it breaks</h2>
+ <p class="sub">The three products are three doors into one core. The red pins mark weak points, and each number matches a card below.</p>
+ <div class="pm">
+  <div></div>
+  <div class="h" style="background:#7b4fd6">Dashboard<br><small style="font-weight:500">people who look</small></div>
+  <div class="h" style="background:var(--cool)">API<br><small style="font-weight:500">software that pulls</small></div>
+  <div class="h" style="background:#0f9d8a">MCP<br><small style="font-weight:500">agents that ask</small></div>
+
+  <div class="rl">L6 · user's tool</div><div class="c">Browser</div><div class="c">Postman, Python, apps <span class="pin">8</span></div><div class="c">Claude Code, Cursor</div>
+  <div class="rl">L5 · surface</div><div class="c">Map UI, reports, export</div><div class="c no">none</div><div class="c">11 tools (docs: 9) <span class="pin">1</span></div>
+  <div class="rl">L4 · gateway</div><div class="c">Login, queue <span class="t as">likely calls the API</span></div><div class="c">api-key, credits, async <span class="pin">6</span></div><div class="c">Bearer, then API <span class="t as">assumed</span> <span class="pin">6</span></div>
+  <div class="rl">L3 · services</div><div class="c" style="grid-column:span 3;text-align:center">Shared job and tile services. Every API component fails together. <span class="pin">2</span> <span class="t as">assumed</span></div>
+  <div class="rl">L1–L2 · model</div><div class="c" style="grid-column:span 3;text-align:center">One LTM grid behind all three: tile size, time window, what the number means <span class="pin">3</span><span class="pin">4</span><span class="pin">5</span></div>
+  <div class="rl">Watching</div><div class="c" style="grid-column:span 3;text-align:center">Status page <span class="pin">7</span></div>
+ </div>
+
+ <div class="weak">
+  <div class="wk"><h3><span class="pin">1</span>The status page has listed the MCP as down since 14 Oct</h3><p style="margin:4px 0"><b>Testing:</b> it connected first time on 21 Nov, showed 11 tools and returned numbers identical to the API, so the incident is stale.</p>Open incident since 14 Oct 2026. The 90-day bar reads 78% "No data". The newest product, built for agents, is the one that doesn't work. <span class="t doc">doc</span>
+   <div class="bar"><i style="width:78%;background:var(--hot)"></i></div><div class="ev">Status page, read 20 Nov. The context sheet counts about 1 operational day in 90.</div></div>
+  <div class="wk"><h3><span class="pin">2</span>The outages are correlated</h3>All 5 API components show exactly 98.24%, and the Dashboard shows 98.28%. That points to one shared backend and a single point of failure. <span class="t as">assumed</span>
+   <div class="bar"><i style="width:98.24%;background:var(--warm)"></i></div><div class="ev">Down days fell from 4 to 21 Sep, right after the hackathon, and again in mid-November.</div></div>
+  <div class="wk"><h3><span class="pin">3</span>The resolution claims don't agree</h3>The marketing says "20 m", the home page says "2 m granularity", the API and Dashboard offer 60 to 100 m, and one real user said the field "resolves near 1 km". <span class="t cr">conflict</span>
+   <div class="ev">Sources: V1, V3, V4, V8 and the site. Test: ask for 20 m and see which cell size comes back.</div></div>
+  <div class="wk med"><h3><span class="pin">4</span>The time window isn't clear</h3>Forecast: 12 h (V8) or 2 weeks (site). History: 2021 (V8) or 2019 (docs). Agents and apps can't plan around a limit they can't see. <span class="t cr">conflict</span></div>
+  <div class="wk med"><h3><span class="pin">5</span>People misread what the number means</h3>It is 2 m air temperature, modelled. Yet 4 of 18 teams called it "surface" or "sensor" temperature, one of them inside an automated safety phone call. Field names need to say what the number is. <span class="t doc">doc</span></div>
+  <div class="wk med"><h3><span class="pin">6</span>The interfaces are inconsistent</h3><code>api-key</code> vs <code>Bearer</code>, FeatureCollection vs bare Polygon, "Completed" vs "succeeded", and rate limits "documented" but missing. <span class="t cr">conflict</span></div>
+  <div class="wk med"><h3><span class="pin">7</span>The status page is unreliable</h3>The banner reads "Status unavailable", the MCP has no status label, and nothing below the customer boundary is monitored. <span class="t doc">doc</span></div>
+  <div class="wk med"><h3><span class="pin">8</span>Customers build their own workarounds</h3>Teams added OpenMeteo fallbacks, caches and their own agent tools. Once the fallback kicks in, the hyperlocal promise quietly breaks. <span class="t doc">doc</span></div>
+ </div>
+</div>
+</section>
+
+<!-- 7 ZOOM -->
+<section class="band" id="zoom">
+<div class="wrap">
+ <h2><span class="num">8</span>Zoom in, zoom out: which report appears when, what it computes, and what it costs</h2>
+ <p class="sub">Choose a zoom level. The map shows what the user sees there. The panel shows the reports, the matching API or MCP call, and the decision it serves.</p>
+
+ <div class="zoomwrap">
+  <div>
+   <div class="zmap" id="zmap"><div class="zgrid" id="zgrid"></div><div class="zscale" id="zscale"></div><div class="zlabel" id="zlabel"></div></div>
+   <div class="zslider" id="zslider" role="tablist" aria-label="Zoom level"></div>
+   <div class="zbtns"><span>− zoomed out</span><span>zoomed in +</span></div>
+  </div>
+  <div class="zpanel" id="zpanel" aria-live="polite"></div>
+ </div>
+
+ <h3 style="margin-top:30px">When each report comes out in a Dashboard session</h3>
+ <p class="cap" style="margin:0">The red steps produce something the user can keep or send. <span class="t doc">documented</span> in the launch and release-2 demos (V1, V2)</p>
+ <div class="journey">
+  <div><span class="dot">1</span><b>Find the place</b>Search a city, or zoom the US map<br><span class="cap">Nothing out yet</span></div>
+  <div><span class="dot">2</span><b>Define the area</b>Polygon, draw, circle or upload<br><span class="cap">Max 50 mi² (API)</span></div>
+  <div><span class="dot">3</span><b>Pick time and tile</b>An hour, an hour range or a day · 60, 80 or 100 m</div>
+  <div><span class="dot r">4</span><b>Submit and wait</b>Joins the queue, 30–60 s<br><span class="out">Heatmap layer + legend</span></div>
+  <div><span class="dot r">5</span><b>Analyse the area</b>Stats panel<br><span class="out">Statistics, charts, observations</span></div>
+  <div><span class="dot r">6</span><b>Click one tile</b>Heat Intelligence<br><span class="out">"Why is it hot" report</span></div>
+  <div><span class="dot r">7</span><b>Export</b>Layer with legend and metadata<br><span class="out">File + PDF or Word (promised)</span></div>
+ </div>
+
+ <div class="ladder">
+  <table>
+   <thead><tr><th>Zoom level</th><th>User action</th><th>Dashboard report</th><th>API / MCP call</th><th>Computation</th><th>Time</th><th>Credits</th><th>Why at this level (the decision)</th></tr></thead>
+   <tbody id="ztable"></tbody>
+  </table>
+ </div>
+
+
+ <h3 style="margin-top:30px">Computation, time and credits: what you pay for at each step</h3>
+ <div class="g2c">
+  <div class="panel2">
+   <b>Credits per call</b> <span class="t doc">doc</span> <span class="cap">Premium plan. Docs say the free key has 5,000,000 a month; the real key had 1,000,000 one-time (testing).</span>
+   <div class="cbar"><span>Pan, zoom, restyle a finished map</span><i style="width:0.5%"></i><em>0 <span class="t as">assumed</span></em></div>
+   <div class="cbar"><span>Failed job or status re-read</span><i style="width:0.5%"></i><em>0 (claimed, to test)</em></div>
+   <div class="cbar"><span>env_params (one point, one hour)</span><i style="width:68.7%"></i><em>2,900</em></div>
+   <div class="cbar"><span>temperature_routing (MCP)</span><i style="width:82.9%"></i><em>3,500</em></div>
+   <div class="cbar"><span>heatmap (any tile size)</span><i style="width:100%"></i><em>4,220</em></div>
+   <div class="cbar"><span>Satellite, Street View, Heat Intelligence</span><i style="width:100%;background:repeating-linear-gradient(45deg,var(--line) 0 6px,transparent 6px 12px)"></i><em>not published</em></div>
+   <p class="cap">The real 1M one-time key buys about <b>237 heatmaps</b> or <b>345 point lookups</b> in total (5M would be 1,185 or 1,724). Repeating an identical request is expected to be charged again, since there is no cache discount (to test).</p>
+  </div>
+  <div class="panel2">
+   <b>The heatmap price is flat, but the work isn't</b> <span class="t doc">price doc</span> <span class="t as">compute assumed</span>
+   <div class="tiles">
+    <div><div class="tbar" style="height:12%"></div><b>100 m</b><span>~169 tiles</span><span>4,220 cr</span><span class="pt">25 cr / tile</span></div>
+    <div><div class="tbar" style="height:30%"></div><b>60 m</b><span>~480 tiles</span><span>4,220 cr</span><span class="pt">8.8 cr / tile</span></div>
+    <div><div class="tbar" style="height:100%;background:repeating-linear-gradient(0deg,var(--hot) 0 6px,color-mix(in srgb,var(--hot) 40%,transparent) 6px 12px)"></div><b>20 m (claimed)</b><span>~4,300 tiles</span><span>4,220 cr?</span><span class="pt">~1 cr / tile</span></div>
+   </div>
+   <p class="cap">Downtown Phoenix, the same polygon in all three. Zooming in by picking a smaller tile gives about 3× (60 m) or 25× (20 m) more tiles for the same credits. Either the price ignores compute, or 20 m isn't really computed. That makes it a good test.</p>
+  </div>
+ </div>
+ <div class="tline">
+  <div style="flex:0 0 6%;background:var(--ok)">~1 s<small>submit, get activity_id</small></div>
+  <div style="flex:0 0 44%;background:var(--warm)">30–60 s<small>queued, then processing: poll /status</small></div>
+  <div style="flex:0 0 6%;background:var(--hot)">✓<small>Completed, credits charged</small></div>
+  <div style="flex:1;background:repeating-linear-gradient(45deg,#8a8f99 0 8px,#9aa0aa 8px 16px)">? s<small>Heat Intelligence: longer, not published</small></div>
+ </div>
+ <p class="cap">The typical async job, drawn to scale. Every endpoint is async, even a single-point lookup. A dashboard user waits through the queue too, but panning or zooming an existing map doesn't start a new job.</p>
+ <div class="truth">
+  <div style="border-left:6px solid var(--hot)"><b>The zoom floor <span class="t cr">conflict</span></b>Zooming past one tile shows no new detail. The tile size picked in step 3 (60–100 m) is the finest grain available. A "parcel-level" point query returns its tile's value, and one real user found the field "resolves near 1 km" (V4).</div>
+  <div style="border-left:6px solid var(--warm)"><b>Zooming the map ≠ a new job <span class="t as">assumed</span></b>Panning and zooming a finished heatmap is free, because it redraws tiles already computed. Only a new area, time or tile size starts a job that costs credits. A heatmap costs 4,220 on Premium.</div>
+  <div style="border-left:6px solid var(--cool)"><b>Reports narrow as you zoom in <span class="t doc">doc</span></b>Wide views answer "where" (a map and stats). Close views answer "why" (land cover, Street View, Heat Intelligence). A point answers "what now" (wet bulb, comfort, AQI for one site and hour).</div>
+ </div>
+</div>
+</section>
+
+<!-- CUSTOMERS -->
+<section class="band" id="customers">
+<div class="wrap">
+ <h2><span class="num">9</span>Customers: from their need to the final decision, and what they bring from outside</h2>
+ <p class="sub">FortyGuard supplies one ingredient: the temperature. Every customer finishes the job with their own data, other datasets and other tools. Pick a customer to follow their whole path. The <span style="border:2px dashed #7b4fd6;padding:0 6px;border-radius:5px">purple dashed box</span> is everything outside FortyGuard.</p>
+ <div class="ptabs" id="ptabs" role="tablist" aria-label="Customer type"></div>
+ <div class="pmeta" id="pmeta"></div>
+ <div class="jr" id="jr"></div>
+ <div class="gapline" id="pgap"></div>
+
+ <h3 style="margin-top:30px">What each customer has to bring from outside FortyGuard</h3>
+ <p class="cap" style="margin:0"><span class="dF"></span> FortyGuard supplies it &nbsp; <span class="d3"></span> must come from outside &nbsp; <span class="d2"></span> often needed. Built from the users map scenarios and what the 18 hackathon teams joined in. <span class="t doc">teams</span> <span class="t as">segment mapping</span></p>
+ <div class="omx"><table id="omx"></table></div>
+
+ <div class="gaps">
+  <div class="panel2">
+   <b>Work the hackathon teams had to rebuild themselves</b> <span class="t doc">18 demos</span>
+   <div class="gb"><span>Heat along a route</span><i style="width:100%"></i><b>6</b></div>
+   <div class="gb"><span>Look up many sites at once</span><i style="width:100%"></i><b>6</b></div>
+   <div class="gb"><span>Summarise by tract or polygon (census, vulnerability, EPA)</span><i style="width:66%"></i><b>4</b></div>
+   <div class="gb"><span>Hours above a threshold, how long heat lasts</span><i style="width:66%"></i><b>4</b></div>
+   <div class="gb"><span>Fallback provider or cache</span><i style="width:66%"></i><b>4</b></div>
+   <div class="gb"><span>Show the credit cost before a run</span><i style="width:33%"></i><b>2</b></div>
+   <p class="cap">Each bar is a missing piece customers rebuilt on their own. These are FortyGuard's clearest next endpoints or MCP tools.</p>
+  </div>
+  <div class="panel2">
+   <b>Where customer pain meets the product</b>
+   <ul style="margin:8px 0 0;padding-left:18px;font-size:13.5px;line-height:1.5">
+    <li><b>Horizon.</b> Utilities and HSE plan 1 to 14 days ahead. The API forecasts 12 h, so one team built its own 72 h model. <span class="t cr">gap</span></li>
+    <li><b>Resolution.</b> Designers need the plaza scale, but the field "resolves near 1 km" for one user. <span class="t cr">gap</span></li>
+    <li><b>Batch and cost.</b> Insurers and site teams score thousands of addresses at 2,900 credits a point. <span class="t as">risk</span></li>
+    <li><b>Trust.</b> Risk teams want error bars. No accuracy figure is published, and only 1 team showed confidence per cell. <span class="t cr">gap</span></li>
+    <li><b>Meaning.</b> 4 teams labelled the number "surface" temperature, one inside a safety call. <span class="t doc">doc</span></li>
+    <li><b>Reliability.</b> Agent builders lose their only door while the MCP is down. <span class="t doc">doc</span></li>
+   </ul>
+  </div>
+ </div>
+</div>
+</section>
+
+<!-- 8 AHA -->
+<section class="band" id="aha">
+<div class="wrap">
+ <h2><span class="num">10</span>The aha, in five lines</h2>
+ <div class="aha">
+  <div><b>It's a model factory</b>Each hour, data goes in and a grid of 2 m air temperatures comes out. Everything else is packaging.</div>
+  <div><b>With three doors</b>The Dashboard is for eyes, the API for code and the MCP for agents. All three reach the same grid through the same gateway.</div>
+  <div><b>Automation sits on both sides</b>FortyGuard automates model runs, jobs, credits and alerts. Customers automate the decision: alerts, reroutes, shift changes and agents.</div>
+  <div><b>The weak points sit at the edges</b>The precision claims sit at the model end, and outages and a stale status page sit at the delivery end. The middle, the async API, is the part that works.</div>
+  <div><b>Temperature is one ingredient</b>Every customer finishes the decision with outside data: census, assets, costs, routes, rules and design tools. The gaps they rebuild show FortyGuard's next products.</div>
+ </div>
+ <h3 style="margin-top:26px">Sources</h3>
+ <ul class="src">
+  <li>Project context sheet: 11 FortyGuard videos (V1–V11), 18 hackathon demos (V12–V29) and the status page</li>
+  <li>Project testing guide: notes from FortyGuard docs (Quickstart, Authentication, MCP Overview, Tools, Client Setup, Create Heatmap, Environmental Parameters, Satellite, Check Status, Known Limitations, credits)</li>
+  <li>Project users map: pricing, the MCP page and the industry pages</li>
+  <li>status.fortyguard.com and fortyguard.com, both read 20 Nov 2026. The docs site renders in the browser, so I relied on the testing-guide notes for endpoint details.</li>
+  <li>Everything tagged <span class="t as">assumed</span> is my reading of how it likely works. FortyGuard has not published its internal architecture.</li>
+ </ul>
+</div>
+</section>
+<div class="heat"></div>
+
+<script>
+// hero grid
+(function(){const g=document.getElementById('g10');const cols=['#2a6fdb','#5b9be0','#9cc7e8','#ffe08a','#ffc93c','#f9a83a','#f28c28','#ec6a22','#e8451e','#b8300f'];
+ for(let r=0;r<5;r++)for(let c=0;c<12;c++){const v=Math.sin(c*.7+r*.4)*2.2+Math.cos(r*1.3-c*.25)*1.6+(c>6&&r<3?3:0)+4.5;const i=document.createElement('i');i.style.background=cols[Math.max(0,Math.min(9,Math.round(v)))];g.appendChild(i);}})();
+
+// worked example
+const LAY=[['L7','Decision','#9b1f0a'],['L6','Claude (agent)','#c2410c'],['L5','MCP server','#e8451e'],['L4','API gateway','#f28c28'],['L3','Job services','#8a8f99'],['L2','Model store','#6b7280'],['L1','LTM','#2a6fdb'],['L0','Data inputs','#5b6475']];
+const S=[
+ {l:['L7'],who:'Warehouse manager',t:'The question',tag:'doc',d:'The manager types the question into Claude. Three sites, 3 pm today, Phoenix. Nothing technical yet.',x:'"Which of my 3 Phoenix sites will be hottest at 3 pm today, and should I move loading?"',lbl:'Typed in chat'},
+ {l:['L6','L5'],who:'Claude → MCP server',t:'Claude finds the tools',tag:'doc',d:'Claude Code connects to the FortyGuard MCP with the key as a Bearer token and asks which tools it has. It gets 9 back.',x:'POST https://tos-mcp.app.fortyguard.com/mcp\nAuthorization: Bearer ••••\n{"method":"tools/list"}\n→ env_params, heatmap, heatmap_read, …',lbl:'What travels',broken:true},
+ {l:['L6','L5'],who:'Claude → MCP server',t:'Claude picks env_params, once per site',tag:'doc',d:'The question is about points, not an area, so Claude calls env_params for each site at 15:00 local time. Good tool descriptions make this choice easy.',x:'tools/call env_params\n{"latitude":33.4484,"longitude":-112.074,\n "date_time":{"start_date":"2026-07-15",\n  "start_time":"15:00","filter_type":1}}\n× 3 sites',lbl:'Tool call (one of three)',broken:true},
+ {l:['L5','L4'],who:'MCP server → REST API',t:'The MCP turns the call into an API request',tag:'as',d:'The MCP server likely passes the call on to the same REST API that developers use, swapping Bearer for the api-key header. The matching _read tools and /status pattern suggest this.',x:'POST https://api.fortyguard.com/v1/env_params\napi-key: ••••\n{ …same body… }',lbl:'Assumed internal hop',broken:true},
+ {l:['L4'],who:'API gateway',t:'Key, credits and input checks',tag:'doc',d:'The gateway checks the key and plan, and should check the input: US only, a valid date and time, inside the forecast window. A good gateway rejects bad requests here, before any queue or charge.',x:'✓ key valid · Premium plan\n✓ Phoenix is in the US\n✓ 15:00 is +6 h, within 12 h\n✓ credits available',lbl:'Checks'},
+ {l:['L4','L3'],who:'API gateway → queue',t:'An async job starts',tag:'doc',d:'The API answers at once with a ticket rather than the data. That is FortyGuard\'s pattern for every endpoint: submit, then check.',x:'202 Accepted\n{"data":{"activity_id":"env_7f3c…","status":"Processing"}}',lbl:'Response'},
+ {l:['L3','L2','L1','L0'],who:'Workers → model store',t:'The answer was already computed',tag:'as',d:'A worker finds the tile that contains each site in the 15:00 forecast grid. That grid came from this morning\'s hourly LTM run, which used satellite, station, sensor and urban-form data. Little or no modelling happens per request.',x:'tile(33.4484,-112.074) @100 m\n  forecast run 09:00 → valid 15:00\n  t2m 41.2 °C · wet bulb 24.8 °C · AQI 61',lbl:'Assumed lookup (illustrative values)'},
+ {l:['L4'],who:'API gateway',t:'Job Completed, credits charged',tag:'doc',d:'The job moves to Completed. Credits are charged only now, and failed jobs are said to be free. A typical job takes 30 to 60 s.',x:'GET /v1/status/env_7f3c…\n→ {"status":"Completed","result":{…}}\ncredits: −N',lbl:'Polling'},
+ {l:['L5','L6'],who:'MCP → Claude',t:'Exact numbers return to the agent',tag:'doc',d:'Claude gets the structured result for all 3 sites. The numbers come from FortyGuard, not the model, so the "the engine decides, the AI explains" pattern from 8 hackathon teams holds.',x:'Site A 38.9 °C · Site B 41.2 °C · Site C 39.6 °C\n(2 m air temperature, modelled, 100 m tile, MST)',lbl:'Result (illustrative)'},
+ {l:['L7'],who:'Claude → manager',t:'Answer, then decision',tag:'doc',d:'Claude explains: Site B will be hottest, so move loading there to 6 to 10 am. The manager decides, and can set a Heat Monitoring alert for over 40 °C so tomorrow happens automatically.',x:'"Site B peaks at 41.2 °C at 3 pm, 2.3 °C hotter than A.\n Move B\'s loading to 6–10 am. Want an alert above 40 °C?"',lbl:'Answer'}
+];
+let i=0,timer=null;const mini=document.getElementById('mini'),card=document.getElementById('card'),dots=document.getElementById('dots'),real=document.getElementById('real');
+LAY.forEach((L,k)=>{if(k===4){const b=document.createElement('div');b.className='bd';b.textContent='— customer boundary —';mini.appendChild(b);}const d=document.createElement('div');d.dataset.id=L[0];d.dataset.c=L[2];d.innerHTML='<span>'+L[0]+'</span><span>'+L[1]+'</span>';mini.appendChild(d);});
+S.forEach((s,k)=>{const d=document.createElement('i');d.title='Step '+(k+1);d.onclick=()=>{stop();i=k;draw();};dots.appendChild(d);});
+function tag(t){return t==='as'?'<span class="t as">assumed</span>':'<span class="t doc">documented</span>';}
+function draw(){const s=S[i],R=real.checked,br=R&&s.broken;
+ mini.querySelectorAll('div[data-id]').forEach(d=>{const on=s.l.includes(d.dataset.id);d.classList.toggle('on',on);d.style.background=on?d.dataset.c:'';d.classList.toggle('broken',on&&br&&d.dataset.id==='L5');});
+ dots.querySelectorAll('i').forEach((d,k)=>d.classList.toggle('on',k<=i));
+ let h='<div class="stephead"><span class="num" style="margin:0">'+(i+1)+'</span><h3 style="margin:0;font-size:18px">'+s.t+'</h3>'+tag(s.tag)+'<span class="who">'+s.who+'</span></div><p>'+s.d+'</p><div class="travel"'+(s.tag==='as'?' style="border:1.5px dashed var(--warm)"':'')+'><span class="lbl">'+s.lbl+'</span>'+s.x.replace(/</g,'&lt;')+'</div>';
+ if(br&&i===1)h+='<div class="warnbox"><b>✗ Breaks here today.</b> The status page lists the MCP server as unavailable since 14 Oct 2026. In testing on 21 Nov it worked, so this broken path is what the status page implies, not what happened.</div><div class="okbox"><b>The detour:</b> the same question works through the REST API in Postman (submit env_params, then poll /status), or by drawing the 3 sites in the Dashboard. You lose the "just ask" experience, which is the MCP\'s whole value.</div>';
+ else if(br)h+='<div class="warnbox">Skipped today: the MCP is down. Through the REST detour, this step happens in Postman, not in Claude.</div>';
+ if(i===4)h+='<div class="okbox">To test: does Paris, an +13 h forecast or a 20 m tile fail here with a clear 4xx and no charge? That is the testing guide\'s error-handling section.</div>';
+ card.innerHTML=h;document.getElementById('prev').disabled=i===0;document.getElementById('next').textContent=i===S.length-1?'Restart ↺':'Next →';}
+function stop(){clearInterval(timer);timer=null;document.getElementById('play').textContent='▶ Play';}
+document.getElementById('next').onclick=()=>{stop();i=i===S.length-1?0:i+1;draw();};
+document.getElementById('prev').onclick=()=>{stop();if(i>0)i--;draw();};
+document.getElementById('play').onclick=()=>{if(timer){stop();return;}document.getElementById('play').textContent='❚❚ Pause';timer=setInterval(()=>{if(i>=S.length-1){stop();return;}i++;draw();},3200);};
+real.onchange=draw;draw();
+// zoom explorer
+(function(){
+const C=['#2a6fdb','#5b9be0','#9cc7e8','#ffe08a','#ffc93c','#f9a83a','#f28c28','#ec6a22','#e8451e','#b8300f'];
+function v(x,y){return Math.sin(x*.45+y*.3)*2.2+Math.cos(y*.8-x*.2)*1.6+((x>18&&x<30&&y>6&&y<16)?3:0)+4.5;}
+function col(x,y){return C[Math.max(0,Math.min(9,Math.round(v(x,y))))];}
+const Z=[
+ {k:'US',btn:'1 · Country',scale:'~4,000 km',label:'Whole US: coverage only, no heat values yet',
+  act:'Search a city or zoom the US map. Outside the US, the request is refused.',
+  rep:['Coverage boundary','Activity History (past jobs)'],
+  api:'None. A non-US point should return a 4xx "US only" with no charge (to test).',
+  why:'Choose where to look. FortyGuard only covers the US today.',comp:'Nothing. The map is a basemap, so no model data is read <span class="t as">assumed</span>',time:'Instant',cr:'0 credits',who:'Everyone',tag:'doc',
+  draw:g=>{g.style.gridTemplateColumns='1fr';g.innerHTML='<i style="background:linear-gradient(135deg,var(--panel),color-mix(in srgb,var(--cool) 18%,var(--panel)));display:grid;place-items:center;font-weight:800;color:var(--mut);font-size:15px">🇺🇸 Covered area · no heatmap until you define one</i>';}},
+ {k:'City',btn:'2 · City / district',scale:'~10 km · 100 m tiles',label:'City heatmap: about 160 tiles at 100 m',
+  act:'Draw or upload an area up to 50 mi². Pick an hour and 100 m tiles. Submit to the queue.',
+  rep:['Heatmap layer + legend','Statistics + distribution charts','Plain-language observations','Export layer + metadata'],
+  api:'POST /heatmap, then GET /status/{id} · MCP heatmap → heatmap_read · 4,220 credits',
+  why:'Find the hot neighbourhoods and rank them: where to put cooling centres, which district to study.',comp:'Cut the precomputed hourly grid to your polygon, then compute min, mean, max and the distribution <span class="t as">assumed</span>',time:'Submit in about 1 s, then 30–60 s in the queue <span class="t doc">doc</span>',cr:'4,220 per heatmap (Premium), charged only on Completed <span class="t doc">doc</span>',who:'Planners, heat officers, public health',tag:'doc',n:[16,10],o:[0,0]},
+ {k:'Area',btn:'3 · Neighbourhood',scale:'~1.5 km · 60 m tiles',label:'Neighbourhood at 60 m: finer tiles, same model',
+  act:'Re-run on a smaller polygon with 60 m tiles, and switch the basemap to satellite.',
+  rep:['Finer heatmap','Satellite segmentation: land cover %','Street View segmentation: green vs built','Solar irradiance'],
+  api:'POST /heatmap (granularity 60) · POST /satellite · Street View · MCP satellite, streetview',
+  why:'Explain why one block is hotter, for example 72.7% built-up with no trees. That decides where to plant and shade.',comp:'The same grid cut at 60 m, plus image models that segment satellite and Street View pictures into land-cover classes <span class="t as">assumed</span>',time:'30–60 s per heatmap. Segmentation time is not published (to measure)',cr:'4,220 for the heatmap again, plus the satellite call (the testing guide budgets 14,400 for its land-cover step)',who:'Landscape architects, developers, consultants',tag:'doc',n:[12,8],o:[16,6]},
+ {k:'Tile',btn:'4 · One tile',scale:'60–100 m',label:'One tile selected: the unit Heat Intelligence explains',
+  act:'Click a single tile and request a Heat Intelligence report across 5 areas (geographic, events, environmental, urban, anthropogenic).',
+  rep:['Heat Intelligence text report (sourced)','Environmental parameters + thermal comfort','Metadata + accuracy table','PDF / Word export (promised, not shown)'],
+  api:'Heat Intelligence endpoint · MCP report → report_read',
+  why:'A written "why it is hot" that goes into a memo, a planning case or a client report.',comp:'Pull the tile\'s context from 5 sources and write a sourced text report, probably with a language model <span class="t as">assumed</span>',time:'Longest of all: it queues, then you wait (V2). No figure is published, so measure it',cr:'Not published. Measure the balance before and after',who:'Consultants, real estate, ESG',tag:'doc',n:[3,2],o:[22,10],sel:[1,0]},
+ {k:'Point',btn:'5 · Address / point',scale:'a point inside one tile',label:'Your point gets its whole tile\'s value',
+  act:'Drop coordinates or a site address, and pick an hour (past, or up to +12 h ahead).',
+  rep:['2 m air temperature','Wet bulb, humidity, AQI, CO₂, solar','Comfort analysis'],
+  api:'POST /env_params (lat, lon, date, time) · MCP env_params',
+  why:'An operational call for one site and hour: shift crews, move loading, send an alert.',comp:'Look up the tile that holds the point in the grid for that hour, then derive wet bulb and comfort <span class="t as">assumed</span>',time:'Async too: submit in about 1 s, then poll /status until Completed',cr:'2,900 per env_params call · 3,500 per route (MCP) <span class="t doc">doc</span>',who:'Operations, HSE, logistics, agents',tag:'doc',n:[1,1],o:[23,10],pin:true}
+];
+const g=document.getElementById('zgrid'),sl=document.getElementById('zslider'),pn=document.getElementById('zpanel'),tb=document.getElementById('ztable');
+const sizes=['—','<span class="sq" style="width:22px;height:14px"></span>','<span class="sq" style="width:16px;height:11px"></span>','<span class="sq" style="width:10px;height:10px"></span>','<span class="sq" style="width:5px;height:5px;border-radius:50%;background:var(--hot)"></span>'];
+Z.forEach((z,k)=>{const b=document.createElement('button');b.textContent=z.btn;b.setAttribute('role','tab');b.onclick=()=>show(k);sl.appendChild(b);
+ const tr=document.createElement('tr');tr.innerHTML='<td>'+sizes[k]+z.btn.replace(/^\d · /,'')+'</td><td>'+z.act+'</td><td>'+z.rep.join('<br>')+'</td><td><code style="font-size:11.5px">'+z.api+'</code></td><td>'+z.comp+'</td><td>'+z.time+'</td><td><b>'+z.cr+'</b></td><td>'+z.why+'</td>';tr.onclick=()=>show(k);tr.style.cursor='pointer';tb.appendChild(tr);});
+function show(k){const z=Z[k];
+ [...sl.children].forEach((b,j)=>{b.classList.toggle('on',j===k);b.setAttribute('aria-selected',j===k);});
+ [...tb.children].forEach((r,j)=>r.classList.toggle('cur',j===k));
+ if(z.draw)z.draw(g);else{const[nx,ny]=z.n,[ox,oy]=z.o;g.style.gridTemplateColumns='repeat('+nx+',1fr)';let h='';
+  for(let y=0;y<ny;y++)for(let x=0;x<nx;x++){const s=z.sel&&z.sel[0]===x&&z.sel[1]===y;h+='<i'+(s?' class="zsel"':'')+' style="background:'+col(ox+x*(k===1?1:1),oy+y)+'"></i>';}
+  g.innerHTML=h;}
+ document.querySelectorAll('#zmap .zpin').forEach(p=>p.remove());
+ if(z.pin){const p=document.createElement('div');p.className='zpin';p.textContent='📍';document.getElementById('zmap').appendChild(p);}
+ document.getElementById('zscale').textContent=z.scale;document.getElementById('zlabel').textContent=z.label;
+ pn.innerHTML='<div class="stephead"><h3 style="margin:0;font-size:18px">'+z.btn.replace(/^\d · /,'')+'</h3><span class="t doc">documented</span></div>'+
+  '<div class="zrow"><span>User does</span><span>'+z.act+'</span><span>Reports</span><span>'+z.rep.map(r=>'<span class="rep">📄 '+r+'</span>').join('')+'</span><span>API / MCP</span><span><code>'+z.api+'</code></span><span>Computes</span><span>'+z.comp+'</span><span>Time</span><span>'+z.time+'</span><span>Credits</span><span><b>'+z.cr+'</b></span><span>Why here</span><span><b>'+z.why+'</b></span><span>Who</span><span>'+z.who+'</span></div>'+
+  (k===4?'<div class="warnbox">Zoom floor: two points 30 m apart inside the same tile return the same number. "Parcel level" really means the tile level.</div>':'')+
+  (k===3?'<div class="warnbox">The PDF and Word export was promised in release 2 but never shown. Check whether it exists.</div>':'');}
+show(1);
+})();
+// fusion scene
+(function(){
+const svg=document.getElementById('city');if(!svg)return;
+const $=id=>document.getElementById(id);
+const C=['#2a6fdb','#5b9be0','#9cc7e8','#ffe08a','#ffc93c','#f9a83a','#f28c28','#ec6a22','#e8451e','#b8300f'];
+const f=$('mgfine');for(let i=0;i<36;i++){const e=document.createElement('i');e.style.background=C[3+((i*7+Math.floor(i/6)*3)%6)];f.appendChild(e);}
+const o=$('mgout');for(let i=0;i<16;i++){const e=document.createElement('i');e.style.background=C[2+((i*5+Math.floor(i/4)*2)%8)];o.appendChild(e);}
+const targets=[[150,168],[300,352],[460,140],[600,230]];
+const notes=[[5,7,'Before sunrise. No sun, and the streets are still giving back yesterday\'s stored heat (4). This is the coolest hour, but cities stay warmer than open land.'],
+[7,11,'Morning. The sun (1) starts heating surfaces. White roofs bounce light back (2), and dark asphalt starts storing heat (3). Trees shade and cool (5, 7).'],
+[11,16,'Midday to afternoon. The sun is at its strongest. Asphalt and walls absorb the most (3), and the air peaks a few hours after noon. Shade (5) and wind (6) make the biggest difference between tiles now.'],
+[16,19.5,'Evening. The sun is low, but the stored heat starts coming out (4). Narrow streets between tall buildings trap it. AC and traffic add heat (8).'],
+[19.5,24,'Night. No sunlight. Stored heat (4) and human heat (8) keep the city warm, which is the urban heat island. Wind (6) is the main thing cooling it down.']];
+function act(h){const day=h>=6&&h<=19.5;const a=new Set();if(day){a.add(1);a.add(2);a.add(3);a.add(5);a.add(7);}if(h>=16||h<7)a.add(4);a.add(6);a.add(8);a.add(9);return a;}
+function draw(h){
+ const day=h>=6&&h<=19.5,t=(h-6)/13.5,el=day?Math.sin(Math.PI*t):0;
+ const sx=60+t*780,sy=320-el*270;
+ $('sun').setAttribute('cx',sx);$('sun').setAttribute('cy',sy);$('sunG').style.opacity=day?1:0;
+ $('moon').style.opacity=day?0:1;
+ const sk=day?(el>0.3?['#8ec5ff','#e6f2ff']:['#f7a35c','#fde2c4']):['#0f1a33','#2a3550'];
+ $('sk1').setAttribute('stop-color',sk[0]);$('sk2').setAttribute('stop-color',sk[1]);
+ targets.forEach((p,k)=>{const r=$('r'+(k+1));r.setAttribute('x1',sx);r.setAttribute('y1',sy+20);r.setAttribute('x2',p[0]+(p[0]-sx)*0);r.setAttribute('y2',p[1]-10);});
+ $('rays').style.opacity=day?Math.max(.25,el):0;$('refl').style.opacity=day?el:0;
+ $('shade').style.opacity=day?.15+.4*el:0;$('evap').style.opacity=day?el:0.1;
+ // stored heat lags the sun by ~3h
+ const st=Math.max(0,Math.sin(Math.PI*((h-9)/16)));
+ const lw=(h>=15||h<8)?Math.max(.15,st):0.1;$('lw').style.opacity=lw;
+ const g=Math.round(43+st*60);$('asphalt2').setAttribute('fill','rgb('+Math.round(g+st*80)+','+g+','+Math.round(g-st*10)+')');
+ const temp=Math.round(27+el*9+st*4);$('ttext').textContent=temp+'°';
+ $('marks').querySelector('[data-p="1"]').setAttribute('transform','translate('+(sx+30)+' '+(sy-26)+')');
+ $('marks').querySelector('[data-p="1"]').style.opacity=day?1:0;
+ const A=act(h);
+ document.querySelectorAll('#proc .pr').forEach(c=>c.classList.toggle('dim',!A.has(+c.dataset.p)));
+ document.querySelectorAll('#marks [data-p]').forEach(m=>{if(m.dataset.p!=='1')m.style.opacity=A.has(+m.dataset.p)?1:.25;});
+ const hh=Math.floor(h),mm=h%1?'30':'00';$('todv').textContent=String(hh).padStart(2,'0')+':'+mm;
+ $('todtxt').textContent=(notes.find(n=>h>=n[0]&&h<n[1])||notes[0])[2];
+}
+$('tod').oninput=e=>draw(+e.target.value);draw(15);
+document.querySelectorAll('#proc .pr').forEach(c=>{const m=document.querySelector('#marks [data-p="'+c.dataset.p+'"] circle');
+ c.onmouseenter=()=>{c.classList.add('hi');if(m)m.setAttribute('r',16);};c.onmouseleave=()=>{c.classList.remove('hi');if(m)m.setAttribute('r',11);};});
+})();
+// customers
+(function(){
+const P=[
+ {ic:'🏙️',n:'City heat officer / planner',k:'src',prod:'Dashboard',zoom:'City → neighbourhood · see §8',phys:'Absorption, shade · see §2, cards 3, 5',
+  beh:['Seasonal: spring planning, summer crisis','Works in maps and GIS','Compares years and districts'],
+  need:['Proof of which blocks are hottest','Evidence for grants and budgets'],
+  pain:['Consultant studies take months','Weather data gives one number per city','Grant deadlines'],
+  req:['Heatmap at 100 m for July afternoons','Satellite land cover %','Export for the council report'],
+  ret:['Tile map + stats','Built-up and green shares','Heat Intelligence text'],
+  out:['Census: age, income, no AC','Heat Vulnerability Index','Tree canopy and parcel ownership','GIS (ArcGIS, QGIS) and budget'],
+  dec:'Which 20 blocks get trees and shade structures first',
+  gap:'Hours above a threshold for a whole season in one call, and exports with a CRS that drop straight into GIS.'},
+ {ic:'🚑',n:'Public health / emergency',k:'inf',prod:'Dashboard + Alerts',zoom:'City / district · see §8',phys:'Night release · see §2, cards 4',
+  beh:['Event-driven: reacts to heat warnings','Needs answers in hours, not weeks'],
+  need:['Where people are most exposed today and tonight'],
+  pain:['Heat warnings cover whole counties','Nights matter most for health, and maps show noon'],
+  req:['Heatmap by district for today','Environmental parameters: wet bulb, AQI','A monitor that alerts above a threshold'],
+  ret:['Hottest blocks, wet bulb, AQI','Alert (component exists, never demoed)'],
+  out:['NWS heat warnings','Census: elderly, isolated, no AC','Cooling centre and clinic locations','SMS and outreach tools'],
+  dec:'Where to open cooling centres and send outreach teams',
+  gap:'Summaries by census tract, and forecasts beyond 12 h for a 3 to 5 day heat wave.'},
+ {ic:'🌳',n:'Architect / landscape designer',k:'src',prod:'Dashboard → Heat Intelligence',zoom:'Neighbourhood → one tile · see §8',phys:'Reflection, shade, wind · see §2, cards 2, 5, 6',
+  beh:['Project-based, design-review deadlines','Lives in CAD, Rhino and Forma'],
+  need:['Will the plaza be usable at 3 pm in August?','Which design option is cooler?'],
+  pain:['The field "resolves near 1 km" (V4)','Tripling trees moved temperature by hundredths of a degree (V4)'],
+  req:['Site heatmap at 60 m','Heat Intelligence report for key tiles','Street View and satellite segmentation'],
+  ret:['Current heat of the site','Why it is hot (land cover, urban form)'],
+  out:['CAD, Rhino or Autodesk Forma model','Microclimate simulation for design what-ifs (e.g. ENVI-met)','Material specs and client brief'],
+  dec:'Where shading, planting and cool materials go',
+  gap:'A what-if simulation at design scale ("add 30 trees here"), and an official Forma extension instead of each team building one.'},
+ {ic:'🏢',n:'Site selection: real estate & data centres',k:'src',prod:'API (+ Enterprise)',zoom:'Address / point · see §8',phys:'Absorption, humidity · see §2, cards 3, 7',
+  beh:['Bursty: screens 10 to 100 sites, then stops','Scripts and spreadsheets'],
+  need:['Rank candidate parcels by heat and cooling need'],
+  pain:['No batch endpoint, so one call per site','Cooling cost lasts decades, but history only goes back to 2021'],
+  req:['env_params per parcel (wet bulb, humidity)','Heatmaps around the shortlist'],
+  ret:['Peak temperatures and wet bulb per site','Hotspot maps'],
+  out:['Parcel, land price and zoning data','Power and fibre availability','Cooling, PUE and HVAC cost models','Spatial indexing (e.g. H3)'],
+  dec:'Which sites move to due diligence',
+  gap:'A batch point lookup, plus long climatologies (typical summer, worst week) and not just single hours.'},
+ {ic:'⚡',n:'Utility load forecaster',k:'inf',prod:'API (nightly)',zoom:'District / feeder area · see §8',phys:'Night release, humidity · see §2, cards 4, 7',
+  beh:['Automated nightly jobs','Peaks during heat domes'],
+  need:['Temperature per feeder area for the coming days'],
+  pain:['The API forecasts 12 h, but load planning needs 3 to 14 days','Uptime matters: a missed pull means a bad forecast'],
+  req:['Scheduled heatmaps and point forecasts per feeder'],
+  ret:['+12 h hourly temperatures per tile'],
+  out:['Load history, eGRID, power prices','Transformer thermal models (IEEE)','Longer weather forecasts (e.g. NVIDIA Earth-2, NWS)'],
+  dec:'Call demand response and pre-stage crews at hot substations',
+  gap:'A multi-day forecast (one team built a 72 h model itself), an SLA, and a status page that works.'},
+ {ic:'🛡️',n:'Insurer / risk analyst',k:'src',prod:'API batch + Dashboard',zoom:'Address / point · see §8',phys:'All, summarised · see §2',
+  beh:['Portfolio runs at renewal','Opens the Dashboard only for outliers'],
+  need:['A heat-risk score for thousands of addresses'],
+  pain:['No published accuracy or confidence','2,900 credits per point at scale'],
+  req:['Batch env_params or heatmaps per address','History for exposure trends'],
+  ret:['Hourly temperatures and wet bulb per tile'],
+  out:['Policy and address lists','Claims history, cat models','Building characteristics','Their own scoring model'],
+  dec:'Price, flag or require mitigation for high-exposure assets',
+  gap:'Error bars per value, validation reports, and bulk pricing.'},
+ {ic:'🚚',n:'Logistics / field HSE ops',k:'src',prod:'API + routing (MCP)',zoom:'Point and route · see §8',phys:'Sun, humidity · see §2, cards 1, 7',
+  beh:['Daily, early-morning decisions','Driven by tomorrow\'s forecast'],
+  need:['Safe shift times and cooler routes for drivers and crews'],
+  pain:['Route heat exposure isn\'t one call (6 teams rebuilt it)','Labels: 4 teams called it "surface" temperature'],
+  req:['env_params for the next shift (≤12 h)','temperature_routing for routes'],
+  ret:['Wet bulb per site and hour','Route heat comparison'],
+  out:['Routing engine (Mapbox, Google Maps)','Fleet and shift schedules','OSHA heat rules and thresholds','Alerting: phone, SMS, voice'],
+  dec:'Start shifts earlier, reroute, add breaks',
+  gap:'A route-exposure endpoint on the REST API (not only via the MCP), with field names that say "2 m air temperature".'},
+ {ic:'🤖',n:'AI agent builder / consultant',k:'src',prod:'MCP',zoom:'Any, by prompt · see §8',phys:'Explains them in words',
+  beh:['Asks in plain language in Claude or Cursor','Expects answers inside a meeting'],
+  need:['Exact numbers an agent can cite, with units and source'],
+  pain:['The status page lists the MCP as down (it worked in testing)','Teams hand-wrote their own tools instead'],
+  req:['heatmap → heatmap_read, env_params, report via the MCP'],
+  ret:['The same numbers as the API (tested 21 Nov)'],
+  out:['An LLM client (Claude, Cursor)','Their own deterministic engine for scores','Other data tools (maps, census)'],
+  dec:'Recommend a site or plan in the same meeting',
+  gap:'An MCP that is up, with provenance, units and time zone in every tool result.'}
+];
+const OUT=['Temperature data','Demographics / census','Vulnerability index','Own assets & sites','Cost / finance models','Maps & routing','Grid / energy data','Regulations (OSHA)','Design / GIS tools','Longer forecasts','Air quality (EPA)','LLM / agent'];
+const M=[[2,3,3,2,1,0,0,0,3,0,1,0],[2,3,3,2,0,1,0,0,1,3,2,0],[2,0,0,3,1,0,0,0,3,0,0,1],[2,0,0,3,3,1,1,0,1,1,0,0],[2,0,0,3,3,0,3,0,0,3,0,0],[2,1,1,3,3,0,0,0,0,1,0,0],[2,0,0,3,1,3,0,3,0,1,1,1],[2,1,0,1,0,1,0,0,0,0,0,3]];
+const $=id=>document.getElementById(id),tabs=$('ptabs');
+P.forEach((p,k)=>{const b=document.createElement('button');b.innerHTML=p.ic+' '+p.n;b.setAttribute('role','tab');b.onclick=()=>show(k);tabs.appendChild(b);});
+const li=a=>'<ul>'+a.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+function show(k){const p=P[k];[...tabs.children].forEach((b,j)=>{b.classList.toggle('on',j===k);b.setAttribute('aria-selected',j===k);});
+ $('pmeta').innerHTML='<span><b>Product</b>'+p.prod+'</span><span><b>Zoom level</b>'+p.zoom+'</span><span><b>Physics that matters</b>'+p.phys+'</span><span>'+(p.k==='src'?'<span class="t doc">segment from FortyGuard or a hackathon team</span>':'<span class="t as">segment inferred</span>')+'</span>';
+ $('jr').innerHTML=
+  '<div class="jb"><div class="h">👀 Behaviour</div>'+li(p.beh)+'</div>'+
+  '<div class="jb"><div class="h">🎯 Need</div>'+li(p.need)+'</div>'+
+  '<div class="jb pain"><div class="h">😣 Pain today</div>'+li(p.pain)+'</div>'+
+  '<div class="jb fg"><div class="h">📨 Request to FortyGuard</div>'+li(p.req)+'</div>'+
+  '<div class="jb fg"><div class="h">🌡️ FortyGuard returns</div>'+li(p.ret)+'</div>'+
+  '<div class="jb out"><div class="h">🧩 From outside</div>'+li(p.out)+'</div>'+
+  '<div class="jb dec"><div class="h">✅ Final decision</div><b style="font-size:14px">'+p.dec+'</b></div>';
+ $('pgap').innerHTML='<b>What FortyGuard could add so less comes from outside:</b> '+p.gap+' <span class="t as">recommendation</span>';
+ [...$('omx').querySelectorAll('tbody tr')].forEach((r,j)=>r.style.background=j===k?'color-mix(in srgb,var(--hot) 8%,transparent)':'');}
+let h='<thead><tr><th>Customer</th>'+OUT.map((o,i)=>'<th'+(i===0?' class="fgc"':'')+'>'+o+'</th>').join('')+'</tr></thead><tbody>';
+P.forEach((p,k)=>{h+='<tr style="cursor:pointer" data-k="'+k+'"><td>'+p.ic+' '+p.n+'</td>'+M[k].map((v,i)=>'<td'+(i===0?' class="fgc"':'')+'>'+(v===2&&i===0?'<span class="dF"></span>':v===3?'<span class="d3"></span>':v>=1?'<span class="d2"></span>':'')+'</td>').join('')+'</tr>';});
+$('omx').innerHTML=h+'</tbody>';$('omx').querySelectorAll('tbody tr').forEach(r=>r.onclick=()=>show(+r.dataset.k));
+show(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FortyGuard evaluation: how I tested and what I found</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--stone:#e7e4df;--ink:#171513;--mute:#5b5650;--brick:#c8371e;--panel:#fff;--line:#cfcac2;--ok:#2f7d4f;--part:#a86a00;--bad:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--stone);color:var(--ink);font:16px/1.55 "Schibsted Grotesk",system-ui,sans-serif}
+a{color:var(--brick)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+header.hero{background:var(--ink);color:#f3f1ed;padding:56px 0 40px}
+.kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#e9a294;font-weight:700}
+h1{font-size:44px;line-height:1.08;margin:10px 0 16px;font-weight:800;max-width:900px}
+.lede{font-size:19px;max-width:820px;color:#d9d5ce}
+.figs{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;margin-top:32px;background:#3a3631}
+.fig{background:var(--ink);padding:14px 16px}
+.fig b{display:block;font-size:30px;font-weight:800;color:#fff}
+.fig span{font-size:13px;color:#bdb7ae}
+nav.spine{position:sticky;top:0;z-index:5;background:var(--stone);border-bottom:2px solid var(--ink)}
+nav.spine ol{list-style:none;display:flex;margin:0 auto;padding:0 24px;max-width:1120px;overflow-x:auto}
+nav.spine li{flex:none}
+nav.spine a{display:block;padding:10px 26px 10px 8px;color:var(--ink);text-decoration:none;font-size:14px;font-weight:600;position:relative;white-space:nowrap}
+nav.spine a::after{content:"→";position:absolute;right:4px;color:var(--brick)}
+nav.spine li:last-child a::after{content:""}
+nav.spine a i{font-style:normal;display:inline-block;width:22px;height:22px;border-radius:50%;background:var(--brick);color:#fff;text-align:center;line-height:22px;font-size:12px;margin-right:6px}
+section{padding:56px 0 24px}
+.step{display:flex;gap:14px;align-items:center;margin-bottom:6px}
+.step i{font-style:normal;width:40px;height:40px;border-radius:50%;background:var(--brick);color:#fff;font-weight:800;font-size:18px;display:grid;place-items:center;flex:none}
+h2{font-size:30px;margin:0;line-height:1.15}
+.flow-note{font-size:14px;color:var(--mute);margin:4px 0 20px 54px}
+.flow-note b{color:var(--brick)}
+.panel{background:var(--panel);border:1px solid var(--line);padding:22px;margin:16px 0}
+svg{width:100%;height:auto;display:block}
+svg text{font-family:"Schibsted Grotesk",system-ui,sans-serif}
+table{width:100%;border-collapse:collapse;font-size:14.5px;background:#fff}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--ink);color:#fff;font-weight:600;font-size:13px}
+td.id,code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--mute)}
+.chip{display:inline-block;padding:2px 8px;font-size:12.5px;font-weight:700;border-radius:3px;color:#fff;white-space:nowrap}
+.v{background:var(--ok)}.p{background:var(--part)}.r{background:var(--bad)}.n{background:#7a746c}
+.card{background:#fff;border:1px solid var(--line);margin:28px 0;display:grid;grid-template-columns:1.35fr 1fr}
+.card figure{margin:0;background:#111;border-right:1px solid var(--line)}
+.card img{width:100%;display:block}
+.card figcaption{color:#cfc9c0;font-size:12.5px;padding:8px 12px}
+.card .body{padding:20px}
+.card h3{margin:0 0 4px;font-size:20px;line-height:1.25}
+.card .tag{font-size:12px;font-weight:700;color:var(--brick);letter-spacing:.06em;text-transform:uppercase}
+.card ol{padding-left:0;list-style:none;margin:12px 0}
+.card ol li{display:flex;gap:10px;margin:6px 0;font-size:14.5px}
+.card ol li b{flex:none;width:22px;height:22px;border-radius:50%;background:var(--brick);color:#fff;font-size:12px;display:grid;place-items:center;margin-top:1px}
+.chain{grid-column:1/-1;display:flex;border-top:1px solid var(--line);background:#f6f4f1}
+.chain div{flex:1;padding:12px 26px 12px 16px;position:relative;font-size:14px}
+.chain div:not(:last-child)::after{content:"";position:absolute;right:-1px;top:0;bottom:0;width:18px;background:linear-gradient(to top right,transparent 49%,var(--line) 50%,transparent 52%) top/100% 50% no-repeat,linear-gradient(to bottom right,transparent 49%,var(--line) 50%,transparent 52%) bottom/100% 50% no-repeat}
+.chain small{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--brick)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fix{display:grid;grid-template-columns:44px 1fr 170px;gap:12px;background:#fff;border:1px solid var(--line);padding:14px;margin:8px 0;align-items:start}
+.fix b.fn{font-size:22px;font-weight:800;color:var(--brick)}
+.fix h4{margin:0;font-size:16.5px}
+.fix p{margin:4px 0 0;font-size:14px;color:var(--mute)}
+.fix .links{font-size:12.5px;color:var(--mute)}
+.callout{border-left:4px solid var(--brick);background:#fff;padding:14px 18px;margin:16px 0;font-size:15.5px}
+footer{background:var(--ink);color:#bdb7ae;padding:32px 0;margin-top:48px;font-size:14px}
+.nb tr.tot td{font-weight:700;background:#f6f4f1}.bar{display:inline-block;height:8px;background:#171513;border-radius:0 4px 4px 0;margin-right:8px;vertical-align:middle}.small{font-size:14px;color:var(--mute)}h3{margin:28px 0 10px}.mx th:first-child,.mx tbody th{background:#171513;color:#fff;width:200px}.mx tbody th{font-size:13.5px;font-weight:600;vertical-align:top}.mx td{border-left:1px solid #cfcac2}.mx td.e{color:#bdb7ae;text-align:center}
+.tsf{margin:16px 0;background:#fff;border:1px solid var(--line)}.tsf small{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--brick);margin-bottom:4px}.tsf-phil{background:#171513;color:#e7e4df;padding:16px 20px;font-size:14.5px}.tsf-phil b{color:#fff}.tsf-phil small{color:#e9a294}.tsf-grid{display:grid;grid-template-columns:130px repeat(3,1fr);font-size:14px}.tsf-grid>div{padding:12px 14px;border-top:1px solid var(--line);border-left:1px solid var(--line)}.tsf-grid>div:nth-child(4n+1){border-left:0}.tsf-h{font-weight:700;font-size:15px;background:#f6f4f1;border-top:0!important}.tsf-r{font-weight:700;color:var(--brick);font-size:12.5px;text-transform:uppercase;letter-spacing:.06em}.tsf-foot{padding:12px 20px;border-top:2px solid #171513;font-size:14px;background:#f6f4f1}
+.keyg{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}.keyg>div{background:#fff;padding:12px 14px;font-size:13.5px;color:#3d3934}.keyg b{display:block;color:var(--ink);font-size:14px;margin-bottom:3px}.keyg .chip{font-size:11px;padding:1px 6px}
+.ref{font-size:12px;color:#8a847c;margin:12px 0 0;border-top:1px dashed var(--line);padding-top:8px}
+.kl{list-style:none;margin:2px 0 0;padding:0}.kl li{display:flex;gap:8px;align-items:baseline;padding:2px 0;border-bottom:1px dotted var(--line)}.kl li:last-child{border-bottom:0}.kl code{flex:none;min-width:62px}.kl .chip{flex:none}.kl .chip{min-width:58px;text-align:center;margin-right:4px}
+.ringwrap{display:grid;grid-template-columns:330px 1fr;gap:28px;align-items:center}.rings a{cursor:pointer}.rings a:hover circle+circle{opacity:.8}.rlist{display:flex;flex-direction:column;gap:2px}.rl{display:grid;grid-template-columns:30px 1fr auto;gap:12px;align-items:center;padding:10px 12px;background:#fff;border:1px solid var(--line);text-decoration:none;color:var(--ink)}.rl:hover{border-color:var(--brick)}.rl-n{width:24px;height:24px;border-radius:50%;color:#fff;font-size:12px;display:grid;place-items:center}.rl-s{color:var(--brick);font-weight:700;font-size:13px}.rl-w{font-size:13px;color:var(--mute)}.rl-p{font-size:12px;color:var(--brick);font-weight:700;white-space:nowrap}
+#jwidget{position:fixed;right:18px;bottom:18px;z-index:9;background:#fff;border:1px solid var(--line);border-radius:50%;width:132px;height:132px;padding:6px;box-shadow:0 4px 18px rgba(0,0,0,.12)}#jwidget svg{width:120px;height:120px}#jlabel{position:absolute;right:140px;bottom:52px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;white-space:nowrap}
+.jr a{cursor:pointer}.jr .jp{transition:stroke-dasharray .25s}.jr a.on circle:first-child{stroke:#d3cdc4}.rl.on{border-color:var(--brick);box-shadow:inset 4px 0 0 var(--brick)}.rl-n{background:var(--brick)}
+.xp .seg td,.xp .lens td{font-size:14px}.xp i.d0,.xp i.d1,.xp i.d2,.xp i.d3{display:inline-block;width:13px;height:13px;border-radius:50%;border:2px solid #171513;vertical-align:middle}.xp i.d1{background:linear-gradient(90deg,#171513 30%,#fff 30%)}.xp i.d2{background:linear-gradient(90deg,#171513 65%,#fff 65%)}.xp i.d3{background:#c8371e;border-color:#c8371e}.xp i.d0{border-color:#bdb7ae}.xp .seg td:nth-child(n+2):nth-child(-n+4),.xp .seg th:nth-child(n+2):nth-child(-n+4){text-align:center}.xp .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.xp .box{background:#f6f4f1;padding:14px;border-left:3px solid #171513;font-size:14.5px}.xp .lens tr.grp td{background:#f6f4f1;font-weight:800;color:var(--brick)}.xp h3{margin:20px 0 8px}
+@media print{#jwidget{display:none}}
+@media screen and (max-width:820px){#jwidget{width:84px;height:84px}#jwidget svg{width:72px;height:72px}#jlabel{display:none}.xp .cols3{grid-template-columns:1fr}}
+@media screen and (max-width:820px){.keyg{grid-template-columns:1fr 1fr}}
+@media screen and (max-width:820px){.tsf-grid{grid-template-columns:1fr}.tsf-grid>div{border-left:0}.tsf-h:first-child{display:none}}
+@media screen and (max-width:820px){h1{font-size:32px}.figs{grid-template-columns:repeat(3,1fr)}.card,.two{grid-template-columns:1fr}.card figure{border-right:0}.chain{flex-direction:column}.chain div::after{display:none}.fix{grid-template-columns:36px 1fr}.fix .links{grid-column:2}}
+@page{size:A4 landscape;margin:10mm 12mm}
+@media print{nav.spine{display:none}body{background:#fff;font-size:14px}header.hero{padding:28px 0 22px}h1{font-size:34px}.wrap{max-width:none;padding:0 4px}section{padding:14px 0 6px}#map,#plan,#assume,#tests,#evidence,#reliability,#consequence,#fixes,#verdict,#numbers{break-before:page}.card,.fix,.tsf-grid,.panel,tr,.callout,.keyg{break-inside:avoid}h2,h3,.step{break-after:avoid}.card{margin:14px 0;grid-template-columns:1.15fr 1fr}.card img{max-height:250px;object-fit:contain;background:#111}.card figure img:only-of-type{max-height:440px}.card .body{padding:14px}.chain div{padding:8px 22px 8px 12px;font-size:12.5px}th,td{padding:6px 8px}header.hero,.tsf-phil,th,.fig,.chip,.bar,.step i,.card figure,rect{-webkit-print-color-adjust:exact;print-color-adjust:exact}a{color:inherit;text-decoration:none}footer{margin-top:16px}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+<div class="kicker">Product evaluation · FortyGuard dashboard, API and MCP · 21–22 November 2026</div>
+<h1>The MCP is ready. The dashboard shows numbers it can't stand behind.</h1>
+<p class="lede">I tested the three FortyGuard products over two days. This write-up goes in the order I worked: the plan, what I expected to be true, the order I tested in, what I found (with the screenshots), why it happens, and what I would fix first. The key below explains the reference codes; you can skip them and still follow the story.</p>
+<div class="figs">
+<div class="fig"><b>67</b><span>planned steps (64 run, 3 skipped or blocked)</span></div>
+<div class="fig"><b>92</b><span>findings logged along the way (X-01 to X-92)</span></div>
+<div class="fig"><b>16</b><span>walkthrough videos analysed</span></div>
+<div class="fig"><b>13</b><span>places where docs and product disagree</span></div>
+<div class="fig"><b>24/40</b><span>usability problem score (lower is better)</span></div>
+<div class="fig"><b>67,480</b><span>API credits spent of 1M</span></div>
+</div>
+</div></header>
+
+<nav class="spine" aria-label="Thinking path"><ol>
+<li><a href="#plan"><i>1</i>Plan</a></li>
+<li><a href="#assume"><i>2</i>Assumptions</a></li>
+<li><a href="#tests"><i>3</i>Test path</a></li>
+<li><a href="#evidence"><i>4</i>Evidence</a></li>
+<li><a href="#customers"><i>C</i>Customers</a></li>
+<li><a href="#lens"><i>L</i>Data system</a></li>
+<li><a href="#reliability"><i>5</i>Causes</a></li>
+<li><a href="#consequence"><i>6</i>Consequences</a></li>
+<li><a href="#fixes"><i>7</i>Fixes</a></li>
+<li><a href="#concept"><i>★</i>Product idea</a></li>
+<li><a href="#verdict"><i>8</i>Verdict</a></li>
+<li><a href="#numbers"><i>9</i>Numbers</a></li>
+</ol></nav>
+
+<main class="wrap">
+
+
+
+<section id="key" style="padding-top:40px">
+<div class="panel" style="margin:0">
+<h3 style="margin:0 0 6px">How to read this report</h3>
+<p class="small" style="margin:0 0 14px">You don't need the codes to follow the story. They're there so anyone can check a claim against my evidence log.</p>
+<div class="keyg">
+<div><b>Fig. 1–9</b><ul class="kl"><li>Annotated screenshots in section 4</li><li>Each one is a finding you can see</li></ul></div>
+<div><b>H1–H13, W1–W5</b><ul class="kl"><li><code>H1–H13</code> What I expected to be true</li><li><code>W1–W5</code> Weak points I planned to probe</li></ul></div>
+<div><b>R1–R4</b><ul class="kl"><li><code>R1</code> No single source of truth</li><li><code>R2</code> Display doesn't check data</li><li><code>R3</code> Job status isn't shown</li><li><code>R4</code> Platform basics without an owner</li></ul></div>
+<div><b>F1–F10</b><ul class="kl"><li>The fixes I recommend</li><li><span><code>F1</code> is the most urgent</span></li><li><span><code>F1–F5</code> cover every Critical and High issue</span></li></ul></div>
+<div><b>Log IDs</b><ul class="kl"><li><code>S</code> Setup</li><li><code>M</code> AI assistant (MCP)</li><li><code>A</code> API</li><li><code>E-01…E-15</code> Bad-input tests</li><li><code>D</code> Docs</li><li><code>B</code> Dashboard</li><li><code>X-01…X-92</code> Issues found along the way</li></ul></div>
+<div><b>Severity</b><ul class="kl"><li><span class="chip r">Critical</span> Wrong or unsafe</li><li><span class="chip r" style="opacity:.8">High</span> Blocks or misleads</li><li><span class="chip p">Medium</span> Slows or confuses</li><li><span class="chip n">Low</span> Polish</li><li><span class="chip v">Positive</span> Works well</li></ul></div>
+<div><b>Scores</b><ul class="kl"><li><span><b style="display:inline">Focus areas</b> 1–5, higher is better</span></li><li><span><b style="display:inline">Lighthouse</b> 0–100, higher is better</span></li><li><span><b style="display:inline">Usability problems</b> 24/40, <u>lower</u> is better</span></li></ul></div>
+<div><b>Credits</b><ul class="kl"><li>FortyGuard's API currency</li><li>Test account: 1,000,000</li><li>Heatmap: 4,220</li><li>Heat Intelligence report: 8,600</li></ul></div>
+</div></div></section>
+<section id="map">
+<div class="step"><i>0</i><h2>The whole path on one page</h2></div>
+<p class="flow-note">The bottom row shows how each claim ties to a log row and a fix.</p>
+<div class="panel"><svg viewBox="0 0 1060 270" role="img" aria-label="Thinking path from plan to verdict">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#c8371e"/></marker>
+<marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5b5650"/></marker></defs>
+<g font-size="14" font-weight="700" text-anchor="middle">
+<g><rect x="4" y="20" width="112" height="70" fill="#171513"/><text x="60" y="50" fill="#fff">1 Plan</text><text x="60" y="70" fill="#d9d5ce" font-size="11" font-weight="400">3 products × 9 areas</text></g>
+<g><rect x="136" y="20" width="112" height="70" fill="#171513"/><text x="192" y="50" fill="#fff">2 Assume</text><text x="192" y="70" fill="#d9d5ce" font-size="11" font-weight="400">13 claims · 5 risks</text></g>
+<g><rect x="268" y="20" width="112" height="70" fill="#171513"/><text x="324" y="50" fill="#fff">3 Test</text><text x="324" y="70" fill="#d9d5ce" font-size="11" font-weight="400">MCP → API → UI</text></g>
+<g><rect x="400" y="20" width="112" height="70" fill="#c8371e"/><text x="456" y="50" fill="#fff">4 Evidence</text><text x="456" y="70" fill="#fff" font-size="11" font-weight="400">159 logged rows</text></g>
+<g><rect x="532" y="20" width="112" height="70" fill="#171513"/><text x="588" y="50" fill="#fff">5 Causes</text><text x="588" y="70" fill="#d9d5ce" font-size="11" font-weight="400">4 root causes</text></g>
+<g><rect x="664" y="20" width="112" height="70" fill="#171513"/><text x="720" y="50" fill="#fff">6 Impact</text><text x="720" y="70" fill="#d9d5ce" font-size="11" font-weight="400">trust, adoption, cost</text></g>
+<g><rect x="796" y="20" width="112" height="70" fill="#171513"/><text x="852" y="50" fill="#fff">7 Fixes</text><text x="852" y="70" fill="#d9d5ce" font-size="11" font-weight="400">10, ranked</text></g>
+<g><rect x="928" y="20" width="128" height="70" fill="#fff" stroke="#171513" stroke-width="2"/><text x="992" y="50" fill="#171513">8 Verdict</text><text x="992" y="70" fill="#5b5650" font-size="11" font-weight="400">for sign-off</text></g>
+</g>
+<g stroke="#c8371e" stroke-width="2.5" marker-end="url(#ar)"><line x1="116" y1="55" x2="134" y2="55"/><line x1="248" y1="55" x2="266" y2="55"/><line x1="380" y1="55" x2="398" y2="55"/><line x1="512" y1="55" x2="530" y2="55"/><line x1="644" y1="55" x2="662" y2="55"/><line x1="776" y1="55" x2="794" y2="55"/><line x1="908" y1="55" x2="926" y2="55"/></g>
+<path d="M456 92 C456 150 192 120 192 92" fill="none" stroke="#5b5650" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ag)"/>
+<text x="324" y="138" font-size="12" fill="#5b5650" text-anchor="middle">evidence confirms or refutes each assumption</text>
+<g font-size="13" text-anchor="middle">
+<rect x="4" y="180" width="1052" height="72" fill="#f6f4f1" stroke="#cfcac2"/>
+<text x="20" y="202" text-anchor="start" font-weight="700" fill="#c8371e" font-size="11" letter-spacing="1">TRACE KEPT FOR EVERY CLAIM</text>
+<g font-weight="600" fill="#171513"><text x="110" y="234">Claim (H1–H13, W1–W5)</text><text x="330" y="234">Test step (S, D, A, M, E, B)</text><text x="560" y="234">Evidence ID (X-nn)</text><text x="760" y="234">Severity</text><text x="950" y="234">Fix (F1…F10)</text></g>
+<g stroke="#5b5650" stroke-width="1.5" marker-end="url(#ag)"><line x1="185" y1="230" x2="225" y2="230"/><line x1="435" y1="230" x2="490" y2="230"/><line x1="625" y1="230" x2="710" y2="230"/><line x1="810" y1="230" x2="890" y2="230"/></g>
+</g></svg></div>
+</section>
+
+<section id="plan">
+<div class="step"><i>1</i><h2>What I planned, and why</h2></div>
+<p class="flow-note">Each product goal became a claim to check in step 2.</p>
+<div class="panel"><svg viewBox="0 0 1060 330" role="img" aria-label="Plan tree">
+<g font-size="13" text-anchor="middle">
+<rect x="430" y="8" width="200" height="54" fill="#171513"/><text x="530" y="32" fill="#fff" font-weight="700" font-size="15">Brief</text><text x="530" y="50" fill="#d9d5ce" font-size="11.5">Is FortyGuard ready for real users?</text>
+<g stroke="#c8371e" stroke-width="2" fill="none" marker-end="url(#ar)"><path d="M530 62 V82 H180 V100"/><path d="M530 62 V100"/><path d="M530 62 V82 H880 V100"/></g>
+<g font-weight="700" font-size="15"><rect x="60" y="102" width="240" height="74" fill="#fff" stroke="#171513" stroke-width="2"/><text x="180" y="126">Dashboard</text>
+<rect x="410" y="102" width="240" height="74" fill="#fff" stroke="#171513" stroke-width="2"/><text x="530" y="126">API</text>
+<rect x="760" y="102" width="240" height="74" fill="#fff" stroke="#171513" stroke-width="2"/><text x="880" y="126">MCP (AI assistant)</text></g>
+<g fill="#5b5650" font-size="12"><text x="180" y="148">Goal: time to first insight</text><text x="180" y="165">16 videos, Lighthouse, heuristics</text>
+<text x="530" y="148">Goal: time to first successful call</text><text x="530" y="165">docs, errors, credits, limits</text>
+<text x="880" y="148">Goal: answers match the API</text><text x="880" y="165">setup, tools, honesty</text></g>
+<g stroke="#5b5650" stroke-width="1.5" marker-end="url(#ag)"><line x1="180" y1="176" x2="180" y2="206"/><line x1="530" y1="176" x2="530" y2="206"/><line x1="880" y1="176" x2="880" y2="206"/></g>
+<rect x="60" y="208" width="940" height="50" fill="#f6f4f1" stroke="#cfcac2"/>
+<text x="530" y="230" font-weight="700">9 focus areas scored 1–5 for each product</text>
+<text x="530" y="248" fill="#5b5650" font-size="12">UX · navigation · performance · API design · docs · errors · MCP and AI use · scalability and maintainability · data trust</text>
+<line x1="530" y1="258" x2="530" y2="280" stroke="#5b5650" stroke-width="1.5" marker-end="url(#ag)"/>
+<rect x="60" y="282" width="940" height="44" fill="#171513"/>
+<text x="530" y="309" fill="#fff" font-size="13">7 phases · 135 min planned against a 45–90 min guide · test places: Los Angeles (Phoenix blocked by plan), Springfield, Paris</text>
+</g></svg></div>
+<div class="tsf">
+<div class="tsf-phil"><small>Philosophy, all three products</small><b>Test from raw data to the finished screen, and keep a log row for every claim.</b> I started with the most direct route to the numbers, then used it to judge each layer added on top. Each claim got an ID, a screenshot or a response, a severity and a fix.</div>
+<div class="tsf-grid">
+<div class="tsf-h"></div><div class="tsf-h">Dashboard</div><div class="tsf-h">API</div><div class="tsf-h">MCP (AI assistant)</div>
+<div class="tsf-r">Strategy</div>
+<div>Use it as a first-time user would. Compare every number on screen with the API, so any gap counts as a dashboard problem.</div>
+<div>Treat it as the ground truth. Note the credits before and after every call, and send it bad input on purpose.</div>
+<div>Ask in plain language, then check each answer against the API value. Use edge prompts to see if it makes things up.</div>
+<div class="tsf-r">Tools</div>
+<div>16 screen recordings, with key frames grabbed and annotated · Lighthouse (mobile, desktop, Fast 4G) · browser console and cookie inspector</div>
+<div>Scripted calls from my PC · the credits endpoint · response codes, timings and rate-limit headers</div>
+<div>An AI assistant connected to the FortyGuard MCP server (v4.0.11, 11 tools) · 8 test prompts · API calls for comparison</div>
+<div class="tsf-r">Frameworks</div>
+<div>Nielsen's 10 usability heuristics (0–4 each) · Core Web Vitals · WCAG contrast (4.5:1)</div>
+<div>Docs rubric: 7 criteria scored 1–5 · a 15-case bad-input matrix · time to first successful call</div>
+<div>Answers must match the API · the tool list is checked against the docs · cost confirmed before paid calls</div>
+<div class="tsf-r">Goal metric</div>
+<div><b>Time to first insight</b></div><div><b>Time to first successful call</b></div><div><b>Answer correctness</b></div>
+</div>
+<div class="tsf-foot"><small>Shared across all three</small>9 focus areas scored 1–5 · severity scale: Critical, High, Medium, Low, Positive · trace from claim to step to evidence ID to severity to fix</div>
+</div>
+<div class="callout"><b>Why I split it this way:</b> the three products sit on one data engine. If the MCP and the API agree, the engine is sound and any difference in the dashboard is a dashboard problem. That let me separate data problems from interface problems instead of blaming "the product".</div>
+</section>
+
+<section id="assume">
+<div class="step"><i>2</i><h2>What I assumed, and what I wanted to validate</h2></div>
+<p class="flow-note">Each row is one hypothesis, the test that checks it, and the result.</p>
+<table>
+<thead><tr><th>#</th><th>I assumed (claim from FortyGuard or my plan)</th><th>How I tested it</th><th>Result</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td class="id">H1</td><td>The data engine is consistent across products</td><td>Same tile and hour in API vs dashboard (B-12)</td><td><span class="chip v">✓ Validated</span> 16.11 °C both</td><td class="id">B-12 · <a href="#e9">Fig.&nbsp;9</a></td></tr>
+<tr><td class="id">H2</td><td>The MCP works and answers match the API</td><td>Connect, call all tools, compare numbers</td><td><span class="chip v">✓ Validated</span> 11 tools, identical numbers</td><td class="id">M-01…M-13</td></tr>
+<tr><td class="id">H3</td><td>Failed requests are free</td><td>Send bad inputs, check balance</td><td><span class="chip v">✓ Validated</span></td><td class="id">E-05 X-22</td></tr>
+<tr><td class="id">H4</td><td>Dashboard numbers can be trusted</td><td>Compare stats, colours and reports with the tiles and with weather records</td><td><span class="chip r">✕ Refuted</span></td><td class="id"><a href="#e1">Fig.&nbsp;1</a> <a href="#e2">Fig.&nbsp;2</a> X-70</td></tr>
+<tr><td class="id">H5</td><td>20 m resolution</td><td>Request 20 m via API; read dashboard cell size</td><td><span class="chip r">✕ Refuted</span> 60/80/100 m only</td><td class="id">A-09 X-78</td></tr>
+<tr><td class="id">H6</td><td>Real time, to the previous hour</td><td>Hourly requests; look for time zone</td><td><span class="chip p">◐ Partly</span> hourly, time zone unstated</td><td class="id">A-13 <a href="#e9">Fig.&nbsp;9</a></td></tr>
+<tr><td class="id">H7</td><td>Forecast 12 h, history from 2019</td><td>Request past and future dates</td><td><span class="chip p">◐ Partly</span> +13 h worked; history only from 2021</td><td class="id">A-11 A-12</td></tr>
+<tr><td class="id">H8</td><td>Docs describe the product</td><td>Cross-check every limit across docs, API, MCP, dashboard</td><td><span class="chip r">✕ Refuted</span> 13 contradictions</td><td class="id">D-01 X-76 X-78</td></tr>
+<tr><td class="id">H9</td><td>The dashboard gives a fast first insight</td><td>Lighthouse; time each analysis</td><td><span class="chip r">✕ Refuted</span> mobile 34, LCP 12.9 s</td><td class="id">B-09 B-10 <a href="#e4">Fig.&nbsp;4</a></td></tr>
+<tr><td class="id">H10</td><td>Status and progress are honest</td><td>Watch Task Progress, gallery, status page</td><td><span class="chip r">✕ Refuted</span> stuck at 30%; stale status</td><td class="id">X-85 X-90 X-92</td></tr>
+<tr><td class="id">H11</td><td>Costs are clear before you spend</td><td>Compare dashboard prompts with API price list</td><td><span class="chip r">✕ Refuted</span> no cost shown</td><td class="id"><a href="#e3">Fig.&nbsp;3</a> X-79</td></tr>
+<tr><td class="id">H12</td><td>Coverage is "any location worldwide"</td><td>Paris, Phoenix, LA</td><td><span class="chip r">✕ Refuted</span> US only, one state</td><td class="id">X-04 X-88 <a href="#e5">Fig.&nbsp;5</a></td></tr>
+<tr><td class="id">H13</td><td>Reports export to PDF and Word</td><td>Generate and download a report</td><td><span class="chip p">◐ Partly</span> PDF yes (30 pages), Word no</td><td class="id">X-91 <a href="#e8">Fig.&nbsp;8</a></td></tr>
+<tr><td class="id">W1</td><td>Weak point: key and auth</td><td>How the key arrives, where it lives</td><td><span class="chip r">✕ Confirmed risk</span> key by email, no key page</td><td class="id">X-14 X-87 <a href="#e6">Fig.&nbsp;6</a></td></tr>
+<tr><td class="id">W2</td><td>Weak point: credits and limits</td><td>Plan, balance, usage breakdown</td><td><span class="chip r">✕ Confirmed risk</span> plan matches nothing published</td><td class="id">X-76 X-81</td></tr>
+<tr><td class="id">W3</td><td>Weak point: one shared API</td><td>Status page vs live behaviour</td><td><span class="chip p">◐ Partly</span> API and MCP worked; status page wrong</td><td class="id">X-92</td></tr>
+<tr><td class="id">W4–W5</td><td>US-only coverage; latency at peak</td><td>Gate checks; job timings; rate-limit headers</td><td><span class="chip n">○ Not load-tested</span> jobs 16 s to over 2 min</td><td class="id">A-06 X-88</td></tr>
+</tbody></table>
+</section>
+
+<section id="tests">
+<div class="step"><i>3</i><h2>The order I tested in, and why that order</h2></div>
+<p class="flow-note">Each test used the one before it as its reference.</p>
+<div class="panel"><svg viewBox="0 0 1060 250" role="img" aria-label="Test sequence">
+<g font-size="13" text-anchor="middle">
+<g font-weight="700" font-size="14" fill="#fff">
+<rect x="4" y="20" width="180" height="80" fill="#171513"/><text x="94" y="52">MCP</text>
+<rect x="219" y="20" width="180" height="80" fill="#171513"/><text x="309" y="52">API</text>
+<rect x="434" y="20" width="180" height="80" fill="#171513"/><text x="524" y="52">Dashboard</text>
+<rect x="649" y="20" width="180" height="80" fill="#171513"/><text x="739" y="52">Performance</text>
+<rect x="864" y="20" width="192" height="80" fill="#c8371e"/><text x="960" y="52">Cross-check</text></g>
+<g fill="#d9d5ce" font-size="11.5"><text x="94" y="72">fastest way to see</text><text x="94" y="87">the raw data</text>
+<text x="309" y="72">ground truth with exact</text><text x="309" y="87">billing and errors</text>
+<text x="524" y="72">16 videos of a real user,</text><text x="524" y="87">judged against the API</text>
+<text x="739" y="72">Lighthouse mobile, desktop,</text><text x="739" y="87">Fast 4G; accessibility</text>
+<text x="960" y="72" fill="#fff">same tile, same hour,</text><text x="960" y="87" fill="#fff">API vs dashboard (B-12)</text></g>
+<g stroke="#c8371e" stroke-width="2.5" marker-end="url(#ar)"><line x1="184" y1="60" x2="217" y2="60"/><line x1="399" y1="60" x2="432" y2="60"/><line x1="614" y1="60" x2="647" y2="60"/><line x1="829" y1="60" x2="862" y2="60"/></g>
+<g fill="#5b5650" font-size="12"><text x="94" y="128">Why first: no UI between</text><text x="94" y="144">me and the numbers</text>
+<text x="309" y="128">Why next: confirms MCP</text><text x="309" y="144">and sets the reference</text>
+<text x="524" y="128">Why then: any gap from</text><text x="524" y="144">the API is a UI problem</text>
+<text x="739" y="128">Why: "first insight"</text><text x="739" y="144">starts with page load</text>
+<text x="960" y="128">Why last: settles whether</text><text x="960" y="144">the engine or the UI is wrong</text></g>
+<rect x="4" y="170" width="1052" height="64" fill="#f6f4f1" stroke="#cfcac2"/>
+<text x="530" y="196" font-weight="700">The API, the AI assistant and the dashboard return the same numbers. The problems are in how the dashboard shows them.</text>
+<text x="530" y="218" fill="#5b5650" font-size="12">API and dashboard returned the identical 16.11 °C at 01:00; the dashboard then painted that single value as a full red-to-blue map.</text>
+</g></svg></div>
+</section>
+
+<section id="evidence">
+<div class="step"><i>4</i><h2>The evidence, annotated</h2></div>
+<p class="flow-note">The numbers on each screenshot match the list beside it. The strip under each card runs <b>what I saw → why it matters → risk → fix</b>. Severity is as logged.</p>
+
+<article class="card" id="e1"><figure><img src="img/e1-colour-stretch.jpg" alt="Heatmap of Marina del Rey painted fully red to blue"><figcaption>Video 16, 0:00 · Marina del Rey, 14 Nov 2026, 01:00</figcaption><img src="img/e2-one-value.jpg" alt="Statistics panel showing one bar for all 930 points"><figcaption>Video 16, 0:32 · same heatmap, Statistics panel</figcaption></figure>
+<div class="body"><div class="tag">Fig.&nbsp;1 · Data trust · High</div><h3>A 0.31 °C spread is painted as a full red-to-blue heat map</h3>
+<p style="font-size:13px;color:#5b5650;margin:6px 0 0">Top screenshot</p><ol style="margin-top:4px"><li><b>1</b>Deep red and deep blue blocks.</li><li><b>2</b>The tile popup reads 16.12 °C. Others read 16.11 and 16.01 °C.</li><li><b>3</b>The report job I started sits at 30% (see Fig.&nbsp;4).</li></ol><p style="font-size:13px;color:#5b5650;margin:6px 0 0">Bottom screenshot</p><ol style="margin-top:4px"><li><b>1</b>Max 16.25 °C, min 15.94 °C.</li><li><b>2</b>All 930 points fall in one bar at 16.11 °C.</li></ol><p class="ref">Evidence log: X-89</p></div>
+<div class="chain"><div><small>What I saw</small>The colour scale stretches to whatever range the map has, even a third of a degree.</div><div><small>Why it matters</small>People read the colour before the number. Red reads as a hot spot.</div><div><small>Risk</small>A city could plan shade or cooling for a block that is no hotter than its neighbours.</div><div><small>Fix</small><a href="#fixes">F1</a> minimum colour span</div></div></article>
+
+<article class="card" id="e2"><figure><img src="img/e3-la-january.jpg" alt="Statistics showing 101.93 °F maximum in Los Angeles in January"><figcaption>Video 2 · demo heatmap, Los Angeles, 20 Jan 2022</figcaption></figure>
+<div class="body"><div class="tag">Fig.&nbsp;2 · Data trust · Critical</div><h3>Los Angeles in January shows 101.9 °F, and FortyGuard's own report calls it implausible</h3>
+<ol><li><b>1</b>Max 101.93 °F, min 56.75 °F. The statistics give a mean of 85.3 °F.</li></ol>
+<p style="font-size:14px;color:#5b5650;margin:0">Open-Meteo has that day at a 56.4 °F mean and a 72.6 °F max. 102 °F would beat the all-time January record. When I ran Heat Intelligence on this demo, the report itself said the 88.6 °F input was "physically implausible".</p><p class="ref">Evidence log: X-34, X-70</p></div>
+<div class="chain"><div><small>What I saw</small>The demo a new user sees first carries a number the product's own report rejects.</div><div><small>Why it matters</small>Anyone who knows LA weather will doubt everything after this.</div><div><small>Risk</small>The first impression is that the data is wrong.</div><div><small>Fix</small><a href="#fixes">F1</a> sanity-check inputs before display</div></div></article>
+
+<article class="card" id="e3"><figure><img src="img/e4-no-cost.jpg" alt="Heat Intelligence form with no cost shown"><figcaption>Video 9 · Heat Intelligence form</figcaption></figure>
+<div class="body"><div class="tag">Fig.&nbsp;3 · Cost clarity · Medium</div><h3>A report the API prices at 8,600 credits shows no cost at all</h3>
+<ol><li><b>1</b>Analytics types to choose.</li><li><b>2</b>Generate Report: no price, no balance.</li></ol>
+<p style="font-size:14px;color:#5b5650;margin:0">In fact the dashboard runs on a separate 30-heatmaps-a-day quota that no document mentions.</p><p class="ref">Evidence log: X-64, X-79, X-87</p></div>
+<div class="chain"><div><small>What I saw</small>Two separate allowances, and neither shows up when you press Generate.</div><div><small>Why it matters</small>Customers buy credits, but the dashboard never mentions them.</div><div><small>Risk</small>Users can't predict when they will be blocked or what a report costs.</div><div><small>Fix</small><a href="#fixes">F4</a> cost and balance before paid actions</div></div></article>
+
+<article class="card" id="e4"><figure><img src="img/e5-empty-gallery.jpg" alt="Gallery says no reports while task shows 30 percent"><figcaption>Video 12 · Heat Intelligence panel</figcaption><img src="img/e6-gallery-download.jpg" alt="Gallery cards with Download buttons"><figcaption>Video 11 · the same gallery, reached another way, with both reports</figcaption></figure>
+<div class="body"><div class="tag">Fig.&nbsp;4 · Reliability · Medium</div><h3>"No reports saved yet", while reports exist and the task never passes 30%</h3>
+<p style="font-size:13px;color:#5b5650;margin:6px 0 0">Top screenshot</p><ol style="margin-top:4px"><li><b>1</b>"No heat intelligence reports saved yet".</li><li><b>2</b>Task Progress at 30%, no link, no time. It stayed at exactly 30% in two separate runs.</li></ol><p style="font-size:13px;color:#5b5650;margin:6px 0 0">Bottom screenshot</p><ol style="margin-top:4px"><li><b>1</b>Both reports, each with a Download button.</li><li><b>2</b>The legend is in °C although I chose Imperial.</li></ol>
+<p style="font-size:14px;color:#5b5650;margin:0">Download gave a 30-page PDF. I first logged the reports as missing.</p><p class="ref">Evidence log: X-85, X-90, X-83, X-91</p></div>
+<div class="chain"><div><small>What I saw</small>The progress bar and the gallery don't show what the job is actually doing.</div><div><small>Why it matters</small>I was looking for the reports on purpose and still thought they had failed.</div><div><small>Risk</small>Users run the job again, using up quota, or give up.</div><div><small>Fix</small><a href="#fixes">F4</a> real progress, ready notice, Open link</div></div></article>
+
+<article class="card" id="e5"><figure><img src="img/e8-phoenix-search.jpg" alt="Search suggests Phoenix AZ"><figcaption>Video 15, 0:00 · the search box offers Phoenix</figcaption><img src="img/e7-state-gate.jpg" alt="Stacked warnings outside subscribed state"><figcaption>Video 15, 0:11 · after choosing it</figcaption></figure>
+<div class="body"><div class="tag">Fig.&nbsp;5 · Errors · Medium</div><h3>Search offers Phoenix, then blocks it without saying why</h3>
+<p style="font-size:13px;color:#5b5650;margin:6px 0 0">Top screenshot</p><ol style="margin-top:4px"><li><b>1</b>Phoenix, AZ is the first suggestion.</li></ol><p style="font-size:13px;color:#5b5650;margin:6px 0 0">Bottom screenshot</p><ol style="margin-top:4px"><li><b>1</b>Two identical "outside your subscribed state" toasts. Neither names my state or says what to do.</li></ol>
+<p style="font-size:14px;color:#5b5650;margin:0">The welcome screen says "any location worldwide".</p><p class="ref">Evidence log: X-88, X-04</p></div>
+<div class="chain"><div><small>What I saw</small>The search offers a place the account isn't allowed to open.</div><div><small>Why it matters</small>Without a reason, a blocked search looks like a bug, not a plan limit.</div><div><small>Risk</small>Trial users stop there, and there is no upgrade link.</div><div><small>Fix</small><a href="#fixes">F8</a> name the state and the next step</div></div></article>
+
+<article class="card" id="e6"><figure><img src="img/e9-usage-modal.jpg" alt="Usage modal showing heatmaps only"><figcaption>Video 14 · Profile, Usage</figcaption></figure>
+<div class="body"><div class="tag">Fig.&nbsp;6 · Security · High</div><h3>Nowhere in the app to see your API key or credits</h3>
+<ol><li><b>1</b>Usage shows 0/30 heatmaps today. No key, no credit balance, no plan.</li></ol>
+<p style="font-size:14px;color:#5b5650;margin:0">The key arrived in a plain-text email. Its plan ("Premium, one-time, 1M, one month") matches no published plan.</p><p class="ref">Evidence log: X-87, X-14, X-76</p></div>
+<div class="chain"><div><small>What I saw</small>The key only exists in an email. It can't be viewed, masked or rotated in the app.</div><div><small>Why it matters</small>Anyone with the key can spend the account's credits.</div><div><small>Risk</small>This is the kind of thing a customer's security review flags.</div><div><small>Fix</small><a href="#fixes">F5</a> in-app key page; <a href="#fixes">F2</a> one plan truth</div></div></article>
+
+<article class="card" id="e7"><figure><img src="img/e10-route.jpg" alt="Coolest route showing 25.00 °C average"><figcaption>Video 10 · Coolest Route</figcaption></figure>
+<div class="body"><div class="tag">Fig.&nbsp;7 · Consistency · Medium</div><h3>Imperial selected, yet the route speaks Celsius and kilometres</h3>
+<ol><li><b>1</b>"1 Route Found": one option, so nothing to compare.</li><li><b>2</b>"25.00 °C avg" despite Imperial in Settings.</li></ol><p class="ref">Evidence log: X-66</p></div>
+<div class="chain"><div><small>What I saw</small>The route, legend, gallery and monitors all ignore the unit setting.</div><div><small>Why it matters</small>To a US reader, "25" sounds cold.</div><div><small>Risk</small>Misread numbers, and less confidence in the rest of the screen.</div><div><small>Fix</small><a href="#fixes">F1</a> bind units to Settings</div></div></article>
+
+<article class="card" id="e8"><figure><img src="img/e11-report-tabs.jpg" alt="Report tabs cut off with no title block"><figcaption>Video 13 · Heat Intelligence report viewer</figcaption></figure>
+<div class="body"><div class="tag">Fig.&nbsp;8 · Report quality · Medium/High</div><h3>A long report with no summary, no title block, and a cut-off tab</h3>
+<ol><li><b>1</b>Five tabs; the last is cut off. No title, date or location at the top.</li></ol>
+<p style="font-size:14px;color:#5b5650;margin:0">The text runs to about 16,000 words (30 pages as a PDF). It links only 3 sites, all homepages, and 18 source lines just say "established knowledge".</p><p class="ref">Evidence log: X-73, X-72</p></div>
+<div class="chain"><div><small>What I saw</small>An analyst can work through it. A manager won't.</div><div><small>Why it matters</small>A report like this usually gets forwarded to someone who wants one page.</div><div><small>Risk</small>The report doesn't get shared, so neither does the product.</div><div><small>Fix</small><a href="#fixes">F10</a> one-page summary, real citations</div></div></article>
+
+<article class="card" id="e9"><figure><img src="img/e12-pdf-meta.jpg" alt="PDF metadata block"><figcaption>Downloaded PDF, page 1</figcaption></figure>
+<div class="body"><div class="tag">Fig.&nbsp;9 · Data consistency · Positive</div><h3>The same 16.11 °C in the PDF, the dashboard and the API</h3>
+<ol><li><b>1</b>Coordinates to 14 decimals, a time of 01:00, and no time zone.</li></ol>
+<p style="font-size:14px;color:#5b5650;margin:0">I called the API for the same point: 16.11 °C at 01:00, an exact match. At 09:00 it gave 18.09 °C, so which clock "01:00" means is still unproven.</p><p class="ref">Evidence log: B-12, X-91</p></div>
+<div class="chain"><div><small>What I saw</small>The value matches everywhere. The label is missing a time zone.</div><div><small>Why it matters</small>It shows Fig.&nbsp;1 to Fig.&nbsp;8 come from how the number is shown, not from the number.</div><div><small>Risk</small>Without a time zone, someone comparing with local weather can be hours off.</div><div><small>Fix</small><a href="#fixes">F3</a> time zone and cell size on every result</div></div></article>
+</section>
+
+<section id="customers">
+<div class="step"><i>C</i><h2>Who uses FortyGuard, and when they all arrive at once</h2></div>
+<div class="panel xp">
+
+<p>Different customers come in through different products. The risky moment isn't an average day. It's a heat wave, when every segment shows up together.</p>
+<table class="seg">
+<thead><tr><th style="width:38%">Customer segment</th><th>Dashboard</th><th>API</th><th>AI assistant</th><th style="width:22%">When they need it</th></tr></thead>
+<tbody>
+<tr><td><b>City heat planners</b><br><span class="small">heat officer, urban planner</span></td><td><i class="d3"></i></td><td><i class="d1"></i></td><td><i class="d1"></i></td><td class="small">Before summer, grant deadlines</td></tr>
+<tr><td><b>Architects and landscape designers</b></td><td><i class="d3"></i></td><td><i class="d1"></i></td><td><i class="d2"></i></td><td class="small">Design reviews</td></tr>
+<tr><td><b>Data centre and energy site teams</b></td><td><i class="d2"></i></td><td><i class="d3"></i></td><td><i class="d1"></i></td><td class="small">Site screening, any season</td></tr>
+<tr><td><b>Utilities and grid operations</b></td><td><i class="d1"></i></td><td><i class="d3"></i></td><td><i class="d0"></i></td><td class="small">Nightly, plus every heat dome</td></tr>
+<tr><td><b>Insurance, finance, real estate</b></td><td><i class="d2"></i></td><td><i class="d3"></i></td><td><i class="d1"></i></td><td class="small">Renewals, acquisitions</td></tr>
+<tr><td><b>Logistics, cold chain, field safety</b></td><td><i class="d1"></i></td><td><i class="d3"></i></td><td><i class="d1"></i></td><td class="small">Day before a hot shift</td></tr>
+<tr><td><b>Public health and emergency teams</b></td><td><i class="d3"></i></td><td><i class="d1"></i></td><td><i class="d1"></i></td><td class="small">The hour a heat warning is issued</td></tr>
+<tr><td><b>Developers and AI agent builders</b></td><td><i class="d1"></i></td><td><i class="d3"></i></td><td><i class="d3"></i></td><td class="small">Build time, then always on</td></tr>
+</tbody></table>
+<p class="small" style="margin:1.5mm 0 4mm"><i class="d3"></i> main tool &nbsp; <i class="d2"></i> often &nbsp; <i class="d1"></i> occasional &nbsp; <i class="d0"></i> rare · From FortyGuard's industry pages; how often each one is used is my estimate.</p>
+<h3>A heat-wave week: demand and the weak points it hits</h3>
+<svg viewBox="0 0 1000 380" role="img" aria-label="Heat wave demand curve with weak points">
+<defs><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#c8371e"/></marker></defs>
+<rect x="250" y="20" width="420" height="200" fill="#fbe9e5"/>
+<text x="460" y="38" text-anchor="middle" font-size="13" font-weight="700" fill="#c8371e">Heat dome: everyone checks at once</text>
+<g stroke="#d6d1c9"><line x1="60" y1="220" x2="980" y2="220"/><line x1="60" y1="20" x2="60" y2="220"/></g>
+<g font-size="13" fill="#5b5650" text-anchor="middle"><text x="120" y="240">Mon</text><text x="250" y="240">Tue: warning issued</text><text x="390" y="240">Wed</text><text x="530" y="240">Thu</text><text x="670" y="240">Fri</text><text x="820" y="240">Sat–Sun</text></g>
+<text x="20" y="120" font-size="12" fill="#5b5650" transform="rotate(-90 20 120)" text-anchor="middle">calls per hour</text>
+<path d="M60 200 C150 198 200 195 250 150 C290 70 330 60 390 62 C450 66 480 55 530 60 C590 66 630 80 670 120 C720 175 800 195 980 198" fill="none" stroke="#171513" stroke-width="3"/>
+<text x="975" y="186" font-size="13" fill="#5b5650" text-anchor="end">normal summer day</text>
+<text x="460" y="120" font-size="14" fill="#171513" font-weight="700" text-anchor="middle">about 3 to 10 times normal (my estimate)</text>
+<g font-size="11.5" fill="#171513">
+<circle cx="265" cy="128" r="11" fill="#c8371e"/><text x="265" y="132" text-anchor="middle" fill="#fff" font-weight="700">1</text>
+<circle cx="345" cy="64" r="11" fill="#c8371e"/><text x="345" y="68" text-anchor="middle" fill="#fff" font-weight="700">2</text>
+<circle cx="470" cy="58" r="11" fill="#c8371e"/><text x="470" y="62" text-anchor="middle" fill="#fff" font-weight="700">3</text>
+<circle cx="580" cy="66" r="11" fill="#c8371e"/><text x="580" y="70" text-anchor="middle" fill="#fff" font-weight="700">4</text>
+<circle cx="655" cy="108" r="11" fill="#c8371e"/><text x="655" y="112" text-anchor="middle" fill="#fff" font-weight="700">5</text>
+</g>
+<g font-size="11.5" fill="#171513">
+<text x="60" y="272" font-size="14.5"><tspan font-weight="700" fill="#c8371e">1</tspan>  Sign-ups hit a 12.9 s mobile sign-in and a key sent only by email</text><text x="60" y="294" font-size="14.5"><tspan font-weight="700" fill="#c8371e">2</tspan>  Each account is capped at 300 requests a minute and 30 heatmaps a day</text><text x="60" y="316" font-size="14.5"><tspan font-weight="700" fill="#c8371e">3</tspan>  Jobs already take 16 s to over 2 min, and progress sticks at 30%</text><text x="60" y="338" font-size="14.5"><tspan font-weight="700" fill="#c8371e">4</tspan>  One shared API: on 18 Nov about 20 incidents hit every product at once</text><text x="60" y="360" font-size="14.5"><tspan font-weight="700" fill="#c8371e">5</tspan>  The status page can't show users what is really down</text></g>
+</svg>
+
+</div>
+<div class="step" style="margin-top:36px"><i>C</i><h2>Where a new customer loses time and trust</h2></div>
+<div class="panel xp">
+
+<p>These are the steps a new customer goes through, with what I measured at each one. Red marks a step where I saw something break.</p>
+<svg viewBox="0 0 1000 400" role="img" aria-label="Customer journey"><defs><marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5b5650"/></marker></defs><g text-anchor="middle"><rect x="0" y="10" width="136" height="78" fill="#171513"/><text x="68.0" y="44" fill="#fff" font-size="17" font-weight="700">Discover</text><text x="68.0" y="68" fill="#d9d5ce" font-size="13">site, news, hackathon</text><line x1="136" y1="49" x2="143" y2="49" stroke="#5b5650" stroke-width="2" marker-end="url(#c)"/><text x="68.0" y="150" font-size="15" fill="#171513">"Any location</text><text x="68.0" y="170" font-size="15" fill="#171513">worldwide"</text><text x="68.0" y="240" font-size="15" fill="#5b5650" font-style="italic">"This covers</text><text x="68.0" y="260" font-size="15" fill="#5b5650" font-style="italic">me"</text><rect x="144" y="10" width="136" height="78" fill="#c8371e"/><text x="212.0" y="44" fill="#fff" font-size="17" font-weight="700">Sign up</text><text x="212.0" y="68" fill="#f6dcd5" font-size="13">state gate</text><line x1="280" y1="49" x2="287" y2="49" stroke="#5b5650" stroke-width="2" marker-end="url(#c)"/><text x="212.0" y="150" font-size="15" fill="#171513">12.9 s on mobile,</text><text x="212.0" y="170" font-size="15" fill="#171513">score 34</text><text x="212.0" y="240" font-size="15" fill="#5b5650" font-style="italic">"Is it</text><text x="212.0" y="260" font-size="15" fill="#5b5650" font-style="italic">loading?"</text><rect x="288" y="10" width="136" height="78" fill="#c8371e"/><text x="356.0" y="44" fill="#fff" font-size="17" font-weight="700">Get the key</text><text x="356.0" y="68" fill="#f6dcd5" font-size="13">sent by email</text><line x1="424" y1="49" x2="431" y2="49" stroke="#5b5650" stroke-width="2" marker-end="url(#c)"/><text x="356.0" y="150" font-size="15" fill="#171513">No key page</text><text x="356.0" y="170" font-size="15" fill="#171513">in the app</text><text x="356.0" y="240" font-size="15" fill="#5b5650" font-style="italic">"Where is</text><text x="356.0" y="260" font-size="15" fill="#5b5650" font-style="italic">my key?"</text><rect x="432" y="10" width="136" height="78" fill="#c8371e"/><text x="500.0" y="44" fill="#fff" font-size="17" font-weight="700">First map</text><text x="500.0" y="68" fill="#f6dcd5" font-size="13">heatmap job</text><line x1="568" y1="49" x2="575" y2="49" stroke="#5b5650" stroke-width="2" marker-end="url(#c)"/><text x="500.0" y="150" font-size="15" fill="#171513">16 s to</text><text x="500.0" y="170" font-size="15" fill="#171513">over 2 min</text><text x="500.0" y="240" font-size="15" fill="#5b5650" font-style="italic">"Did it</text><text x="500.0" y="260" font-size="15" fill="#5b5650" font-style="italic">work?"</text><rect x="576" y="10" width="136" height="78" fill="#c8371e"/><text x="644.0" y="44" fill="#fff" font-size="17" font-weight="700">Trust it</text><text x="644.0" y="68" fill="#f6dcd5" font-size="13">read the numbers</text><line x1="712" y1="49" x2="719" y2="49" stroke="#5b5650" stroke-width="2" marker-end="url(#c)"/><text x="644.0" y="150" font-size="15" fill="#171513">0.3 °C shown</text><text x="644.0" y="170" font-size="15" fill="#171513">as red vs blue</text><text x="644.0" y="240" font-size="15" fill="#5b5650" font-style="italic">"Is that</text><text x="644.0" y="260" font-size="15" fill="#5b5650" font-style="italic">right?"</text><rect x="720" y="10" width="136" height="78" fill="#c8371e"/><text x="788.0" y="44" fill="#fff" font-size="17" font-weight="700">Spend, report</text><text x="788.0" y="68" fill="#f6dcd5" font-size="13">reports, credits</text><line x1="856" y1="49" x2="863" y2="49" stroke="#5b5650" stroke-width="2" marker-end="url(#c)"/><text x="788.0" y="150" font-size="15" fill="#171513">No price shown;</text><text x="788.0" y="170" font-size="15" fill="#171513">stuck at 30%</text><text x="788.0" y="240" font-size="15" fill="#5b5650" font-style="italic">"What did</text><text x="788.0" y="260" font-size="15" fill="#5b5650" font-style="italic">that cost?"</text><rect x="864" y="10" width="136" height="78" fill="#171513"/><text x="932.0" y="44" fill="#fff" font-size="17" font-weight="700">Come back</text><text x="932.0" y="68" fill="#d9d5ce" font-size="13">next heat event</text><text x="932.0" y="150" font-size="15" fill="#171513">US only,</text><text x="932.0" y="170" font-size="15" fill="#171513">one state</text><text x="932.0" y="240" font-size="15" fill="#5b5650" font-style="italic">"Phoenix is</text><text x="932.0" y="260" font-size="15" fill="#5b5650" font-style="italic">blocked"</text><text x="0" y="122" text-anchor="start" font-size="12.5" font-weight="700" fill="#c8371e" letter-spacing="1">WHAT I MEASURED</text><text x="0" y="212" text-anchor="start" font-size="12.5" font-weight="700" fill="#c8371e" letter-spacing="1">WHAT THE CUSTOMER THINKS</text><text x="0" y="300" text-anchor="start" font-size="12.5" font-weight="700" fill="#c8371e" letter-spacing="1">CUSTOMER CONFIDENCE</text><path d="M0 320 C110 318 140 330 216 335 C290 340 320 345 360 348 C420 352 450 350 504 356 C570 362 600 375 648 378 C700 380 740 382 792 384 C860 386 900 388 1000 390" fill="none" stroke="#c8371e" stroke-width="4"/><text x="1000" y="365" text-anchor="end" font-size="14" fill="#c8371e" font-weight="700">drops at every red step</text></g></svg>
+<div style="height:5mm"></div>
+<h3>What the hackathon teams' behaviour already shows</h3>
+<p class="small" style="margin-bottom:3mm">From 18 recorded team demos built on FortyGuard's API before my testing</p>
+<div class="cols3">
+<div class="box"><b>They didn't fully trust the API</b><br>One team fell back to Open-Meteo and another put a caching gateway in front of FortyGuard. Customers protect themselves when a single dependency feels risky.</div>
+<div class="box"><b>They wanted AI, but nobody used the MCP</b><br>14 of 18 teams added an AI layer and 5 built agents, yet none used the MCP. 8 said "the engine decides, the AI explains". That is exactly what the MCP does well today.</div>
+<div class="box"><b>They misread the data</b><br>4 teams called the 2 m air temperature "surface" or "sensor" temperature, one of them inside an automated safety call. Results that describe themselves would prevent this.</div>
+</div>
+
+</div>
+</section>
+<section id="lens">
+<div class="step"><i>L</i><h2>Reliability, scalability and maintainability</h2></div>
+<div class="panel xp">
+
+<p>FortyGuard is a data-intensive application: its hard problems are the amount, the complexity and the freshness of its data, not computing power. Martin Kleppmann's <i>Designing Data-Intensive Applications</i> (chapter 1) judges such systems on three properties. This is how FortyGuard measures up.</p>
+<table class="lens">
+<thead><tr><th style="width:23%">The book asks</th><th style="width:40%">What I saw at FortyGuard</th><th>What to do or measure</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="3">Reliability: keeps working correctly, even when things go wrong</td></tr>
+<tr><td><b>Does a fault turn into a failure the user sees?</b></td><td><span class="chip v">Good</span> The engine stayed consistent: the same 16.11 °C everywhere, and bad input rejected for free.<br><span class="chip r">Weak</span> The dashboard shows correct data so that it looks wrong.</td><td>Check data before it is displayed; the display is part of the system.</td></tr>
+<tr><td><b>Can one fault spread everywhere?</b></td><td><span class="chip r">Weak</span> On 18 Nov about 20 incidents hit every product at the same moment. The dashboard and the MCP both sit on one API.</td><td>Isolate products; degrade gracefully, for example by serving cached maps.</td></tr>
+<tr><td><b>Do people get clear monitoring and quick recovery?</b></td><td><span class="chip r">Weak</span> A status page with a 39-day stale incident, progress stuck at 30%, no Cancel, and keys that can't be rotated.</td><td>Honest telemetry; undo and cancel; rotatable keys.</td></tr>
+<tr class="grp"><td colspan="3">Scalability: copes as load grows</td></tr>
+<tr><td><b>What are the load parameters?</b></td><td>300 requests a minute, a 50 mi² area cap, 30 heatmaps a day, 1M credits. Peak load is a heat wave, not an average day.</td><td>Plan capacity for heat-wave peaks, not monthly averages.</td></tr>
+<tr><td><b>How is performance described?</b></td><td><span class="chip p">Gap</span> Only ranges exist: API 0.4–3.2 s, assistant 14–50 s, jobs 16 s to over 2 min. There are no percentiles, so the slowest users stay invisible.</td><td>Track p50, p95 and p99 per product, and publish targets.</td></tr>
+<tr><td><b>Is there a service target?</b></td><td><span class="chip r">Weak</span> 98.28–99.14% uptime per service, against the common 99.9%.</td><td>Set and publish an availability target.</td></tr>
+<tr class="grp"><td colspan="3">Maintainability: easy to run, simple, and easy to change</td></tr>
+<tr><td><b>Operability: can the team and customers see what's happening?</b></td><td><span class="chip r">Weak</span> No time zone on results, a wrong status page, and an undated changelog.</td><td>Results that describe themselves; a status page driven by real checks.</td></tr>
+<tr><td><b>Simplicity: is there accidental complexity?</b></td><td><span class="chip r">Weak</span> Limits written in four places, two billing systems, units that ignore Settings, seven forced tours.</td><td>One source of truth; one billing model visible everywhere.</td></tr>
+<tr><td><b>Evolvability: can it change safely?</b></td><td><span class="chip r">Weak</span> 20 m was dropped in code but is still advertised; 13 contradictions built up.</td><td>Generate docs, errors and MCP descriptions from one place.</td></tr>
+</tbody></table>
+
+</div>
+</section>
+<section id="reliability">
+<div class="step"><i>5</i><h2>Reliability and maintainability: root causes</h2></div>
+<p class="flow-note">Most of what I logged traces back to one of four causes.</p>
+<div class="panel"><svg viewBox="0 0 1060 470" role="img" aria-label="Root causes to symptoms">
+<g font-size="13">
+<text x="10" y="18" font-weight="700" fill="#c8371e" font-size="11" letter-spacing="1">ROOT CAUSE</text><text x="400" y="18" font-weight="700" fill="#c8371e" font-size="11" letter-spacing="1">SYMPTOM WE SAW</text><text x="800" y="18" font-weight="700" fill="#c8371e" font-size="11" letter-spacing="1">EVIDENCE</text>
+<g fill="#171513"><rect x="10" y="40" width="300" height="76"/><rect x="10" y="146" width="300" height="76"/><rect x="10" y="252" width="300" height="76"/><rect x="10" y="358" width="300" height="76"/></g>
+<g fill="#fff" font-weight="700" font-size="14"><text x="24" y="68">R1 No single source of truth</text><text x="24" y="174">R2 Display layer doesn't check data</text><text x="24" y="280">R3 Job state isn't surfaced</text><text x="24" y="386">R4 Platform hygiene gaps</text></g>
+<g fill="#d9d5ce" font-size="11.5"><text x="24" y="90">limits, plans, tools written in</text><text x="24" y="105">four places by hand</text>
+<text x="24" y="196">colours, stats and units computed</text><text x="24" y="211">separately from the tiles</text>
+<text x="24" y="302">async jobs with no status contract</text><text x="24" y="317">between API and UI</text>
+<text x="24" y="408">security, consent and performance</text><text x="24" y="423">not owned by one team</text></g>
+<g fill="#fff" stroke="#cfcac2">
+<rect x="400" y="34" width="360" height="30"/><rect x="400" y="70" width="360" height="30"/><rect x="400" y="106" width="360" height="30"/>
+<rect x="400" y="148" width="360" height="30"/><rect x="400" y="184" width="360" height="30"/><rect x="400" y="220" width="360" height="30"/>
+<rect x="400" y="262" width="360" height="30"/><rect x="400" y="298" width="360" height="30"/>
+<rect x="400" y="346" width="360" height="30"/><rect x="400" y="382" width="360" height="30"/><rect x="400" y="418" width="360" height="30"/></g>
+<g fill="#171513"><text x="412" y="54">13 contradictions: dates, 20 m, forecast, tools</text><text x="412" y="90">Free key matches no published plan</text><text x="412" y="126">Usage breakdown omits routing (3,500 gap)</text>
+<text x="412" y="168">0.31 °C painted as full red-to-blue</text><text x="412" y="204">Stat cards disagree with the chart</text><text x="412" y="240">°C and km despite Imperial</text>
+<text x="412" y="282">Task Progress frozen at 30%; empty gallery</text><text x="412" y="318">Status page: MCP "unavailable" 39 days, yet it works</text>
+<text x="412" y="366">API key sent by plain-text email</text><text x="412" y="402">8 tracking cookies before consent</text><text x="412" y="438">925 KiB unused JS; mobile score 34</text></g>
+<g fill="#5b5650" font-family="ui-monospace,Menlo,monospace" font-size="12"><text x="800" y="54">D-01 A-11 M-03 X-78</text><text x="800" y="90">X-76 · Fig.&nbsp;6</text><text x="800" y="126">X-81</text><text x="800" y="168">X-89 · Fig.&nbsp;1</text><text x="800" y="204">X-89 · Fig.&nbsp;1</text><text x="800" y="240">X-66 X-83 · Fig.&nbsp;7</text><text x="800" y="282">X-85 X-64 · Fig.&nbsp;4</text><text x="800" y="318">X-92</text><text x="800" y="366">X-14 · Fig.&nbsp;6</text><text x="800" y="402">B-10</text><text x="800" y="438">B-09 B-10</text></g>
+<g stroke="#c8371e" stroke-width="2" fill="none" marker-end="url(#ar)">
+<path d="M310 78 C350 78 360 49 398 49"/><path d="M310 78 H398"/><path d="M310 78 C350 78 360 121 398 121"/>
+<path d="M310 184 C350 184 360 163 398 163"/><path d="M310 184 C350 184 360 199 398 199"/><path d="M310 184 C350 184 360 235 398 235"/>
+<path d="M310 290 C350 290 360 277 398 277"/><path d="M310 290 C350 290 360 313 398 313"/>
+<path d="M310 396 C350 396 360 361 398 361"/><path d="M310 396 H398"/><path d="M310 396 C350 396 360 433 398 433"/></g>
+<g stroke="#5b5650" stroke-width="1.2" marker-end="url(#ag)"><line x1="760" y1="49" x2="796" y2="49"/><line x1="760" y1="85" x2="796" y2="85"/><line x1="760" y1="121" x2="796" y2="121"/><line x1="760" y1="163" x2="796" y2="163"/><line x1="760" y1="199" x2="796" y2="199"/><line x1="760" y1="235" x2="796" y2="235"/><line x1="760" y1="277" x2="796" y2="277"/><line x1="760" y1="313" x2="796" y2="313"/><line x1="760" y1="361" x2="796" y2="361"/><line x1="760" y1="397" x2="796" y2="397"/><line x1="760" y1="433" x2="796" y2="433"/></g>
+</g></svg></div>
+<div class="two">
+<div class="callout"><b>Reliability</b> means "will it give the same right answer every time, and tell me when it can't?" The engine passed every check I gave it. The surfaces didn't: the progress bar, the gallery and the status page each showed a state that wasn't true (R3).</div>
+<div class="callout"><b>Maintainability</b> means "can the team change one thing without four places drifting?" Today a limit lives in docs, API errors, MCP descriptions and the dashboard separately, which is how 13 contradictions appeared (R1).</div>
+</div>
+</section>
+
+<section id="consequence">
+<div class="step"><i>6</i><h2>Who feels it</h2></div>
+<p class="flow-note">Each filled cell is something I saw, not a forecast.</p>
+<table class="mx"><thead><tr><th></th><th>Trust in the numbers</th><th>Trial users getting started</th><th>Support load</th><th>Security and privacy</th></tr></thead><tbody>
+<tr><th>R1 No single source of truth</th><td>Docs and product disagree in 13 places (20 m, dates, plans)</td><td>The key's plan matches no published plan</td><td>Credit usage report is 3,500 off</td><td class="e">·</td></tr>
+<tr><th>R2 Display doesn't check data</th><td>0.31 °C shown as red vs blue; 101.9 °F in an LA January</td><td>The first demo heatmap looks wrong</td><td class="e">·</td><td class="e">·</td></tr>
+<tr><th>R3 Job state not surfaced</th><td>Status page says MCP down for 39 days while it works</td><td>Reports look missing</td><td>Reruns and "where is my report?"</td><td class="e">·</td></tr>
+<tr><th>R4 Platform hygiene</th><td class="e">·</td><td>Mobile sign-in: score 34, 12.9 s to content</td><td class="e">·</td><td>Key sent by email; 8 tracking cookies before consent</td></tr>
+</tbody></table>
+</section>
+
+<section id="fixes">
+<div class="step"><i>7</i><h2>Ten fixes, in priority order</h2></div>
+<p class="flow-note">Each fix names the root cause it removes and the evidence it answers, so it can be checked after release.</p>
+<div id="fixlist"></div>
+</section>
+
+<section id="concept">
+<div class="step"><i>★</i><h2>A product idea: rings for the reports customers generate</h2></div>
+<p class="flow-note">Turn the five tabs of a Heat Intelligence report into five rings around the headline number. Customers see the whole report at once and know what they haven't read yet.</p>
+<div class="panel"><svg viewBox="0 0 1000 560" role="img" aria-label="Concept: ring navigation for a generated heat report" style="font-family:Schibsted Grotesk,system-ui,sans-serif"><rect x="0" y="0" width="1000" height="560" rx="14" fill="#fff" stroke="#cfd6dd" stroke-width="2"/><rect x="0" y="0" width="1000" height="56" rx="14" fill="#f6f4f1"/><rect x="0" y="40" width="1000" height="16" fill="#f6f4f1"/><text x="28" y="35" font-size="19" font-weight="800" fill="#171513">Heat Intelligence report · Marina del Rey, CA · 14 Nov 2026, 01:00</text><rect x="830" y="14" width="146" height="30" rx="4" fill="#c8371e"/><text x="903" y="34" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Download PDF</text><circle cx="230" cy="300" r="77.0" fill="none" stroke="#e7ecf0" stroke-width="22"/><circle cx="230" cy="300" r="77.0" fill="none" stroke="#171513" stroke-width="22" stroke-linecap="round" stroke-dasharray="483.8 483.8" transform="rotate(-90 230 300)"/><text x="230" y="228" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">1</text><circle cx="230" cy="300" r="105.0" fill="none" stroke="#e7ecf0" stroke-width="22"/><circle cx="230" cy="300" r="105.0" fill="none" stroke="#5b5650" stroke-width="22" stroke-linecap="round" stroke-dasharray="659.7 659.7" transform="rotate(-90 230 300)"/><text x="230" y="200" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">2</text><circle cx="230" cy="300" r="133.0" fill="none" stroke="#e7ecf0" stroke-width="22"/><circle cx="230" cy="300" r="133.0" fill="none" stroke="#c8371e" stroke-width="22" stroke-linecap="round" stroke-dasharray="501.4 835.7" transform="rotate(-90 230 300)"/><text x="230" y="172" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">3</text><circle cx="230" cy="300" r="161.0" fill="none" stroke="#e7ecf0" stroke-width="22"/><circle cx="230" cy="300" r="161.0" fill="none" stroke="#e08a76" stroke-width="22" stroke-linecap="round" stroke-dasharray="252.9 1011.6" transform="rotate(-90 230 300)"/><text x="230" y="144" text-anchor="middle" font-size="13" font-weight="800" fill="#171513">4</text><circle cx="230" cy="300" r="189.0" fill="none" stroke="#e7ecf0" stroke-width="22"/><text x="230" y="116" text-anchor="middle" font-size="13" font-weight="800" fill="#171513">5</text><text x="230" y="294" text-anchor="middle" font-size="30" font-weight="800" fill="#171513">16.1 °C</text><text x="230" y="316" text-anchor="middle" font-size="12.5" fill="#5b6670">2 of 5 sections read</text><text x="470" y="96" font-size="12" font-weight="700" fill="#c8371e" letter-spacing="1.5">SUMMARY</text><text x="470" y="120" font-size="16" font-weight="700" fill="#171513">Cool, still night on a paved basin floor. No heat risk at 01:00.</text><rect x="470" y="146" width="500" height="66" rx="6" fill="#fff" stroke="#cfd6dd" stroke-width="1.5"/><circle cx="500" cy="179" r="14" fill="#171513"/><text x="500" y="184" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">1</text><text x="526" y="173" font-size="15.5" font-weight="700" fill="#171513">Geographic</text><text x="526" y="194" font-size="13" fill="#5b6670">Basin floor, 364 ft: heat pools here</text><text x="955" y="184" text-anchor="end" font-size="13" font-weight="700" fill="#c8371e">100% read</text><rect x="470" y="222" width="500" height="66" rx="6" fill="#fff" stroke="#cfd6dd" stroke-width="1.5"/><circle cx="500" cy="255" r="14" fill="#5b5650"/><text x="500" y="260" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">2</text><text x="526" y="249" font-size="15.5" font-weight="700" fill="#171513">Environmental</text><text x="526" y="270" font-size="13" fill="#5b6670">Clear sky, 0 mm rain, light wind</text><text x="955" y="260" text-anchor="end" font-size="13" font-weight="700" fill="#c8371e">100% read</text><rect x="470" y="298" width="500" height="66" rx="6" fill="#f6f4f1" stroke="#c8371e" stroke-width="2.5"/><circle cx="500" cy="331" r="14" fill="#c8371e"/><text x="500" y="336" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">3</text><text x="526" y="325" font-size="15.5" font-weight="700" fill="#171513">Urban factors</text><text x="526" y="346" font-size="13" fill="#5b6670">Dense paving, little tree cover</text><text x="955" y="336" text-anchor="end" font-size="13" font-weight="700" fill="#c8371e">60% read</text><rect x="470" y="374" width="500" height="66" rx="6" fill="#fff" stroke="#cfd6dd" stroke-width="1.5"/><circle cx="500" cy="407" r="14" fill="#e08a76"/><text x="500" y="412" text-anchor="middle" font-size="13" font-weight="800" fill="#171513">4</text><text x="526" y="401" font-size="15.5" font-weight="700" fill="#171513">Events</text><text x="526" y="422" font-size="13" fill="#5b6670">No heat advisory that day</text><text x="955" y="412" text-anchor="end" font-size="13" font-weight="700" fill="#c8371e">25% read</text><rect x="470" y="450" width="500" height="66" rx="6" fill="#fff" stroke="#cfd6dd" stroke-width="1.5"/><circle cx="500" cy="483" r="14" fill="#f0c6bb"/><text x="500" y="488" text-anchor="middle" font-size="13" font-weight="800" fill="#171513">5</text><text x="526" y="477" font-size="15.5" font-weight="700" fill="#171513">Anthropogenic</text><text x="526" y="498" font-size="13" fill="#5b6670">Not read yet</text><text x="955" y="488" text-anchor="end" font-size="13" font-weight="700" fill="#c8371e">0% read</text></svg>
+<p class="small" style="margin-top:8px">Concept sketch drawn by me, not a FortyGuard screen. Section text is from the Marina del Rey report I generated.</p></div>
+<div class="panel" id="ringlayers"><h3 style="margin-top:0">How the five rings connect, from the ground up</h3>
+<p class="small">The rings are layers. Geographic is the ground, the weather sits over it, buildings change it, events decide when it matters, and people add heat on top. Each ring is fed by FortyGuard data and should show up in the analytics customers already use.</p>
+<svg viewBox="0 0 1000 700" role="img" aria-label="How the five report rings connect, from the ground up, to FortyGuard data and analytics" style="font-family:Schibsted Grotesk,system-ui,sans-serif;display:block;width:100%"><defs><marker id="arc8371e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c8371e"/></marker></defs><rect x="225" y="0" width="775" height="74" rx="8" fill="#f6f4f1"/><text x="245" y="26" font-size="13.5" font-weight="600" fill="#171513" text-anchor="start">All five layers go into one model, which gives</text><text x="245" y="50" font-size="17" font-weight="800" fill="#171513" text-anchor="start">2 m air temperature for each 100 m tile, every hour</text><circle cx="935" cy="37" r="27" fill="#fff" stroke="#c8371e" stroke-width="4"/><text x="935" y="43" font-size="15" font-weight="800" fill="#171513" text-anchor="middle">16.1°</text><text x="855" y="68" font-size="11.5" font-weight="400" fill="#5b6670" text-anchor="middle">centre of the rings</text><text x="0" y="104" font-size="11.5" font-weight="700" fill="#c8371e" text-anchor="start">DATA THAT FEEDS IT</text><line x1="0" y1="112" x2="200" y2="112" stroke="#cfd6dd"/><text x="225" y="104" font-size="11.5" font-weight="700" fill="#c8371e" text-anchor="start">REPORT RING (TAB)</text><line x1="225" y1="112" x2="475" y2="112" stroke="#cfd6dd"/><text x="500" y="104" font-size="11.5" font-weight="700" fill="#c8371e" text-anchor="start">WHERE IT SHOWS IN THE ANALYTICS</text><line x1="500" y1="112" x2="740" y2="112" stroke="#cfd6dd"/><text x="765" y="104" font-size="11.5" font-weight="700" fill="#c8371e" text-anchor="start">WEAK LINK I FOUND</text><line x1="765" y1="112" x2="1000" y2="112" stroke="#cfd6dd"/><line x1="350" y1="124" x2="350" y2="80" stroke="#c8371e" stroke-width="2.5" marker-end="url(#arc8371e)"/><rect x="0" y="132" width="200" height="82" rx="6" fill="#fff" stroke="#cfd6dd"/><text x="12" y="156" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Traffic, AC, industry</text><text x="12" y="173" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Source not stated</text><line x1="200" y1="173.0" x2="222" y2="173.0" stroke="#c8371e" stroke-width="2" marker-end="url(#arc8371e)"/><rect x="225" y="128" width="250" height="90" rx="8" fill="#f0c6bb"/><circle cx="257" cy="173.0" r="18" fill="none" stroke="#171513" stroke-width="5" opacity=".9"/><text x="257" y="178.0" font-size="13" font-weight="800" fill="#171513" text-anchor="middle">5</text><text x="287" y="156" font-size="17" font-weight="800" fill="#171513" text-anchor="start">Anthropogenic</text><text x="287" y="176" font-size="12.5" font-weight="500" fill="#171513" text-anchor="start">Heat people add</text><text x="287" y="196" font-size="11.5" font-weight="400" fill="#171513" text-anchor="start">For: utilities, grid teams</text><line x1="475" y1="173.0" x2="497" y2="173.0" stroke="#c8371e" stroke-width="2" marker-end="url(#arc8371e)"/><rect x="500" y="132" width="240" height="82" rx="6" fill="#f6f4f1"/><text x="512" y="156" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">No call or dashboard view</text><text x="512" y="173" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">for this layer</text><line x1="740" y1="173.0" x2="762" y2="173.0" stroke="#c8371e" stroke-width="2" stroke-dasharray="4 3"/><rect x="765" y="132" width="235" height="82" rx="6" fill="#fff" stroke="#c8371e" stroke-width="1.5"/><circle cx="781" cy="152" r="5" fill="#c8371e"/><text x="793" y="156" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">No visible input or analytics;</text><text x="793" y="173" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">the tab is cut off in the</text><text x="793" y="190" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">report (Finding 8)</text><line x1="350" y1="234" x2="350" y2="220" stroke="#c8371e" stroke-width="2.5" marker-end="url(#arc8371e)"/><rect x="0" y="240" width="200" height="82" rx="6" fill="#fff" stroke="#cfd6dd"/><text x="12" y="264" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Heat advisories</text><text x="12" y="281" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">The hour chosen</text><text x="12" y="298" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Forecast run</text><line x1="200" y1="281.0" x2="222" y2="281.0" stroke="#c8371e" stroke-width="2" marker-end="url(#arc8371e)"/><rect x="225" y="236" width="250" height="90" rx="8" fill="#e08a76"/><circle cx="257" cy="281.0" r="18" fill="none" stroke="#171513" stroke-width="5" opacity=".9"/><text x="257" y="286.0" font-size="13" font-weight="800" fill="#171513" text-anchor="middle">4</text><text x="287" y="264" font-size="17" font-weight="800" fill="#171513" text-anchor="start">Events</text><text x="287" y="284" font-size="12.5" font-weight="500" fill="#171513" text-anchor="start">When the heat matters</text><text x="287" y="304" font-size="11.5" font-weight="400" fill="#171513" text-anchor="start">For: heat-wave operations</text><line x1="475" y1="281.0" x2="497" y2="281.0" stroke="#c8371e" stroke-width="2" marker-end="url(#arc8371e)"/><rect x="500" y="240" width="240" height="82" rx="6" fill="#f6f4f1"/><text x="512" y="264" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">Hour or hour-range picker</text><text x="512" y="281" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">Forecast (+13 h worked)</text><text x="512" y="298" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">Alerts (listed, never shown)</text><line x1="740" y1="281.0" x2="762" y2="281.0" stroke="#c8371e" stroke-width="2" stroke-dasharray="4 3"/><rect x="765" y="240" width="235" height="82" rx="6" fill="#fff" stroke="#c8371e" stroke-width="1.5"/><circle cx="781" cy="260" r="5" fill="#c8371e"/><text x="793" y="264" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Docs promise up to 2 weeks;</text><text x="793" y="281" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">+7 days was refused</text><line x1="350" y1="342" x2="350" y2="328" stroke="#c8371e" stroke-width="2.5" marker-end="url(#arc8371e)"/><rect x="0" y="348" width="200" height="82" rx="6" fill="#fff" stroke="#cfd6dd"/><text x="12" y="372" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Building heights</text><text x="12" y="389" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Land cover (10–30 m satellite)</text><text x="12" y="406" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Street View photos</text><line x1="200" y1="389.0" x2="222" y2="389.0" stroke="#c8371e" stroke-width="2" marker-end="url(#arc8371e)"/><rect x="225" y="344" width="250" height="90" rx="8" fill="#c8371e"/><circle cx="257" cy="389.0" r="18" fill="none" stroke="#fff" stroke-width="5" opacity=".9"/><text x="257" y="394.0" font-size="13" font-weight="800" fill="#fff" text-anchor="middle">3</text><text x="287" y="372" font-size="17" font-weight="800" fill="#fff" text-anchor="start">Urban factors</text><text x="287" y="392" font-size="12.5" font-weight="500" fill="#fff" text-anchor="start">What people built on it</text><text x="287" y="412" font-size="11.5" font-weight="400" fill="#fff" text-anchor="start">For: city planners</text><line x1="475" y1="389.0" x2="497" y2="389.0" stroke="#c8371e" stroke-width="2" marker-end="url(#arc8371e)"/><rect x="500" y="348" width="240" height="82" rx="6" fill="#f6f4f1"/><text x="512" y="372" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">Land cover call</text><text x="512" y="389" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">Street View segmentation</text><text x="512" y="406" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">Dashboard segmentation</text><line x1="740" y1="389.0" x2="762" y2="389.0" stroke="#c8371e" stroke-width="2" stroke-dasharray="4 3"/><rect x="765" y="348" width="235" height="82" rx="6" fill="#fff" stroke="#c8371e" stroke-width="1.5"/><circle cx="781" cy="368" r="5" fill="#c8371e"/><text x="793" y="372" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Land cover is the costliest</text><text x="793" y="389" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">call I made: 14,400 credits</text><line x1="350" y1="450" x2="350" y2="436" stroke="#c8371e" stroke-width="2.5" marker-end="url(#arc8371e)"/><rect x="0" y="456" width="200" height="82" rx="6" fill="#fff" stroke="#cfd6dd"/><text x="12" y="480" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Reanalysis (~25 km)</text><text x="12" y="497" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Weather stations, own sensors</text><text x="12" y="514" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Satellite imagery</text><line x1="200" y1="497.0" x2="222" y2="497.0" stroke="#c8371e" stroke-width="2" marker-end="url(#arc8371e)"/><rect x="225" y="452" width="250" height="90" rx="8" fill="#5b5650"/><circle cx="257" cy="497.0" r="18" fill="none" stroke="#fff" stroke-width="5" opacity=".9"/><text x="257" y="502.0" font-size="13" font-weight="800" fill="#fff" text-anchor="middle">2</text><text x="287" y="480" font-size="17" font-weight="800" fill="#fff" text-anchor="start">Environmental</text><text x="287" y="500" font-size="12.5" font-weight="500" fill="#fff" text-anchor="start">Weather over that ground</text><text x="287" y="520" font-size="11.5" font-weight="400" fill="#fff" text-anchor="start">For: outdoor crews, safety</text><line x1="475" y1="497.0" x2="497" y2="497.0" stroke="#c8371e" stroke-width="2" marker-end="url(#arc8371e)"/><rect x="500" y="456" width="240" height="82" rx="6" fill="#f6f4f1"/><text x="512" y="480" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">Environmental data call</text><text x="512" y="497" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">Heat map and statistics</text><text x="512" y="514" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">Forecast</text><line x1="740" y1="497.0" x2="762" y2="497.0" stroke="#c8371e" stroke-width="2" stroke-dasharray="4 3"/><rect x="765" y="456" width="235" height="82" rx="6" fill="#fff" stroke="#c8371e" stroke-width="1.5"/><circle cx="781" cy="476" r="5" fill="#c8371e"/><text x="793" y="480" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">LA in January at 101.9 °F</text><text x="793" y="497" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">(Finding 2); 0.3 °C shown as</text><text x="793" y="514" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">a full heat map (Finding 1)</text><line x1="350" y1="558" x2="350" y2="544" stroke="#c8371e" stroke-width="2.5" marker-end="url(#arc8371e)"/><rect x="0" y="564" width="200" height="82" rx="6" fill="#fff" stroke="#cfd6dd"/><text x="12" y="588" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Terrain and elevation</text><text x="12" y="605" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Coastline, water</text><text x="12" y="622" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Building footprints (~1 m)</text><line x1="200" y1="605.0" x2="222" y2="605.0" stroke="#c8371e" stroke-width="2" marker-end="url(#arc8371e)"/><rect x="225" y="560" width="250" height="90" rx="8" fill="#171513"/><circle cx="257" cy="605.0" r="18" fill="none" stroke="#fff" stroke-width="5" opacity=".9"/><text x="257" y="610.0" font-size="13" font-weight="800" fill="#fff" text-anchor="middle">1</text><text x="287" y="588" font-size="17" font-weight="800" fill="#fff" text-anchor="start">Geographic</text><text x="287" y="608" font-size="12.5" font-weight="500" fill="#fff" text-anchor="start">The ground it all sits on</text><text x="287" y="628" font-size="11.5" font-weight="400" fill="#fff" text-anchor="start">For: site selection</text><line x1="475" y1="605.0" x2="497" y2="605.0" stroke="#c8371e" stroke-width="2" marker-end="url(#arc8371e)"/><rect x="500" y="564" width="240" height="82" rx="6" fill="#f6f4f1"/><text x="512" y="588" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">Area picker: polygon, city, draw</text><text x="512" y="605" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">100 m tile grid</text><text x="512" y="622" font-size="12.5" font-weight="400" fill="#171513" text-anchor="start">One chosen state</text><line x1="740" y1="605.0" x2="762" y2="605.0" stroke="#c8371e" stroke-width="2" stroke-dasharray="4 3"/><rect x="765" y="564" width="235" height="82" rx="6" fill="#fff" stroke="#c8371e" stroke-width="1.5"/><circle cx="781" cy="584" r="5" fill="#c8371e"/><text x="793" y="588" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">20 m tiles fail, 100 m served;</text><text x="793" y="605" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">Phoenix offered, then blocked</text><text x="793" y="622" font-size="12.5" font-weight="400" fill="#3b4650" text-anchor="start">(Finding 5)</text><text x="350" y="668" font-size="12" font-weight="600" fill="#5b6670" text-anchor="middle">Base layer: every other ring is read on top of the ground</text></svg>
+<p class="small" style="margin-top:8px">The first three layers are well fed and visible in the analytics. Events is half there. Anthropogenic has no stated source and no analytics view, and it is the tab the report cuts off. Data sources come from FortyGuard's materials, weak links from my tests, and the ring-to-user mapping is my own reading.</p></div>
+<div class="xp"><div class="cols3">
+<div class="box"><b>One ring per tab</b><br>Geographic, Environmental, Urban factors, Events and Anthropogenic. Tap a ring or row to open that tab.</div>
+<div class="box"><b>Rings fill as you read</b><br>Like closing a fitness ring. Whoever forwards the report can see whether all five parts have been read.</div>
+<div class="box"><b>Each row leads with its finding</b><br>One line per tab, so the 16,000-word report finally gets a summary (Fig.&nbsp;8).</div>
+</div></div>
+<div class="panel"><h3 style="margin-top:0">The same rings fix the frozen progress bar</h3><p class="small">During generation each section fills on its own, in place of one bar stuck at 30% (Fig.&nbsp;4).</p><svg viewBox="0 0 1000 150" role="img" aria-label="Generation progress per section" style="font-family:Schibsted Grotesk,system-ui,sans-serif"><circle cx="100" cy="60" r="40" fill="none" stroke="#e7ecf0" stroke-width="12"/><circle cx="100" cy="60" r="40" fill="none" stroke="#171513" stroke-width="12" stroke-linecap="round" stroke-dasharray="251.3 251.3" transform="rotate(-90 100 60)"/><text x="100" y="66" text-anchor="middle" font-size="16" font-weight="800" fill="#171513">✓</text><text x="100" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#171513">Geographic</text><text x="100" y="141" text-anchor="middle" font-size="13" fill="#5b6670">Done</text><circle cx="300" cy="60" r="40" fill="none" stroke="#e7ecf0" stroke-width="12"/><circle cx="300" cy="60" r="40" fill="none" stroke="#5b5650" stroke-width="12" stroke-linecap="round" stroke-dasharray="251.3 251.3" transform="rotate(-90 300 60)"/><text x="300" y="66" text-anchor="middle" font-size="16" font-weight="800" fill="#171513">✓</text><text x="300" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#171513">Environmental</text><text x="300" y="141" text-anchor="middle" font-size="13" fill="#5b6670">Done</text><circle cx="500" cy="60" r="40" fill="none" stroke="#e7ecf0" stroke-width="12"/><circle cx="500" cy="60" r="40" fill="none" stroke="#c8371e" stroke-width="12" stroke-linecap="round" stroke-dasharray="138.2 251.3" transform="rotate(-90 500 60)"/><text x="500" y="66" text-anchor="middle" font-size="16" font-weight="800" fill="#171513">55%</text><text x="500" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#171513">Urban factors</text><text x="500" y="141" text-anchor="middle" font-size="13" fill="#5b6670">Writing</text><circle cx="700" cy="60" r="40" fill="none" stroke="#e7ecf0" stroke-width="12"/><text x="700" y="66" text-anchor="middle" font-size="16" font-weight="800" fill="#171513">–</text><text x="700" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#171513">Events</text><text x="700" y="141" text-anchor="middle" font-size="13" fill="#5b6670">Queued</text><circle cx="900" cy="60" r="40" fill="none" stroke="#e7ecf0" stroke-width="12"/><text x="900" y="66" text-anchor="middle" font-size="16" font-weight="800" fill="#171513">–</text><text x="900" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#171513">Anthropogenic</text><text x="900" y="141" text-anchor="middle" font-size="13" fill="#5b6670">Queued</text></svg></div>
+</section>
+<section id="verdict">
+<div class="step"><i>8</i><h2>What the evidence supports</h2></div>
+
+<div class="panel"><ul style="margin:0">
+<li>The MCP worked first time. Its numbers were identical to the API's, it checked the cost before paid calls, and it didn't make up answers (M-01 to M-13).</li>
+<li>The model gave one value (16.11 °C) for one tile and hour in the API, the dashboard and the PDF. I checked this for only one tile, so it is a single match, not a rate (Fig.&nbsp;9).</li>
+<li>The API is usable: async jobs, rate-limit headers, exact billing, and no charge for any of the 15 bad requests. Two of those returned a 500 instead of a clear error (E-05).</li>
+<li>The dashboard is where it breaks down. 21 of the 32 High and Critical findings are there, mostly in how numbers are drawn, labelled and reported (Fig.&nbsp;1, Fig.&nbsp;2, Fig.&nbsp;4, Fig.&nbsp;7).</li>
+<li>Limits, plans and keys are written separately in four places, and they drift apart (R1, Fig.&nbsp;6).</li>
+</ul></div>
+<h3>Method and coverage</h3>
+<table><tbody>
+<tr><td>Scope</td><td>Dashboard (16 videos, Lighthouse, usability problem score 24/40), API (docs rubric 16/35, errors, credits), MCP (11 tools)</td></tr>
+<tr><td>Evidence</td><td>159 logged rows: 67 planned steps plus 92 findings; 32 High or Critical, 28 positive</td></tr>
+<tr><td>Spend</td><td>67,480 of 1,000,000 API credits, 8,440 of them on the B-12 cross-check</td></tr>
+<tr><td>Not proven</td><td>Time zone of hourly data; load behaviour at peak (W5); heat-death and ROI claims; Phoenix (blocked by plan)</td></tr>
+<tr><td>Safety</td><td>API key never printed or shared; nothing submitted to FortyGuard</td></tr>
+</tbody></table>
+</section>
+<section id="numbers">
+<div class="step"><i>9</i><h2>By the numbers, end to end</h2></div>
+<p class="flow-note">Sources: the evidence log (159 rows), the credit history and the Lighthouse runs.</p>
+
+<h3>1. What was tested and how it came out</h3>
+<table class="nb"><thead><tr><th>Phase</th><th>Steps</th><th>Pass</th><th>Partial</th><th>Fail</th><th>Skipped / blocked</th><th>Pass rate</th></tr></thead><tbody>
+<tr><td>Setup</td><td>7</td><td>3</td><td>1</td><td>2</td><td>1</td><td><span class="bar" style="width:39px"></span>43%</td></tr>
+<tr><td>MCP</td><td>13</td><td>7</td><td>5</td><td>0</td><td>1</td><td><span class="bar" style="width:49px"></span>54%</td></tr>
+<tr><td>API (incl. 15 bad-input tests)</td><td>32</td><td>15</td><td>9</td><td>8</td><td>0</td><td><span class="bar" style="width:42px"></span>47%</td></tr>
+<tr><td>Dashboard</td><td>14</td><td>2</td><td>8</td><td>3</td><td>1</td><td><span class="bar" style="width:13px"></span>14%</td></tr>
+<tr><td>Wrap-up</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td><span class="bar" style="width:0px"></span>0%</td></tr>
+<tr class="tot"><td>Planned steps</td><td>67</td><td>27</td><td>24</td><td>13</td><td>3</td><td><span class="bar" style="width:36px"></span>40%</td></tr>
+<tr><td>Findings logged along the way (X-01 to X-92)</td><td>92</td><td>16</td><td>29</td><td>47</td><td>0</td><td><span class="bar" style="width:15px"></span>17%</td></tr>
+<tr class="tot"><td>All logged rows</td><td>159</td><td>43</td><td>53</td><td>60</td><td>3</td><td><span class="bar" style="width:24px"></span>27%</td></tr>
+</tbody></table>
+<p class="small">The 47 must-do steps: 21 pass, 13 partial, 10 fail, 2 skipped, 1 blocked (Phoenix, by plan). 64 of 67 planned steps were run (96%); the other 3 are marked skipped or blocked.</p>
+
+<h3>2. How serious, and where</h3>
+<table class="nb"><thead><tr><th>Product</th><th>Rows</th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>Positive</th><th>Not rated</th><th>Share of High + Critical</th></tr></thead><tbody>
+<tr><td>Dashboard</td><td>94</td><td>1</td><td>20</td><td>39</td><td>14</td><td>13</td><td>7</td><td><span class="bar" style="width:59px"></span>21 of 32 (66%)</td></tr>
+<tr><td>API (incl. API + MCP)</td><td>46</td><td>0</td><td>11</td><td>13</td><td>5</td><td>8</td><td>9</td><td><span class="bar" style="width:31px"></span>11 of 32 (34%)</td></tr>
+<tr><td>MCP</td><td>13</td><td>0</td><td>0</td><td>2</td><td>2</td><td>6</td><td>3</td><td><span class="bar" style="width:0px"></span>0 of 32</td></tr>
+<tr><td>Cross-product</td><td>6</td><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td><td>4</td><td>0</td></tr>
+<tr class="tot"><td>Total</td><td>159</td><td>1</td><td>31</td><td>55</td><td>21</td><td>28</td><td>23</td><td>32</td></tr>
+</tbody></table>
+
+<h3>3. Where the 67,480 credits went</h3>
+<table class="nb"><thead><tr><th>Job type</th><th>Calls</th><th>Credits</th><th>Share</th><th>Steps</th></tr></thead><tbody>
+<tr><td>Heatmaps (4,220 each)</td><td>5</td><td>21,100</td><td><span class="bar" style="width:28px"></span>31%</td><td class="id">A-07 A-08 A-10 M-07 M-13</td></tr>
+<tr><td>Land cover (satellite)</td><td>1</td><td>14,400</td><td><span class="bar" style="width:19px"></span>21%</td><td class="id">A-14</td></tr>
+<tr><td>Environmental parameters (2,900 each)</td><td>4</td><td>11,600</td><td><span class="bar" style="width:15px"></span>17%</td><td class="id">A-02 A-15 C-01 M-06</td></tr>
+<tr><td>Forecast (+3 h and +13 h)</td><td>2</td><td>8,440</td><td><span class="bar" style="width:12px"></span>13%</td><td class="id">A-12</td></tr>
+<tr><td>Cross-check, API vs dashboard</td><td>2</td><td>8,440</td><td><span class="bar" style="width:12px"></span>13%</td><td class="id">B-12</td></tr>
+<tr><td>Coolest route</td><td>1</td><td>3,500</td><td><span class="bar" style="width:4px"></span>5%</td><td class="id">M-12</td></tr>
+<tr><td>Bad-input tests and failed jobs</td><td>17</td><td>0</td><td><span class="bar" style="width:0px"></span>0%</td><td class="id">E-01…E-15 A-09 A-11</td></tr>
+<tr class="tot"><td>Total spent</td><td>32</td><td>67,480</td><td>6.7% of 1,000,000</td><td>932,520 left</td></tr>
+</tbody></table>
+<p class="small">By channel: direct API 44,200 (66%), MCP 14,840 (22%), cross-check 8,440 (13%). Dashboard use cost 0 credits because it runs on a separate quota of 30 heatmaps a day. The account's usage breakdown leaves out the 3,500 route charge.</p>
+
+<h3>4. Speed and quality scores</h3>
+<div class="two">
+<table class="nb"><thead><tr><th>Measure</th><th>Result</th><th>Target</th></tr></thead><tbody>
+<tr><td>Lighthouse performance, mobile</td><td><b>34</b>/100</td><td>90+</td></tr>
+<tr><td>Largest content shown, mobile</td><td><b>12.9 s</b></td><td>under 2.5 s</td></tr>
+<tr><td>Lighthouse performance, desktop</td><td><b>61</b>/100</td><td>90+</td></tr>
+<tr><td>Usable on Fast 4G</td><td><b>5.5 s</b> (score 64)</td><td>under 3 s</td></tr>
+<tr><td>Accessibility / best practice / SEO (mobile)</td><td>78 / 75 / 67</td><td>90+</td></tr>
+<tr><td>Text contrast</td><td>3.52:1</td><td>4.5:1</td></tr>
+<tr><td>Unused JavaScript</td><td>925 KiB</td><td>near 0</td></tr>
+<tr><td>Tracking cookies before consent</td><td>8</td><td>0</td></tr>
+</tbody></table>
+<table class="nb"><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody>
+<tr><td>API response, 27 timed calls</td><td>365 ms to 3.2 s (20 of 27 under 1.3 s)</td></tr>
+<tr><td>MCP answer time, 8 prompts</td><td>13.8 s to 50.2 s</td></tr>
+<tr><td>Dashboard analyses</td><td>16 s to over 2 min; Heat Intelligence stuck at 30%</td></tr>
+<tr><td>Bad inputs handled with a clear 4xx</td><td>13 of 15 (2 return 500)</td></tr>
+<tr><td>Bad inputs charged</td><td>0 of 15</td></tr>
+<tr><td>Usability problem score (10 heuristics × 0–4)</td><td>24 / 40, lower is better; 5 rated severe</td></tr>
+<tr><td>Docs rubric</td><td>16 / 35</td></tr>
+<tr><td>Status page, 90-day uptime</td><td>98.28–99.14% per service; MCP 78%, incident open 39 days</td></tr>
+<tr><td>Focus-area scores (9 areas)</td><td>average 2.3 / 5; MCP 4, data trust 1</td></tr>
+<tr><td>Hypotheses (17)</td><td>3 validated, 9 refuted or confirmed risks, 4 partly, 1 not tested</td></tr>
+</tbody></table>
+</div>
+
+<h3>5. Important numbers we still don't have</h3>
+<table class="nb"><thead><tr><th>Missing number</th><th>Why it matters</th><th>How to get it</th></tr></thead><tbody>
+<tr><td><b>Time to first insight</b> on the dashboard, in minutes</td><td>It was the dashboard's own success goal in the plan, and it was never timed end to end</td><td>Time video 1 from sign-in to first readable heatmap, or rerun with 3 to 5 new users</td></tr>
+<tr><td><b>Time to first successful API call</b>, in minutes</td><td>The API goal; only the call itself (1.5 s) was timed, not reading the docs and getting the key</td><td>Time a new developer from the docs page to a 200</td></tr>
+<tr><td><b>MCP accuracy rate</b> as x of y answers</td><td>The MCP goal; it is "identical numbers" today, not a counted rate</td><td>Score each of the 8 MCP prompts against the API value</td></tr>
+<tr><td><b>Model error in °C</b> against weather stations</td><td>The biggest trust question; FortyGuard's validation claim is unsupported</td><td>Compare 10 to 20 tiles with nearby station readings for the same hours</td></tr>
+<tr><td><b>Sample size of the cross-check</b></td><td>B-12 is 1 tile at 2 hours; one match is not a rate</td><td>Repeat for 5 tiles × 3 hours (about 63,000 credits)</td></tr>
+<tr><td><b>Time zone</b> of hourly data</td><td>01:00 matched; 09:00 differed by 1.98 °C. A wrong clock shifts every report</td><td>Ask FortyGuard, or compare a known midday peak</td></tr>
+<tr><td><b>Load behaviour</b> at peak (W5)</td><td>Heat waves are when users arrive all at once</td><td>A short load test within the 300 per minute limit, with FortyGuard's permission</td></tr>
+<tr><td><b>Users tested</b></td><td>Only one tester (me), so these are expert-review findings, not user research</td><td>3 to 5 moderated sessions with the target persona</td></tr>
+<tr><td><b>Cost per insight</b></td><td>Buyers compare price per report, not per call</td><td>Heat Intelligence 8,600 credits; map that to plan prices once a published plan matches the key</td></tr>
+</tbody></table>
+</section>
+
+</main>
+<footer><div class="wrap">FortyGuard evaluation, 21–22 November 2026. Screenshots are frames from my own walkthrough recordings; red boxes and numbers are my annotations. Evidence IDs refer to the evidence log.</div></footer>
+<script>
+{
+const F=[
+["Make the dashboard's numbers defensible","Sanity-check inputs before display and reports, use a minimum colour span, compute statistics from the tiles shown, bind units to Settings.","R2","Fig.&nbsp;1 Fig.&nbsp;2 Fig.&nbsp;7 · X-70 X-89"],
+["Make every surface tell the same truth","One source for dates, cell sizes, forecast window, plans, quotas and tools, published to docs, API errors, MCP and dashboard.","R1","H8 · D-01 X-76 X-78"],
+["Make heatmap results self-describing","Hour, time zone, cell size, coverage and unit on every result; fail 20 m with a reason.","R1 R2","Fig.&nbsp;9 · A-13 A-09"],
+["Show status, cost and results honestly","Real progress, a ready notice, Cancel, cost and balance before paid actions, Open links in Task Progress.","R3","Fig.&nbsp;3 Fig.&nbsp;4 · X-85 X-79"],
+["Treat the key like a password","No key in email; an in-app API page with masked, rotatable keys; HSTS.","R4","Fig.&nbsp;6 · X-14 X-87"],
+["Stop interrupting","One tour framework, on request, with correct copy; keep state when overlays open.","R3","X-60 X-43"],
+["Speed up the first load","Split the bundle, preconnect to the API, load analytics after consent, allow zoom, fix contrast.","R4","H9 · B-09 B-10 B-11"],
+["Fix the error contract","No 500s on bad dates; failed jobs say why; the state gate names the state and a next step.","R1","Fig.&nbsp;5 · E-05 X-88"],
+["Docs a developer can run","curl and JS samples, OpenAPI, an errors page, a dated changelog.","R1","D-01 M-01"],
+["Shorter, sourced reports","A one-page summary, a title block, real citations.","R3","Fig.&nbsp;8 · X-72 X-73"]];
+const RN={1:"no single source of truth",2:"display doesn't check data",3:"job state not surfaced",4:"platform hygiene gaps"};
+const imp=["High","High","High","High","High","Medium","Medium","Medium","Medium","Medium"];
+document.getElementById("fixlist").innerHTML=F.map((f,i)=>`<div class="fix"><b class="fn">F${i+1}</b><div><h4>${f[0]}</h4><p>${f[1]}</p></div><div class="links">Fixes <b>${f[2].split(" ").map(r=>RN[r[1]]).join(" and ")}</b><br>Impact: ${imp[i]}</div></div>`).join("");
+}
+</script>
+</body>
+</html>

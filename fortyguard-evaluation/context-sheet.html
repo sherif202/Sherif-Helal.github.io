@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FortyGuard context sheet</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#fff,#111318);--ink:light-dark(#15171c,#eef0f4);--mut:light-dark(#596070,#a3aab8);--line:light-dark(#e3e6ec,#2a2e38);--panel:light-dark(#f6f7f9,#191c23);--hot:#e8451e;--warm:#f28c28;--mid:#ffc93c;--cool:#2a6fdb;--ok:#2f9e6b;--nod:light-dark(#dfe3e8,#2c313b)}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{line-height:1.12;letter-spacing:-.015em;margin:0;text-wrap:balance}
+h1{font-size:clamp(28px,4.2vw,44px);font-weight:800;max-width:24ch}
+h2{font-size:clamp(21px,2.6vw,28px);font-weight:800;margin-bottom:10px}
+h3{font-size:16.5px;font-weight:700;margin:14px 0 6px}
+p{margin:.4em 0;max-width:76ch}
+.band{padding:clamp(24px,3.5vw,48px) max(5vw,16px);border-top:1px solid var(--line)}
+.wrap{max-width:1180px;margin:0 auto}
+.heat{height:8px;background:linear-gradient(90deg,var(--cool),var(--mid),var(--warm),var(--hot))}
+.lede{font-size:17px;color:var(--mut);max-width:70ch;margin-top:12px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:0 7px;border-radius:99px;white-space:nowrap;vertical-align:1px}
+.f{background:color-mix(in srgb,var(--cool) 18%,transparent);color:light-dark(#1b4fa8,#9cc0ff)}
+.n{background:color-mix(in srgb,#2f9e6b 22%,transparent);color:light-dark(#17603f,#8fe0b8)}
+.chg{background:color-mix(in srgb,var(--hot) 20%,transparent);color:light-dark(#a3260b,#ffab96)}
+.pc{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+.pc header{padding:12px 14px 8px;border-top:5px solid var(--hot)}
+.pc header .who{font-size:13px;color:var(--mut)}
+.pc dl{margin:0;padding:4px 14px 12px;display:grid;grid-template-columns:5.8em minmax(0,1fr);gap:5px 8px;font-size:14px;line-height:1.42}
+.pc dt{font-size:12.5px;color:var(--mut);font-weight:600;padding-top:1px}.pc dd{margin:0}
+.cnt{font-variant-numeric:tabular-nums;font-weight:800;white-space:nowrap}
+.i{background:color-mix(in srgb,var(--warm) 24%,transparent);color:light-dark(#9a4a00,#ffc184)}
+.s{font-size:12px;color:var(--mut);font-weight:600;white-space:nowrap}
+.key{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:var(--mut);margin-top:14px}
+.nav{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px;margin-top:14px}.nav a{color:var(--mut)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:12px;margin-top:18px}
+.facts div{border-top:3px solid var(--hot);padding-top:6px}
+.facts b{display:block;font-size:clamp(20px,2.2vw,25px);font-weight:800}
+.facts span{font-size:13.5px;color:var(--mut)}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(18px,3vw,40px);align-items:start}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+ul.t{margin:6px 0;padding-left:19px}ul.t li{margin:4px 0}
+table{border-collapse:collapse;width:100%}
+.tb th,.tb td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14.5px}
+.tb th{font-size:13px;color:var(--mut);font-weight:600}
+.scroll{overflow-x:auto}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch;margin:6px 0 4px;counter-reset:st}
+.flow span{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:14px;counter-increment:st}
+.flow span::before{content:counter(st) ". ";font-weight:700;color:var(--hot)}
+.tl{position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:14px}
+.tl::before{content:"";position:absolute;left:0;right:0;top:9px;height:3px;background:linear-gradient(90deg,var(--cool),var(--mid),var(--warm),var(--hot))}
+.tl div{position:relative;padding-top:24px;font-size:14px}
+.tl div::before{content:"";position:absolute;top:2px;left:0;width:17px;height:17px;border-radius:50%;background:var(--bg);border:3px solid var(--hot)}
+.tl b{display:block;font-size:14.5px}
+.tl em{display:block;font-style:normal;color:var(--mut);font-size:12.5px;font-weight:600}
+.st{display:grid;grid-template-columns:13.5em 4.6em minmax(0,1fr);gap:4px 12px;align-items:center;font-size:14px}
+.st .u{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.st .grp{grid-column:1/-1;font-size:12.5px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:10px}
+.bars{display:grid;grid-template-columns:repeat(90,minmax(0,1fr));gap:1px;height:22px}
+.bars i{display:block;border-radius:1px}
+.bo{background:var(--ok)}.bd{background:var(--hot)}.bg{background:var(--mid)}.bn{background:var(--nod)}
+.axis{display:grid;grid-template-columns:13.5em 4.6em minmax(0,1fr);gap:12px;font-size:12px;color:var(--mut)}
+.axis div:last-child{position:relative;height:1.4em}.axis div:last-child span{position:absolute;white-space:nowrap}
+.sw{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+.callout{border-left:5px solid var(--hot);padding:4px 0 4px 14px;font-size:16.5px;max-width:78ch;margin:12px 0}
+.fa{display:inline-block;font-size:12px;font-weight:600;padding:1px 7px;border-radius:5px;background:var(--panel);border:1px solid var(--line);margin:1px 2px 1px 0;white-space:nowrap}
+.mini{font-size:13.5px;color:var(--mut)}
+@media(max-width:760px){.g2{grid-template-columns:minmax(0,1fr)}.tl{grid-template-columns:minmax(0,1fr)}.tl::before{display:none}.st,.axis{grid-template-columns:9.5em 4em minmax(0,1fr)}
+.stack thead{display:none}.stack tr{display:grid;padding-block:8px;border-bottom:1px solid var(--line)}.stack td{display:block;border:0;padding:2px 0}.stack td[data-l]::before{content:attr(data-l) ": ";font-weight:600;color:var(--mut)}}
+</style>
+</head>
+<body>
+<div class="heat"></div>
+
+<header class="band" style="border-top:0">
+<div class="wrap">
+<p class="s">Context for the FortyGuard evaluation · read 20 Nov 2026 · updated with 4 more videos, then 18 hackathon team demos</p>
+<h1>What FortyGuard promises, what it has shown, and where to push when testing</h1>
+<p class="lede">Built from 29 transcripts: 11 FortyGuard videos and 18 hackathon team demos (33 uploads, 4 were exact duplicates), and the public status page as an ordinary visitor sees it. This is background for the evaluation, not the evaluation itself.</p>
+<div class="key"><span><span class="tag f">Fact</span> said in a video or shown on the status page</span><span><span class="tag i">Inference</span> my reading, to be checked</span><span><span class="tag n">New</span> added from V8–V29</span><span><span class="tag chg">Changed</span> an earlier conclusion revised</span><span class="s">V1–V29, S = sources (list at the bottom)</span></div>
+<div class="facts">
+<div><b>2 m</b><span>air temperature height, "what a person feels" (V1, V3, V4)</span></div>
+<div><b>60–100 m</b><span>dashboard tile sizes at launch (V1)</span></div>
+<div><b>~98.2%</b><span>90-day uptime on every API component (S)</span></div>
+<div><b>MCP down</b><span>open incident since 14 Oct, 37 days (S)</span></div>
+<div><b>12 h</b><span>API forecast horizon, history from 2021 (V8) <span class="tag n">New</span></span></div>
+<div><b>14 of 18</b><span>team demos added an AI layer; none named the MCP (V12–V29) <span class="tag chg">Changed</span></span></div>
+</div>
+<nav class="nav"><a href="#delta">What the new videos change</a><a href="#teams">Team projects</a><a href="#msg">Messaging</a><a href="#cust">Customers</a><a href="#hack">Hackathon</a><a href="#flows">Happy paths</a><a href="#time">Strategy over time</a><a href="#status">Status page</a><a href="#map">Insight → test map</a><a href="#verify">Claims to verify</a><a href="#users">vs users map</a><a href="#src">Sources</a></nav>
+</div>
+</header>
+
+<section class="band" id="delta" style="background:var(--panel)">
+<div class="wrap">
+<h2>What the 18 team demos change</h2>
+<p class="mini"><span class="tag n">New</span> 10 more demos added (V20–V29). The points below are updated for all 18.</p>
+<ul class="t" style="max-width:none">
+<li><span class="tag chg">Changed</span> <b>We now know what teams built.</b> Earlier this sheet said no team demos were available. The 18 demos are summarised in <a href="#teams">Team projects</a>.</li>
+<li><span class="tag chg">Changed</span> <b>Agents nearly everywhere, MCP nowhere.</b> 14 of 18 teams added an AI layer, and 5 built tool-calling agents. None names the MCP. <span class="tag i">Inference</span> The status page first shows the MCP on 13 Oct, about six weeks after submissions closed, so it probably didn't exist yet. The demand for agents came before the product.</li>
+<li><span class="tag chg">Changed</span> <b>"The engine decides, the AI explains."</b> 8 of 18 teams said this outright, up from 4. They kept risk scores and rankings deterministic and let the LLM only explain them. This tells you what an MCP must return: exact numbers with their source.</li>
+<li><span class="tag chg">Changed</span> <b>Resolution:</b> 2 teams now quote 20 m, which revises "no team quoted 20 m". Others quote 60 m, 100 m, or "50 to 100 m". FortyGuard's own tile options are 60 to 100 m, so 20 m still needs testing.</li>
+<li><span class="tag chg">Changed</span> <b>Cool routes:</b> 6 of 18 teams. That is a third, below FortyGuard's "most" (V8) but well above the earlier 2 of 8.</li>
+<li><span class="tag n">New</span> <b>Teams hedge against FortyGuard:</b> one falls back to OpenMeteo, and one put a caching gateway with fallbacks in front of the API.</li>
+<li><span class="tag n">New</span> <b>The showcased industries did get teams:</b> logistics (6 including delivery), real estate and buildings (3), and energy (2).</li>
+<li><span class="tag chg">Changed</span> <b>A data meaning gap:</b> 4 teams mislabel FortyGuard's 2 m air temperature as "surface", "ground" or "sensor" temperature. One does it inside an automated safety phone call. This is the exact confusion FortyGuard's own data talk warned about (V3).</li>
+</ul>
+<h3 style="margin-top:22px">Earlier update: what the 4 FortyGuard videos changed</h3>
+<div class="g2">
+<div>
+<ul class="t">
+<li><span class="tag chg">Changed</span> <b>Land cover is in the API, partly.</b> The API session (V8) shows a satellite endpoint that returns land-cover percentages (built-up, roads, greenery) for an area. Earlier I listed "no land cover in the API" as a hackathon pain point from the V3 Q&amp;A. More precisely, the API returns land-cover shares as context, not a land-use raster you can join to other data.</li>
+<li><span class="tag chg">Changed</span> <b>The resolution case against "20 m" is stronger.</b> FortyGuard's own API engineer gives 60, 80 or 100 m tiles. He also calls the output "parcel level" and "street level" (V8).</li>
+<li><span class="tag chg">Changed</span> <b>The forecast horizon and history differ from the users map.</b> The API forecasts up to 12 hours, updated hourly, with history back to 2021 (V8). The users map says 2 weeks and 2019.</li>
+<li><span class="tag chg">Changed</span> <b>The industry segments now come from FortyGuard itself.</b> FortyGuard built six demo apps on its own API for real estate, cold-chain logistics, grid peak, data centres, insurance and ESG / air quality (V8). These are now FortyGuard's stated target segments, not my guesses. No paying customers are named yet.</li>
+</ul>
+</div>
+<div>
+<ul class="t">
+<li><span class="tag n">New</span> <b>Hackathon rules:</b> using FortyGuard's API was compulsory. Judging put commercial value above engineering. Projects had to be deployed live. AI coding tools were allowed if declared. There were themed tracks, and Autodesk Forma was offered as an optional partner platform (V8, V9).</li>
+<li><span class="tag n">New</span> <b>The API exposes more data:</b> wet bulb, humidity, air quality (AQI, CO2) and solar radiation, plus comfort analysis (V8). This gives more to test for API design and error handling.</li>
+<li><span class="tag n">New</span> <b>Origin and partners:</b> a Masdar City pilot with the Abu Dhabi government shaped the business model before the US expansion. A former Palo Alto CIO is FortyGuard's technical advisor (V11).</li>
+<li><span class="tag n">New</span> <b>An early hint of the AI direction:</b> in 2024 the advisor described a future where you "ask about heat in natural language" from FortyGuard (V11). The MCP is the product version of that idea, and it is still the part that doesn't work.</li>
+<li>Unchanged: none of the 11 FortyGuard videos mentions the MCP.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+
+<section class="band" id="msg">
+<div class="wrap g2">
+<div>
+<h2>What FortyGuard says it does</h2>
+<p><span class="tag f">Fact</span> A "temperature operating system" (a foundation model family called LTM, Large Temperature Models) predicts air temperature 2 m above ground, hourly, at street-block scale. The Temperature API is the bridge between the models and products. The Dashboard is the front end on top of the API. (V1, V3)</p>
+<p><span class="tag f">Fact</span> Inputs: proprietary ground-truth sensor data, satellite imagery, reanalysis (ERA5-type), weather stations, IoT, geographic and urban form, atmospheric and environmental layers. (V1, V3)</p>
+<p><span class="tag n">New</span> <span class="tag f">Fact</span> The API covers four data domains: temperature, comfort (wet bulb), air quality and land cover. Weather APIs are pitched as "zip code level" and FortyGuard as "parcel level", queryable at a single point. (V8)</p>
+<p><span class="tag f">Fact</span> Positioning against alternatives: weather stations are sparse, satellite LST is surface not air, reanalysis is coarse (25 km "one value per city"). FortyGuard claims to fill the street-level, hourly, 2 m gap. (V3)</p>
+</div>
+<div>
+<h3 style="margin-top:0">Repeated lines</h3>
+<ul class="t">
+<li>"Democratize the use of temperature", "for engineers and non-engineers" (V1, V2)</li>
+<li>"The truth of temperature", "temperature at the human level, not the atmosphere" (V1, V2, V4)</li>
+<li>Collecting urban heat data is "a broken industry", slow and expensive (V1)</li>
+<li>"From the fingertip of their desktop", replacing site visits (V1)</li>
+<li>Shipping cadence: parameters added "bi-weekly", intelligence sources "weekly", "something new almost every week" (V1, V2)</li>
+<li>Feedback-driven: release 2 framed as fixing what users asked for (V2)</li>
+<li>Transparency: accuracy table shows which datasets fed each heatmap (V1)</li>
+<li><span class="tag n">New</span> "Think commercially": heat data only has value once a decision maker can act on it (V8)</li>
+<li><span class="tag n">New</span> Heat is framed as a health and productivity problem: 235,000 US heat-related ER visits a year, lost worker productivity "doubling by 2030" (CEO, V11)</li>
+</ul>
+<h3>Numbers they quote</h3>
+<ul class="t">
+<li>Tile sizes 60, 80, 100 m (V1); Heat Intelligence tiles "60 by 60 or 100 by 100" (V2); "20 m grid" in the data talk (V3)</li>
+<li>Dashboard "almost five times better" performance in release 2 (V2)</li>
+<li>Real-time mapping "even to the previous hour" (V2)</li>
+<li>Heat Intelligence covers 5 areas: geographic, events, environmental, urban, anthropogenic (V2)</li>
+<li>Demo: DC, 1 Jan 2024, 3 pm, 60 m tiles, 17.45 to 21.28 °C spread in one hour (V1)</li>
+<li><span class="tag n">New</span> Forecast up to 12 h, refreshed hourly; history from 2021 (V8)</li>
+<li><span class="tag n">New</span> CoolScope demo: 40.7 °C tile, 72.7% built-up, almost no greenery (V8)</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="band" id="cust">
+<div class="wrap g2">
+<div>
+<h2>Customers and use cases they name</h2>
+<p><span class="tag f">Fact</span> No paying customer is named in any of the 7 videos. They name roles instead:</p>
+<ul class="t">
+<li>Chief heat officers, resilience directors, city managers, municipal engineers (V1)</li>
+<li>Urban planners, engineering consultants, landscape architects, public health officials (V1)</li>
+<li>Individuals choosing where to live or which house to buy, for children or vulnerable family (V1, the CEO's own origin story)</li>
+<li>Businesses placing a site at the centre of a circle polygon (V2)</li>
+<li>Engineers, sustainability people: "persona-specific intelligence" promised (V2)</li>
+</ul>
+<p><span class="tag n">New</span> <span class="tag f">Fact</span> FortyGuard's first deployment was a <b>Masdar City</b> pilot backed by the Abu Dhabi government. The CEO says it "helped us build the business model" before expanding commercially in the GCC, Europe and the US (V11).</p>
+<p><span class="tag f">Fact</span> One real user appears: a DC landscape architecture studio built a five-layer cooling-priority model on the Temperature API (V4). Also mentioned: "Google accelerated startup" (V1) and NVIDIA as hackathon mentor and judge (V5).</p>
+</div>
+<div class="panel">
+<h3 style="margin-top:0">Use cases shown as worked examples</h3>
+<p class="mini">From FortyGuard's own data scientists (V3). These are illustrations, not customers.</p>
+<ul class="t">
+<li><b>Heat equity:</b> neighbourhood temperature vs tree canopy and population</li>
+<li><b>Grid sensitivity:</b> kW load rising non-linearly above ~24 °C</li>
+<li><b>Outdoor work safety:</b> hours above limit and longest run per site set safe working hours</li>
+<li><b>Agriculture:</b> peak temperature and exceedance drive sprinkler hours</li>
+<li><b>Public health insurance:</b> exposure for health outcomes</li>
+<li><b>Cooling design (V4):</b> where to plant, shade bus stops, daylight buried streams</li>
+<li><b>Data centres (V7 Q&amp;A):</b> raised by a participant, answered by a mentor</li>
+</ul>
+<h3><span class="tag n">New</span> Six apps FortyGuard built on its own API (V8)</h3>
+<ul class="t">
+<li><b>CoolScope</b>, real estate: why a site is hot, simulate trees and cool roofs, projected cooling, HVAC savings, property uplift</li>
+<li><b>Cool routes</b>, cold chain and last mile: route by wet bulb, delivery windows, cargo-specific thresholds</li>
+<li><b>Grid Peak</b>, utilities: temperature plus eGRID and pricing data to predict demand and transformer load</li>
+<li><b>Thermal Grid</b>, data centres: cooling, PUE, carbon-aware scheduling, neighbourhood heat alerts</li>
+<li><b>Thermal score</b>, insurance: heat risk index from historical data and forecasts</li>
+<li><b>Carbon Lens</b>, ESG: heat and air quality (AQI, CO2) by city</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="band" id="hack">
+<div class="wrap">
+<h2>The hackathon</h2>
+<div class="g2">
+<div>
+<p><span class="tag f">Fact</span> Two weeks, final submission 30 August (2026, per V4), video submission required, support through Slack and a hackathon email, API documentation shared with participants and mentors, winners to be published. US coverage only. (V4, V7)</p>
+<p><span class="tag f">Fact</span> Problem set: reduce urban heat, framed as cooling assets, growth sites, streets or neighbourhoods. Teams were told to combine FortyGuard temperature data with open data (demographics, infrastructure, land cover). (V4, V3)</p>
+<p><span class="tag f">Fact</span> Mentor sessions: FortyGuard data science (V3), a landscape architect's DC case study (V4), NVIDIA on CUDA-X, NIMs and Earth-2 weather models (V5), pitching to judges (V6), product-market fit by an ex-BreezoMeter founder (V7). Judging stressed real problem, real user, clear story.</p>
+<p><span class="tag n">New</span> <span class="tag f">Fact</span> <b>Rules and tracks.</b> Using the FortyGuard API was compulsory and other open data was welcome. Judging favoured "commercial value" over engineering, and projects had to be deployed live (Render, Vercel, GitHub Pages) and keep calling the API so judges could test them. AI coding tools were allowed if declared. Named tracks included resilient cities and infrastructure, future buildings and energy, and real estate. Autodesk offered a 30-day Forma trial for building site-design extensions that pull in FortyGuard data. (V8, V9)</p>
+<p><span class="tag f">Fact</span> Which product teams used: only the <b>Temperature API</b> is mentioned. MCP is never mentioned. <span class="tag chg">Changed</span> What teams built is now covered by 8 demo videos (see <a href="#teams">Team projects</a>). FortyGuard's engineer expected most teams to build cooler-routes apps (V8). 6 of 18 did. <span class="tag n">New</span> One demo names "Track 03, industrial and enterprise" (V18).</p>
+</div>
+<div class="panel">
+<h3 style="margin-top:0">Pain points that surfaced</h3>
+<ul class="t">
+<li><span class="tag chg">Changed</span> <b>Land cover is only partly in the API.</b> The V3 Q&amp;A said the API "doesn't provide that directly" and sent teams to Sentinel or Landsat. V8 shows the satellite endpoint returns land-cover percentages for an area. Two different answers in the same hackathon point to unclear docs.</li>
+<li><b>US-only coverage</b> made it hard for non-US teams to validate ideas. (V7 Q&amp;A)</li>
+<li><b>Coarser than advertised in practice:</b> the DC mentor said his field "resolves near 1 km", so a street corner is below what the data shows, and tripling trees moved air temperature by hundredths of a degree. (V4)</li>
+<li><b>Flat fields:</b> a downtown basin read about 2/3 °C end to end, too flat to act on. (V4)</li>
+<li><b>Empty tiles over water:</b> about 18 km² of the DC study came back empty. (V4)</li>
+<li><b>Threshold saturation:</b> on a clear day 95% of tiles were above 30 °C for 11+ hours; he had to re-pull at 33 °C. (V4)</li>
+<li><b>Data-alignment traps</b> FortyGuard itself warns about: UTC vs local time, whether "14:00" is the start or end of the hour, missing hours, air vs surface temperature, units. (V3)</li>
+<li>Q&amp;A questions were moved to email and Slack. (V4)</li>
+<li><span class="tag n">New</span> <b>Unclear rules mid-event:</b> the submission criteria were "coming in a day or two" while teams were already building, and participants were asked to stop "spamming" questions (V8, V9).</li>
+<li><span class="tag n">New</span> <b>Gaps in the data:</b> FortyGuard advised teams to "rely on interpolation" for missing or inconsistent values (V8).</li>
+<li><span class="tag n">New</span> <b>Quota worries:</b> teams were warned that free hosting tiers "die down" and to keep their endpoints live for judging. <span class="tag i">Inference</span> This puts sustained load on the API right after the event, matching the start of the 4 to 21 Sep down days.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+
+<section class="band" id="teams">
+<div class="wrap">
+<h2><span class="tag n">New</span> Hackathon team projects</h2>
+<p class="mini">From 18 team demo videos (V12–V29; V20–V29 added in the latest batch). Many videos don't name the team, so they appear as "Team not named". Every description is what the team said, not something I verified.</p>
+<div class="g3" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr))"><article class="pc"><header><h3 style="margin:0">Thermal Decision Engine</h3><div class="who">Team not named · V12</div></header><dl>
+<dt>Use case</dt><dd>Compare candidate operating sites and rank them by heat</dd><dt>Persona</dt><dd>Operations or site planners</dd><dt>API use</dt><dd>Live mode: picks a historical date and local time window, converted to an hourly request. 1 km² area. Each site is mapped to the cell that contains it. Shows how many FortyGuard 'activities' a run will use before submitting. A replay mode reuses a captured response to save calls.</dd><dt>Resolution</dt><dd>100 m cells</dd><dt>Agent / LLM</dt><dd>A deterministic engine ranks the sites. The AI only explains the result and "has no authority to change the decision".</dd><dt>Industries</dt><dd>Generic operations and site selection</dd><dt>Note</dt><dd>San Francisco</dd></dl></article><article class="pc"><header><h3 style="margin:0">Cool City AI</h3><div class="who">Team not named · V13</div></header><dl>
+<dt>Use case</dt><dd>Send relief (mobile units, water stations, teams) to the most at-risk census tracts</dd><dt>Persona</dt><dd>City heat or emergency response</dd><dt>API use</dt><dd>120,000+ points averaged into 359 Phoenix census tracts, then joined to poverty and minority data to score risk.</dd><dt>Resolution</dt><dd>Not stated (38.5 to 40.7 °C range)</dd><dt>Agent / LLM</dt><dd>A "Tract AI agent" produces a one-click allocation plan.</dd><dt>Industries</dt><dd>Public sector, emergency management</dd><dt>Note</dt><dd>Phoenix. Calls the data "surface temperatures".</dd></dl></article><article class="pc"><header><h3 style="margin:0">HeatShield AI (facilities)</h3><div class="who">Team not named · V14</div></header><dl>
+<dt>Use case</dt><dd>Heat risk for workers at named industrial sites (Amazon DFW7, Tesla Giga Texas)</dd><dt>Persona</dt><dd>Facility, operations and HSE managers</dd><dt>API use</dt><dd>Current temperature plus the 12-hour forecast per facility, microclimate tiles, heat-island difference, and the peak thermal window.</dd><dt>Resolution</dt><dd>Tiles (size not stated)</dd><dt>Agent / LLM</dt><dd>A deterministic score with vulnerability multipliers and a "risk engine audit". A grounded decision assistant answers questions and writes decision-support reports.</dd><dt>Industries</dt><dd>Industrial, logistics, enterprise</dd><dt>Note</dt><dd>Texas</dd></dl></article><article class="pc"><header><h3 style="margin:0">Heat Shield AI (cities)</h3><div class="who">Akshata Mogal, Abdullah Faisal · V15</div></header><dl>
+<dt>Use case</dt><dd>Avoid heat on the move, and test cooling options</dd><dt>Persona</dt><dd>Residents and commuters; planners for the what-if tool</dd><dt>API use</dt><dd>Street-level heat map with satellite view, a cool-route finder that compares a GPS route with a heat-aware route, and a what-if simulator for canopy, pavement and shade.</dd><dt>Resolution</dt><dd>"Street-level"</dd><dt>Agent / LLM</dt><dd>A context-aware AI copilot that reads the current map or route, for example to compare two routes in a table.</dd><dt>Industries</dt><dd>Mobility, public sector, planning</dd><dt>Note</dt><dd>Phoenix, Miami, Austin, Las Vegas. Has a "surface temperature" layer.</dd></dl></article><article class="pc"><header><h3 style="margin:0">NYC thermal impact engine</h3><div class="who">Team not named · V16</div></header><dl>
+<dt>Use case</dt><dd>Rank NYC neighbourhoods by real heat danger, not just temperature</dd><dt>Persona</dt><dd>City planners</dd><dt>API use</dt><dd>FortyGuard data joined to the NYC Heat Vulnerability Index across 262 neighbourhoods.</dd><dt>Resolution</dt><dd>Not stated</dd><dt>Agent / LLM</dt><dd>XGBoost scores each area, SHAP explains the drivers, and an LLM writes plain-English reasons per block.</dd><dt>Industries</dt><dd>Public sector</dd><dt>Note</dt><dd>New York. Calls the data "live sensor data".</dd></dl></article><article class="pc"><header><h3 style="margin:0">Cool Bus Agent</h3><div class="who">Team not named · V17</div></header><dl>
+<dt>Use case</dt><dd>Choose the coolest bus route rather than the shortest</dd><dt>Persona</dt><dd>Students, delivery riders, commuters</dd><dt>API use</dt><dd>Heatmap plus environmental parameters (humidity, air quality), with Google Maps hand-off. Pitched as an API for delivery and mobility apps. Appears to avoid spending credits on repeated identical queries.</dd><dt>Resolution</dt><dd>Not stated</dd><dt>Agent / LLM</dt><dd>A plain-language agent with 6 tools on Gemini, falling back to NVIDIA Nemotron.</dd><dt>Industries</dt><dd>Mobility, delivery</dd><dt>Note</dt><dd>Phoenix</dd></dl></article><article class="pc"><header><h3 style="margin:0">Thermal Sentinel Grid</h3><div class="who">Track 03, industrial and enterprise · V18</div></header><dl>
+<dt>Use case</dt><dd>Protect substation transformers and field crews in heat waves</dd><dt>Persona</dt><dd>Utility grid operators</dd><dt>API use</dt><dd>Live 2 m temperature per tile, IEEE transformer models, a 72-hour multi-day heat build-up model (FortyGuard forecasts only 12 h), and wet bulb limits for crew shifts. An "evidence contract" separates live API data from simulated data.</dd><dt>Resolution</dt><dd>60 m "parcel tiles"</dd><dt>Agent / LLM</dt><dd>A 5-node LangGraph dispatcher behind a deterministic, non-LLM safety gate. Claims a 5.59x ROI.</dd><dt>Industries</dt><dd>Utilities, AI data centres, solar power producers, hospitals</dd><dt>Note</dt><dd>Live site</dd></dl></article><article class="pc"><header><h3 style="margin:0">Heat Guard AI</h3><div class="who">Team Heat Minds · V19</div></header><dl>
+<dt>Use case</dt><dd>Detect hotspots and send early warnings</dd><dt>Persona</dt><dd>Governments, insurers, event organisers, outdoor employers</dd><dt>API use</dt><dd>Heat map, then hotspot detection, a rule-based risk class (low to extreme), automatic alerts for several locations, and JSON, HTML or PDF reports.</dd><dt>Resolution</dt><dd>50 to 100 m tiles</dd><dt>Agent / LLM</dt><dd>LangGraph with Grok (or Groq) and Gradio. Natural-language Q&amp;A. "AI explains the result. It does not calculate the risk score."</dd><dt>Industries</dt><dd>Public sector, insurance, events, outdoor work</dd><dt>Note</dt><dd>Plans to add forecasting and vulnerability data</dd></dl></article><article class="pc"><header><h3 style="margin:0"><span class="tag n">New</span> Heat Shield (Phoenix cooling centres)</h3><div class="who">Team not named · V20</div></header><dl>
+<dt>Use case</dt><dd>Place mobile cooling units where at-risk residents are</dd><dt>Persona</dt><dd>City emergency and public health</dd><dt>API use</dt><dd>Block-level temperatures joined to census data: 131 high-risk blocks, 1,611 residents, 369 elderly or without AC. A coverage model compares before and after deploying 3 units.</dd><dt>Resolution</dt><dd>"20 m resolution"</dd><dt>Agent / LLM</dt><dd>An AI advisor answers heat-safety questions from live data. Also cool routes and a day-cycle "digital twin".</dd><dt>Industries</dt><dd>Public sector</dd><dt>Note</dt><dd>Phoenix. Open source. Claims "47 deaths prevented a summer".</dd></dl></article><article class="pc"><header><h3 style="margin:0"><span class="tag n">New</span> Shade</h3><div class="who">Team not named · V21</div></header><dl>
+<dt>Use case</dt><dd>Turn worksite heat risk into a dollar figure ("heat P&amp;L")</dd><dt>Persona</dt><dd>Fleet and warehouse safety managers</dd><dt>API use</dt><dd>8 Bay Area warehouses: temperature, heat index and risk class per loading dock. Hazard pay, lost productivity and delays add up to $20,478 a day. Every figure shows its formula, inputs and source.</dd><dt>Resolution</dt><dd>"20 m precision"</dd><dt>Agent / LLM</dt><dd>"Kelvin" assistant answers in under 50 ms. "Deterministic. It never invents numbers." Also a coolest-route planner.</dd><dt>Industries</dt><dd>Logistics, warehousing</dd><dt>Note</dt><dd>Bay Area (Tracy vs SF waterfront)</dd></dl></article><article class="pc"><header><h3 style="margin:0"><span class="tag n">New</span> Thermoshift AI</h3><div class="who">Hamza · V22</div></header><dl>
+<dt>Use case</dt><dd>Stop outdoor work when heat crosses limits</dd><dt>Persona</dt><dd>Construction supervisors and safety managers</dd><dt>API use</dt><dd>Tracks job sites across California, finds the hottest point and the nearest shaded refuge. One click produces OSHA compliance certificates.</dd><dt>Resolution</dt><dd>Not stated</dd><dt>Agent / LLM</dt><dd>Autonomous voice-AI phone call to the supervisor when limits are crossed.</dd><dt>Industries</dt><dd>Construction, outdoor work</dd><dt>Note</dt><dd>Calls the data "real ground-level heat" and "surface asphalt temperature, 136 °F". Live on Vercel and Render.</dd></dl></article><article class="pc"><header><h3 style="margin:0"><span class="tag n">New</span> Phoenix heat + ozone risk</h3><div class="who">Team name unclear in transcript · V23</div></header><dl>
+<dt>Use case</dt><dd>Plan the safest 8-hour shift when heat and ozone compound</dd><dt>Persona</dt><dd>Foremen and outdoor-work planners</dd><dt>API use</dt><dd>24 hours of FortyGuard data joined to 24 EPA ozone monitors. Finds the overnight temperature spread is 4x the midday spread. Ranks shift windows by neighbourhood.</dd><dt>Resolution</dt><dd>100 m</dd><dt>Agent / LLM</dt><dd>None mentioned. "One API, no database, no backend." Every cell carries a confidence value.</dd><dt>Industries</dt><dd>Outdoor work, environmental health</dd><dt>Note</dt><dd>Phoenix. States its own limits openly.</dd></dl></article><article class="pc"><header><h3 style="margin:0"><span class="tag n">New</span> Heat Safe</h3><div class="who">Team not named · V24</div></header><dl>
+<dt>Use case</dt><dd>Route delivery riders by minutes spent in dangerous heat</dd><dt>Persona</dt><dd>Delivery riders and dispatchers</dd><dt>API use</dt><dd>Compares fastest and heat-aware routes: 15 vs 2 minutes in danger for 5 extra minutes of travel. Hours above threshold and heat persistence by district. Adding a city took "one line of configuration".</dd><dt>Resolution</dt><dd>Street level</dd><dt>Agent / LLM</dt><dd>Rules fire alerts, so "the safety layer never depends on an AI model". A tool-picking agent cites its sources.</dd><dt>Industries</dt><dd>Delivery, logistics</dd><dt>Note</dt><dd>Phoenix and San Jose</dd></dl></article><article class="pc"><header><h3 style="margin:0"><span class="tag n">New</span> Thermostat AI</h3><div class="who">Team not named · V25</div></header><dl>
+<dt>Use case</dt><dd>Tune home cooling to the heat outside the home</dd><dt>Persona</dt><dd>Homeowners; possibly utilities</dd><dt>API use</dt><dd>Ambient temperature, urban heat-island intensity and surface heat retention feed a cooling strategy for 3 Phoenix areas. Nest and ecobee hand-off is simulated.</dd><dt>Resolution</dt><dd>Not stated</dd><dt>Agent / LLM</dt><dd>None mentioned</dd><dt>Industries</dt><dd>Residential energy</dd><dt>Note</dt><dd>Claims $208M a year of savings at full adoption</dd></dl></article><article class="pc"><header><h3 style="margin:0"><span class="tag n">New</span> Cool Commute</h3><div class="who">Team not named · V26</div></header><dl>
+<dt>Use case</dt><dd>Coolest walking or cycling route</dd><dt>Persona</dt><dd>Pedestrians and cyclists; city dashboard</dd><dt>API use</dt><dd>Penalises hot cells along routes built with Mapbox. The city view counts how many citizens were rerouted.</dd><dt>Resolution</dt><dd>Not stated</dd><dt>Agent / LLM</dt><dd>None mentioned</dd><dt>Industries</dt><dd>Mobility, public sector</dd><dt>Note</dt><dd>Los Angeles. Falls back to <b>OpenMeteo</b> if FortyGuard is unavailable.</dd></dl></article><article class="pc"><header><h3 style="margin:0"><span class="tag n">New</span> Urban Heat IQ</h3><div class="who">Team not named · V27</div></header><dl>
+<dt>Use case</dt><dd>Thermal due diligence on a plot before building</dd><dt>Persona</dt><dd>Real estate developers and architects</dd><dt>API use</dt><dd>Sends plot geometry and a time window (e.g. 27 Aug, 10:00 to 18:00). Gets mean, max and min and the hottest coordinates on the plot. Compares dates to find hotspots that persist. Adds an early-stage HVAC estimate.</dd><dt>Resolution</dt><dd>Not stated</dd><dt>Agent / LLM</dt><dd>None mentioned</dd><dt>Industries</dt><dd>Real estate, architecture</dd><dt>Note</dt><dd>Palm Springs plot currently for sale</dd></dl></article><article class="pc"><header><h3 style="margin:0"><span class="tag n">New</span> HeatCheck</h3><div class="who">Team not named · V28</div></header><dl>
+<dt>Use case</dt><dd>An autonomous heat-monitoring agent per workspace</dd><dt>Persona</dt><dd>Area managers (city or site)</dd><dt>API use</dt><dd>The agent chooses which FortyGuard "tools" to call (thermal map, environmental parameters), finds anomalies and scores risk out of 100.</dd><dt>Resolution</dt><dd>Not stated</dd><dt>Agent / LLM</dt><dd>The LLM plans and picks tools. A deterministic risk engine does the maths. Actions need user approval. Whether these "tools" are the MCP or the team's own wrappers isn't stated.</dd><dt>Industries</dt><dd>Public sector, general</dd><dt>Note</dt><dd>Agent loop: observe, analyse, decide, act, remember</dd></dl></article><article class="pc"><header><h3 style="margin:0"><span class="tag n">New</span> Finestra</h3><div class="who">Team not named · V29</div></header><dl>
+<dt>Use case</dt><dd>Retrofit ROI with subsidies and contractor matching</dd><dt>Persona</dt><dd>Planners, property owners, contractors</dd><dt>API use</dt><dd>Building coordinates and study dates go through H3 spatial lookups to match an intervention catalogue. Returns cooling, cost and payback in about 15 s.</dd><dt>Resolution</dt><dd>Not stated</dd><dt>Agent / LLM</dt><dd>"Zero LLM hallucinations in ROI." Its design records limit the LLM to diagnostics, never maths. It has a FortyGuard API gateway with caching and fallbacks.</dd><dt>Industries</dt><dd>Real estate, construction, energy</dd><dt>Note</dt><dd>Heaviest engineering: FastAPI, Postgres, OpenTelemetry, Terraform</dd></dl></article></div>
+
+<h3 style="margin-top:26px">What the 18 projects say about real API use</h3>
+<div class="scroll">
+<table class="tb stack">
+<thead><tr><th>Pattern</th><th>Teams (of 18)</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td>Some AI layer: copilot, assistant, explainer, voice or agent</td><td data-l="Teams"><span class="cnt">14</span> <span class="tag chg">Changed</span> was 8 of 8</td><td data-l="Means"><span class="tag f">Fact</span> 4 of the new teams (ozone, Thermostat, Cool Commute, Urban Heat IQ) showed none. <span class="tag i">Inference</span> Natural-language access is still the default expectation.</td></tr>
+<tr><td>Tool-calling agent: LLM picks which data calls to make</td><td data-l="Teams"><span class="cnt">5</span> (Cool Bus, Sentinel, Heat Guard, Heat Safe, HeatCheck)</td><td data-l="Means">Each team wrapped the API in its own tools. HeatCheck talks about "FortyGuard's tools" but doesn't say whether that means the MCP. No team names the MCP.</td></tr>
+<tr><td>Deterministic engine decides, LLM only explains or plans</td><td data-l="Teams"><span class="cnt">8</span> <span class="tag chg">Changed</span> was 4 (+Shade, Heat Safe, HeatCheck, Finestra)</td><td data-l="Means">The strongest pattern in the set: "never invents numbers", "zero LLM hallucinations in ROI", "the safety layer never depends on an AI model". MCP tools must return exact values with provenance an agent can cite.</td></tr>
+<tr><td>Route heat exposure</td><td data-l="Teams"><span class="cnt">6</span> <span class="tag chg">Changed</span> was 2</td><td data-l="Means">This is now a third of teams, closer to what FortyGuard expected. Every team sampled points along routes on its own, so a route-exposure tool is the clearest missing endpoint.</td></tr>
+<tr><td>Map sites to cells and rank or monitor them</td><td data-l="Teams"><span class="cnt">6</span></td><td data-l="Means">Decision Engine, HeatShield, Sentinel, Shade, Thermoshift, Thermostat. A batch point lookup is a core need.</td></tr>
+<tr><td>Aggregate to boundaries or join to census, vulnerability or EPA data</td><td data-l="Teams"><span class="cnt">4</span></td><td data-l="Means">Cool City, NYC, Heat Shield Phoenix and the ozone team did their own zonal statistics and joins.</td></tr>
+<tr><td>Durations: hours above threshold, persistence, time windows</td><td data-l="Teams"><span class="cnt">4</span></td><td data-l="Means">Heat Safe, ozone, Urban Heat IQ and Sentinel. FortyGuard's own exceedance and persistence analytics (V3) aren't exposed as one call.</td></tr>
+<tr><td><span class="tag n">New</span> Fallback provider or caching in front of FortyGuard</td><td data-l="Teams"><span class="cnt">4</span> (Cool Commute uses OpenMeteo; Finestra a gateway with cache and fallbacks; Cool Bus caching; Decision Engine replay)</td><td data-l="Means"><span class="tag i">Inference</span> Builders plan for FortyGuard being unavailable or expensive, which matches the status page. If the fallback is a coarse weather API, the hyper-local promise quietly breaks.</td></tr>
+<tr><td>Watch credits or show cost before running</td><td data-l="Teams"><span class="cnt">2</span>+</td><td data-l="Means">The Decision Engine shows how many "activities" a run will use. Cool Bus avoids paying for identical queries.</td></tr>
+<tr><td>Mislabel the data as surface, ground or sensor temperature, not 2 m air</td><td data-l="Teams"><span class="cnt">4</span> <span class="tag chg">Changed</span> was 3 (+Thermoshift)</td><td data-l="Means">Thermoshift's voice alert announces a "surface asphalt temperature of 136 °F". A mislabel inside a safety call is a real-world risk. Field names and tool descriptions need to be explicit.</td></tr>
+<tr><td>Uncertainty shown per cell</td><td data-l="Teams"><span class="cnt">1</span> (ozone)</td><td data-l="Means">Only one team showed confidence per cell. FortyGuard's own accuracy table (V1) isn't something teams could reach through the API.</td></tr>
+<tr><td>Reports, exports, compliance documents</td><td data-l="Teams"><span class="cnt">6</span></td><td data-l="Means">This includes OSHA certificates (Thermoshift) and ROI reports (Finestra). It matches FortyGuard's promised PDF and Word export.</td></tr>
+</tbody></table></div>
+
+<div class="g3" style="margin-top:18px">
+<div class="panel"><h3 style="margin-top:0">Resolution teams quoted <span class="tag chg">Changed</span></h3>
+<p><b>20 m:</b> 2 (Heat Shield Phoenix, Shade). <b>60 m:</b> 1. <b>100 m:</b> 2. <b>50 to 100 m:</b> 1. The other 12 didn't say.</p>
+<p class="mini">The earlier line "no team quoted 20 m" is no longer true. <span class="tag i">Inference</span> The 20 m figure is FortyGuard's marketing number (website, V3). The tile sizes the Dashboard and the API engineer offer are 60 to 100 m. Teams quoting 20 m may be repeating the pitch rather than measuring it. Test this directly.</p></div>
+<div class="panel"><h3 style="margin-top:0">Who the teams targeted <span class="tag chg">Changed</span></h3>
+<p><b>Public sector, city and emergency:</b> 7. <b>Logistics, delivery and mobility:</b> 6. <b>Real estate and buildings:</b> 3 (Urban Heat IQ, Finestra, Thermostat). <b>Construction and outdoor work:</b> 3. <b>Utilities and energy:</b> 2. <b>Insurance and events:</b> 1. Phoenix was the most common city (7 teams), then California (6).</p>
+<p class="mini">This revises the earlier inference. The showcased industries did get teams: logistics strongly, real estate and energy moderately. Data centres and insurance still drew almost no one.</p></div>
+<div class="panel"><h3 style="margin-top:0">Gaps the MCP could fill <span class="tag i">Inference</span></h3>
+<ul class="t">
+<li>One standard tool set in place of many hand-built wrappers across 5+ LLM stacks.</li>
+<li>Tools teams rebuilt: route exposure (6 teams), batch point lookup (6), summarise by polygon (4), hours above threshold and persistence (4), longer forecasts.</li>
+<li>Provenance and units in every response, saying "air temperature at 2 m, modelled", plus a confidence value.</li>
+<li>Cost preview and cached job results, so teams don't need fallbacks to other providers.</li>
+<li>An MCP that is up. The status page shows it down since 14 Oct.</li>
+</ul></div>
+</div>
+</div>
+</section>
+
+<section class="band" id="flows">
+<div class="wrap">
+<h2>Workflows shown in the demos: the happy paths to test</h2>
+<div class="g2">
+<div>
+<h3>A. Create a heatmap (V1, V2)</h3>
+<div class="flow"><span>Area: upload polygon, drop coordinates, search a city, draw, auto-create, or draw circle</span><span>Time frame: single hour, hour range, or single day</span><span>Tile size: 60, 80 or 100 m</span><span>Submit; job joins a queue, a second can run alongside</span><span>Result saved to Activity History</span></div>
+<h3>B. Read and style the map (V1, V2)</h3>
+<div class="flow"><span>Map controls: colour ramp, number of classes, class mode</span><span>Toggle hot or cold classes</span><span>Basemap to satellite, change opacity</span><span>Save controls; reopen and check they persist</span></div>
+<h3>C. Export (V1)</h3>
+<div class="flow"><span>Download heatmap layer with legend and metadata</span><span>Download your polygon; re-upload it later</span></div>
+</div>
+<div>
+<h3>D. Analyse (V1)</h3>
+<div class="flow"><span>Statistics and distribution charts with plain-language observations</span><span>Street View segmentation (share of green, built)</span><span>Satellite segmentation plus solar irradiance</span><span>Environmental parameters and thermal comfort indices</span><span>Metadata and accuracy table</span></div>
+<h3>E. Heat Intelligence report (V2)</h3>
+<div class="flow"><span>Select one tile</span><span>Pick areas: geographic, events, environmental, urban, anthropogenic</span><span>Queue and wait</span><span>Read the sourced text report</span><span>Export PDF or Word (promised)</span></div>
+<h3><span class="tag n">New</span> G. Build on the API (V8)</h3>
+<div class="flow"><span>Pick an area of interest</span><span>Heatmap endpoint for temperature</span><span>Environmental endpoint: wet bulb, humidity, AQI, solar</span><span>Satellite endpoint: land-cover shares explain why it's hot</span><span>Turn it into a decision (route, schedule, alert, agent)</span></div>
+<h3>F. Support loop (V1)</h3>
+<div class="flow"><span>Chatbot</span><span>Units: metric or imperial</span><span>Patch notes</span><span>Feedback form with subject and screenshot</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="band" id="time">
+<div class="wrap">
+<h2>Strategic signals over time</h2>
+<p class="mini">The product videos have no dates. The order of the two releases comes from V2 ("second time"). The 2024 date comes from V11 ("summer of 2024"), and the rest are dated in the transcripts or on the status page.</p>
+<div class="tl">
+<div><em>2024 <span class="tag n">New</span></em><b>Thought leadership</b>The CEO hosts the LinkedIn Live series "AI meets climate", with a GCC and US network. The advisor imagines asking FortyGuard questions about heat in natural language.</div>
+<div><em>Release 1</em><b>Dashboard beta</b>Waitlist, staged rollout, freemium with a paid tier for "engineers and organizations". US-wide. Segmentation and environmental layers already bolted on.</div>
+<div><em>Release 2</em><b>Speed and "intelligence"</b>5x performance, queueing, previous-hour data, and a text Heat Intelligence report: the move from data to explanations.</div>
+<div><em>Aug 2026</em><b>Hackathon</b>The API in front of outside developers, with NVIDIA and Autodesk Forma as partners. FortyGuard shows six industry apps on its own API. The pitch moves to "commercial value".</div>
+<div><em>From 4 Sep 2026</em><b>Status page</b>Monitoring starts. Dashboard features now appear as separate API products: Heatmap, Satellite, Street View, Heat Intelligence, Environmental.</div>
+<div><em>13 Oct 2026 →</em><b>MCP and alerts</b>MCP Server ("connection for AI agents") and Heat Monitoring &amp; Alerts appear. MCP fails the next day and stays down.</div>
+</div>
+<p class="callout"><span class="tag i">Inference</span> The direction is clear: dashboard first, then API, then an agent channel. The idea of asking about heat in natural language goes back to at least 2024 (V11). AI is moving into the product in two places, generated "why is it hot" reports and an MCP server. But the MCP channel is the least mature part. It has never been shown in public and has about one healthy day on record.</p>
+</div>
+</section>
+
+<section class="band" id="status">
+<div class="wrap">
+<h2>The status page, read as a visitor</h2>
+<p class="mini">status.fortyguard.com, checked 20 Nov 2026 13:35 UTC. The banner read <b>"Status unavailable: Service status could not be determined"</b>. Each bar is one day, oldest on the left. <span class="sw bo"></span>operational <span class="sw bg"></span>degraded <span class="sw bd"></span>down <span class="sw bn"></span>no data</p>
+<div class="st" id="strips" style="margin-top:10px"></div>
+<div class="axis" style="margin-top:4px"><div></div><div></div><div><span style="left:0">23 Aug</span><span style="left:13.3%">4 Sep, monitoring starts</span><span style="left:56.7%">13 Oct, MCP appears</span><span style="right:0">20 Nov</span></div></div>
+
+<div class="g3" style="margin-top:20px">
+<div class="panel"><h3 style="margin-top:0">What it shows <span class="tag f">Fact</span></h3>
+<ul class="t">
+<li>9 components in 2 groups. <b>Temperature API</b>: Heatmap, Satellite Imagery, Street View, Heat Intelligence, Environmental Parameters, MCP Server. <b>Platform</b>: Temperature Dashboard, Heat Monitoring &amp; Alerts, Authentication &amp; Accounts.</li>
+<li>All API components at 98.23 to 98.24%. Dashboard 98.27%, Alerts 99.10%, Auth 98.72%, MCP 78.00%.</li>
+<li>Down days: 7, 17, 18, 21 Sep, then 9 and 11 to 18 Nov (7 of the last 10 days). The Dashboard was also down on 2 Oct.</li>
+<li>On 18 Nov, about 100 automatic incidents fired between 04:00 and 09:04 UTC (11 pm to 4 am US Eastern), each lasting 2 to 49 minutes, across every component at the same moments.</li>
+<li>Incident text: "failed requests are safe to retry, and only completed requests consume credits".</li>
+</ul></div>
+<div class="panel"><h3 style="margin-top:0">Inconsistencies <span class="tag f">Fact</span></h3>
+<ul class="t">
+<li>History says "No incidents recorded" in September and October, but the bars show 4 down days in September and one in October.</li>
+<li>The open MCP incident (since 14 Oct) is not in the history at all.</li>
+<li>MCP shows "No data" for today and for most of 15 Oct to 10 Nov, yet the incident is still "Investigating".</li>
+<li>The history list stops at exactly about 100 entries, all from 18 Nov. <span class="tag i">Inference</span> It is capped, so Nov 11 to 17 incidents are hidden.</li>
+<li>Incidents "open and resolve automatically". There are no human updates, causes or post-mortems.</li>
+</ul></div>
+<div class="panel"><h3 style="margin-top:0">What it says about scale <span class="tag i">Inference</span></h3>
+<ul class="t">
+<li>Every component fails together, to the minute. That points to one shared dependency (gateway, auth, database or the monitor itself), not per-service load.</li>
+<li>98.2% over about 78 monitored days is roughly 30+ hours of downtime. That is well below the 99.9% a B2B API usually promises.</li>
+<li>The failures happen in November, overnight in the US, off-season. They are not caused by heat-wave demand. So a summer heat-wave spike, when cities and utilities need the data most, is untested and higher risk.</li>
+<li>Short 2 to 3 minute flaps may be monitor noise. Either way, a buyer reading this page sees instability.</li>
+</ul></div>
+</div>
+</div>
+</section>
+
+<section class="band" id="map">
+<div class="wrap">
+<h2>Insight → focus area → concrete test</h2>
+<div class="scroll">
+<table class="tb stack">
+<thead><tr><th>Insight (source)</th><th>Focus area</th><th>Test to run</th></tr></thead>
+<tbody>
+<tr><td>Heatmap creation is a 3-step flow with 6 ways to define an area (V1, V2)</td><td data-l="Area"><span class="fa">UX/UI</span><span class="fa">Navigation</span></td><td data-l="Test">Time a first heatmap from a cold sign-up and count the clicks. Try every polygon input, including a messy GeoJSON (multipolygon, wrong CRS, self-intersecting).</td></tr>
+<tr><td>Queueing and the "5x faster" claim (V2)</td><td data-l="Area"><span class="fa">Performance</span></td><td data-l="Test">Time a 1 km² and a city-sized area at 60 and 100 m. Queue 3 jobs: is the third blocked, and is progress visible? Note the time to the first map paint.</td></tr>
+<tr><td>Data down to the previous hour; FortyGuard warns about UTC and hour labels (V2, V3)</td><td data-l="Area"><span class="fa">API design</span><span class="fa">Docs</span></td><td data-l="Test">Request the latest hour in the Dashboard and the API. Check whether timestamps carry a time zone and say whether the hour is start or end. Compare the two products' values for the same cell and hour.</td></tr>
+<tr><td>Resolution is stated three ways: 20 m, 60 to 100 m, and "near 1 km" in practice (V3, V1, V4)</td><td data-l="Area"><span class="fa">Docs</span><span class="fa">API design</span></td><td data-l="Test">Pull the same block at each tile size and look for real variation versus upsampled blocks. Check what native resolution the docs state.</td></tr>
+<tr><td>Water areas came back empty (V4)</td><td data-l="Area"><span class="fa">Error handling</span></td><td data-l="Test">Draw a polygon over a river or lake. Are nulls explained in the UI and in the API body, or silently missing?</td></tr>
+<tr><td>Credits are charged only for completed requests (S)</td><td data-l="Area"><span class="fa">Error handling</span><span class="fa">API design</span></td><td data-l="Test">Send a bad polygon, a non-US point, a future date, a bad key and an oversize area. Check status codes, the error schema, whether the message says how to fix it, and that the credit balance does not move.</td></tr>
+<tr><td>Heatmaps are async jobs with queues (V2)</td><td data-l="Area"><span class="fa">API design</span><span class="fa">Scalability</span></td><td data-l="Test">Check the create/read pattern: job IDs, polling guidance, webhooks, rate-limit headers, idempotency on retry, and 429 vs 5xx under 5 to 10 parallel calls within plan limits.</td></tr>
+<tr><td>MCP down since 14 Oct, never demoed (S, V1–V7)</td><td data-l="Area"><span class="fa">MCP + AI tools</span></td><td data-l="Test">Set it up in Claude Desktop or Cursor from the docs alone and log every step. If it fails, record the exact error and whether docs or the status page explain it. If it works, run a 3-site comparison prompt and check the agent gets units, time and model metadata.</td></tr>
+<tr><td>Heat Intelligence is generated text with sources (V2)</td><td data-l="Area"><span class="fa">UX/UI</span><span class="fa">AI quality</span></td><td data-l="Test">Generate a report for one tile. Do the citations open and support the claims? Does the PDF or Word export exist? Is there a persona option? Is the "events" section tied to the actual date?</td></tr>
+<tr><td>Accuracy table and metadata promised (V1)</td><td data-l="Area"><span class="fa">Docs</span><span class="fa">Trust</span></td><td data-l="Test">Check whether every map and API response carries input completeness, model version and an error metric. Look for any published validation figure.</td></tr>
+<tr><td>Saved controls, history and units (V1)</td><td data-l="Area"><span class="fa">UX/UI</span></td><td data-l="Test">Style a map, save, reload and reopen it from history. Switch units. Do the legend, export and analytics all follow?</td></tr>
+<tr><td>US-only coverage (V1, V7)</td><td data-l="Area"><span class="fa">Error handling</span></td><td data-l="Test">Search London or Dubai in the Dashboard and the API. Is the message clear, and does it happen before any credit or queue wait?</td></tr>
+<tr><td><span class="tag n">New</span> Teams built their own agents with hand-written tools (V12–V19)</td><td data-l="Area"><span class="fa">MCP + AI tools</span></td><td data-l="Test">Recreate 3 team tasks through the MCP: rank 3 sites at 2 pm, compare 2 routes, summarise one tract. Count how many tool calls each takes and whether any is impossible. Check whether answers include cell id, time zone and units.</td></tr>
+<tr><td><span class="tag n">New</span> 2 teams quote 20 m; FortyGuard offers 60 to 100 m tiles (V20, V21)</td><td data-l="Area"><span class="fa">Docs</span><span class="fa">API design</span></td><td data-l="Test">Ask the API for 20 m. Is it accepted, rejected, or silently served at 60 m? Does the response state the cell size it actually used?</td></tr>
+<tr><td><span class="tag n">New</span> Teams added an OpenMeteo fallback and caching gateways (V26, V29)</td><td data-l="Area"><span class="fa">Scalability</span><span class="fa">Error handling</span></td><td data-l="Test">During an outage or with a bad key, does the API return a clear status and retry-after so clients can fail over cleanly? Do the docs tell clients what they may cache and for how long?</td></tr>
+<tr><td><span class="tag n">New</span> 4 teams mislabelled the data as surface, ground or sensor temperature</td><td data-l="Area"><span class="fa">Docs</span><span class="fa">API design</span></td><td data-l="Test">Read the field names and the MCP tool descriptions. Is "air temperature at 2 m, modelled" stated where an agent or developer will see it?</td></tr>
+<tr><td><span class="tag n">New</span> Teams previewed credit use and replayed or cached responses</td><td data-l="Area"><span class="fa">API design</span><span class="fa">Scalability</span></td><td data-l="Test">Is there a cost-estimate endpoint or dry run? Is the same request free or cached on repeat? Can a finished job be re-read without paying again?</td></tr>
+<tr><td><span class="tag chg">Changed</span> Land cover: "not provided" (V3) vs satellite land-cover shares (V8)</td><td data-l="Area"><span class="fa">API design</span><span class="fa">Docs</span></td><td data-l="Test">Call the satellite endpoint and check whether it returns percentages only or a joinable raster or polygons. Check whether the docs answer this. Also check export formats (GeoTIFF, GeoJSON, CSV) and the CRS.</td></tr>
+<tr><td><span class="tag n">New</span> Four data domains and many environmental fields (V8)</td><td data-l="Area"><span class="fa">API design</span><span class="fa">Error handling</span></td><td data-l="Test">Request wet bulb, AQI, CO2 and solar for one point and one polygon. Are the units, field names and nulls consistent across endpoints? Is it one endpoint per domain or one with parameters?</td></tr>
+<tr><td><span class="tag n">New</span> 12 h forecast, history from 2021 (V8)</td><td data-l="Area"><span class="fa">API design</span><span class="fa">Validation</span></td><td data-l="Test">Ask for +13 h, +2 weeks, 2019 and 2020. Is there a clear 4xx with the allowed range, or empty data? Compare against what the docs and pricing page state.</td></tr>
+<tr><td><span class="tag n">New</span> "Parcel level" point queries (V8)</td><td data-l="Area"><span class="fa">API design</span></td><td data-l="Test">Query two points 30 m apart and two 150 m apart. Do they return different values, or the same tile value?</td></tr>
+<tr><td><span class="tag n">New</span> FortyGuard's own developer path: AOI → heatmap → environmental → satellite → decision (V8)</td><td data-l="Area"><span class="fa">Docs</span><span class="fa">Developer UX</span></td><td data-l="Test">Rebuild a mini CoolScope or cool-route flow from the docs only. Time it and count the calls and the auth steps. Note any point where you had to guess.</td></tr>
+<tr><td><span class="tag n">New</span> Forma partnership: FortyGuard data inside a design tool (V9)</td><td data-l="Area"><span class="fa">Integrations</span><span class="fa">Improvements</span></td><td data-l="Test">Check whether outputs drop cleanly into GIS or CAD (GeoJSON, GeoTIFF with CRS). Check whether there is an official extension, or whether each team must build one.</td></tr>
+<tr><td>Correlated outages and an inconsistent status page (S)</td><td data-l="Area"><span class="fa">Scalability</span><span class="fa">Maintainability</span></td><td data-l="Test">Recheck the status page during your test window. Subscribe to updates and see if an email arrives. Note whether the Dashboard degrades gracefully when the API fails.</td></tr>
+<tr><td>Heat Monitoring &amp; Alerts exists but was never demoed (S)</td><td data-l="Area"><span class="fa">Workflow</span></td><td data-l="Test">Create a monitor with a threshold. Is it findable, and does an alert arrive?</td></tr>
+<tr><td>Chatbot, patch notes and feedback form promised (V1)</td><td data-l="Area"><span class="fa">UX/UI</span></td><td data-l="Test">Ask the chatbot a real how-to question. Check that patch notes are dated and recent. Send one feedback item.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section class="band" id="verify">
+<div class="wrap">
+<h2>Claims worth verifying hands-on</h2>
+<div class="scroll">
+<table class="tb stack">
+<thead><tr><th>Promise</th><th>Source</th><th>Why it may not hold</th><th>What testing found (21–22 Nov)</th></tr></thead>
+<tbody>
+<tr><td>Street-block, 20 m resolution</td><td data-l="Source">V3, users map</td><td data-l="Why">The Dashboard offers 60 to 100 m tiles, and a real API user said the field "resolves near 1 km".</td><td data-l="Found"><b>Not shown.</b> 20 m jobs fail with no reason; the MCP allows 60 to 100 m only; 60 m repeats the 100 m values (A-08, A-09, M-13).</td></tr>
+<tr><td>"Almost five times" faster</td><td data-l="Source">V2</td><td data-l="Why">No baseline was given. The status page shows daily outages in mid-November.</td><td data-l="Found"><b>Not tested directly.</b> Jobs take 12 to 37 s by API; dashboard analyses take 16 s to over 2 min (A-07, X-41, X-48).</td></tr>
+<tr><td>Real time to the previous hour</td><td data-l="Source">V2</td><td data-l="Why">Check the actual latency and how the hour is labelled.</td><td data-l="Found"><b>Unclear.</b> +3 h and +13 h are served, but no result says which time zone its hour is in (A-12, A-13, B-12).</td></tr>
+<tr><td>PDF and Word export with images "by the time you see this video"</td><td data-l="Source">V2</td><td data-l="Why">It was promised, not shown.</td><td data-l="Found"><b>PDF yes, Word no.</b> Download gives a 30-page branded PDF with map images, but no summary (X-91).</td></tr>
+<tr><td>Persona-specific intelligence "in the upcoming weeks"</td><td data-l="Source">V2</td><td data-l="Why">It was promised, not shown.</td><td data-l="Found"><b>Not found.</b> No persona option anywhere in Heat Intelligence (B-05).</td></tr>
+<tr><td>Model validated against weather stations across seasons</td><td data-l="Source">V1</td><td data-l="Why">No error figure was quoted in any video.</td><td data-l="Found"><b>Not supported.</b> No accuracy figure anywhere; the dashboard's own report calls a demo value "physically implausible" (X-70, X-34).</td></tr>
+<tr><td>New parameters bi-weekly, new sources weekly</td><td data-l="Source">V1, V2</td><td data-l="Why">Check the patch-note dates.</td><td data-l="Found"><b>Doubtful.</b> Release notes are undated, and they claim a heatmap download that fails (D-01, X-66, X-24).</td></tr>
+<tr><td>MCP as a working "connection for AI agents"</td><td data-l="Source">S, users map</td><td data-l="Why">It has been down since 14 Oct, with about one operational day in 90.</td><td data-l="Found"><b>Works.</b> Connected first time, 11 tools, numbers identical to the API; the status page incident is stale (M-02, X-01, X-92).</td></tr>
+<tr><td>Failed requests cost no credits and are safe to retry</td><td data-l="Source">S</td><td data-l="Why">Test it directly by forcing errors and watching the balance.</td><td data-l="Found"><b>True.</b> Errors and failed jobs cost nothing; exact repeats are charged again (C-01, X-77).</td></tr>
+<tr><td>A status page that refreshes every 60 s and is automatic</td><td data-l="Source">S</td><td data-l="Why">The banner says "Status unavailable", and the history contradicts the bars.</td><td data-l="Found"><b>False.</b> Banner still says "Status unavailable"; an MCP incident has been open 39 days (S-06, X-92).</td></tr>
+<tr><td><span class="tag n">New</span> "Parcel-level" intelligence</td><td data-l="Source">V8</td><td data-l="Why">Tiles are 60 to 100 m, which is bigger than most parcels.</td><td data-l="Found"><b>Not shown.</b> Tiles are 100 m, and a 0.3 °C range is painted as strong hot and cold spots (A-07, X-89).</td></tr>
+<tr><td><span class="tag n">New</span> Forecast to 12 h, hourly updates, history from 2021</td><td data-l="Source">V8</td><td data-l="Why">This conflicts with the "2 weeks" and "2019" on the users map and the website.</td><td data-l="Found"><b>Partly.</b> History starts 2021-01-01 (docs say 2019); forecast hours are served though undocumented (A-11, A-12, X-78).</td></tr>
+<tr><td><span class="tag n">New</span> Land cover available</td><td data-l="Source">V8 vs V3</td><td data-l="Why">FortyGuard staff gave opposite answers at the same event.</td><td data-l="Found"><b>Yes, with caveats.</b> Satellite segmentation returns classes, but labels downtown Phoenix "sea" and has no image date (A-14, X-61).</td></tr>
+<tr><td><span class="tag n">New</span> Heat-death and ER-visit statistics</td><td data-l="Source">V11 (CEO)</td><td data-l="Why">The "half a billion" heat deaths figure is implausible (possibly a transcription slip). Don't repeat it without a source.</td><td data-l="Found"><b>Not tested.</b> Outside the scope of the product tests.</td></tr>
+<tr><td><span class="tag n">New</span> Team claims such as a 5.59x ROI, $2.62M saved per heat wave, "100% uptime for hospital feeders", "47 deaths prevented", $208M a year saved, and "$100B lost to heat downtime"</td><td data-l="Source">V18, V20, V21, V25</td><td data-l="Why">These are hackathon pitch numbers. Don't cite them as FortyGuard outcomes.</td><td data-l="Found"><b>Not tested.</b> Outside the scope of the product tests.</td></tr>
+<tr><td>Free for anyone in the US</td><td data-l="Source">V1</td><td data-l="Why">Check whether the waitlist or a card is still needed, and what the free limits are.</td><td data-l="Found"><b>Partly.</b> Free key, no card, but it is 1M one-time credits for one month, the dashboard is limited to one state, and a 30-a-day heatmap quota applies (S-03, X-76, X-87, X-88).</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section class="band" id="users">
+<div class="wrap">
+<h2>Against the earlier users map</h2>
+<div class="g3">
+<div class="panel"><h3 style="margin-top:0">Confirmed</h3>
+<ul class="t">
+<li>City heat officers, planners, landscape architects, public health and homebuyers or parents as users (V1). A landscape studio really is building on the API (V4).</li>
+<li>Air temperature at 2 m; US-only (V1, V3, V7).</li>
+<li>Free Dashboard with a paid tier; credit-based API (V1, S).</li>
+<li>The "why is it hot" written report exists as Heat Intelligence (V2).</li>
+<li>NVIDIA relationship: an NVIDIA mentor and judge at the hackathon (V5).</li>
+<li><span class="tag n">New</span> Masdar City and the Abu Dhabi origin (V11).</li>
+<li><span class="tag n">New</span> The "AI agent builders" segment is real. 14 of 18 teams built AI layers and 5 built tool-calling agents (V12–V29).</li>
+<li><span class="tag n">New</span> Data centres, utilities, insurance, logistics and cold chain, and real estate as API segments: FortyGuard built demo apps for each (V8).</li>
+<li><span class="tag n">New</span> Cooler routes: FortyGuard demoed a cool-routes app built on the API (V8). It may be a demo rather than a product feature.</li>
+</ul></div>
+<div class="panel"><h3 style="margin-top:0">Contradicted or complicated</h3>
+<ul class="t">
+<li><b>20 m grid</b>: the videos show 60 to 100 m tiles, and a user saw about 1 km.</li>
+<li><b>9 MCP tools, validated clients</b>: the status page shows MCP effectively never up.</li>
+<li><b>Peak load in heat waves</b> (an inference in the map): outages so far are off-season and overnight, which points to fragility rather than load.</li>
+<li><span class="tag chg">Changed</span> <b>Utilities, insurance, logistics as main API users</b>: FortyGuard does target these (V8), but only through its own demos. No customers are named.</li>
+<li><span class="tag n">New</span> <b>Forecasts up to 2 weeks, back to 2019</b>: V8 says 12 hours and 2021.</li>
+<li>The map leaves out Heat Monitoring &amp; Alerts and the segmentation APIs listed on the status page.</li>
+</ul></div>
+<div class="panel"><h3 style="margin-top:0">Not covered by these sources</h3>
+<ul class="t">
+<li>DATS, Ecopia, TomTom, Masdar City, MODON case studies</li>
+<li>$79 / $289 pricing and 115x accuracy claim</li>
+<li>52B data points</li>
+</ul>
+<p class="mini">These still rest on the website and press, so treat them as claims.</p></div>
+</div>
+</div>
+</section>
+
+<section class="band" id="src">
+<div class="wrap">
+<h2>Sources</h2>
+<ul class="t mini" style="columns:2 330px">
+<li><b>V1</b> Temperature Dashboard launch demo (beta, waitlist, freemium)</li>
+<li><b>V2</b> Second release: draw circle, queueing, previous-hour data, Heat Intelligence report</li>
+<li><b>V3</b> Hackathon session by FortyGuard data scientists: spatial and temporal data, coupling, analytics</li>
+<li><b>V4</b> Hackathon mentor session: DC landscape architect's cooling-priority model on the Temperature API</li>
+<li><b>V5</b> Hackathon mentor session: NVIDIA, AI for science with CUDA-X</li>
+<li><b>V6</b> Hackathon session: pitching technical ideas to judges</li>
+<li><b>V7</b> Hackathon session: market validation and product-market fit</li>
+<li><b>V8</b> <span class="tag n">New</span> Hackathon session by a FortyGuard engineer: API endpoints, six industry demo apps, Q&amp;A on forecasts and deployment</li>
+<li><b>V9</b> <span class="tag n">New</span> Hackathon mentor session: Autodesk Forma site design and extensions, hackathon tracks and rules</li>
+<li><b>V10</b> <span class="tag n">New</span> LinkedIn Live "AI meets climate" ep. 3 hosted by the CEO, with Aqua AI and Ocean Harvest: climate-tech funding in the GCC (little product content)</li>
+<li><b>V11</b> <span class="tag n">New</span> LinkedIn Live "AI meets climate" hosted by the CEO, with FortyGuard's technical advisor (ex-Palo Alto CIO), summer 2024</li>
+<li><b>V12–V19</b> <span class="tag n">New</span> Hackathon team demo videos: Thermal Decision Engine, Cool City AI, HeatShield AI (facilities), Heat Shield AI (cities), NYC thermal impact engine, Cool Bus Agent, Thermal Sentinel Grid, Heat Guard AI</li>
+<li><b>V20–V29</b> <span class="tag n">New</span> More team demos: Heat Shield (Phoenix cooling centres), Shade, Thermoshift AI, Phoenix heat + ozone, Heat Safe, Thermostat AI, Cool Commute, Urban Heat IQ, HeatCheck, Finestra</li>
+<li><b>S</b> status.fortyguard.com and /incidents, read 20 Nov 2026 13:35 UTC (daily bar data parsed from page markup)</li>
+<li>Users map: fortyguard-users/index.html in this project</li>
+<li>Duplicates skipped: 4 of the 33 uploads were byte-identical copies. The team-demo batches had none.</li>
+</ul>
+</div>
+</section>
+
+<script>
+const D=[
+["g","Temperature API"],
+["Heatmap","98.23%","nnnnnnnnnnnnooodoooogooooddoodoooooooooooooooooooooooooooooooooooooooooooooooododdodddddoo"],
+["Satellite Imagery","98.24%","nnnnnnnnnnnnooodoooooooooddoodoooooooooooooooooooooooooooooooooooooooooooooooododdodddddoo"],
+["Street View","98.23%","nnnnnnnnnnnnooodoooooooooddoodoooooooooooooooooooooooooooooooooooooooooooooooododdodddddoo"],
+["Heat Intelligence","98.23%","nnnnnnnnnnnnooodoooooooooddoodoooooooooooooooooooooooooooooooooooooooooooooooododdodddddoo"],
+["Environmental Parameters","98.23%","nnnnnnnnnnnnooodoooooooooddoodoooooooooooooooooooooooooooooooooooooooooooooooododdodddddoo"],
+["MCP Server","78.00%","nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnodnnnnnnnnnnnnnnnnnnnnnnnnnnnddndddddnn"],
+["g","Platform"],
+["Temperature Dashboard","98.27%","nnnnnnnnnnnnooodoooooooooddooooooooooooodoooooooooooooooooooooooooooooooooooooooddodddddoo"],
+["Heat Monitoring & Alerts","99.10%","nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnoooooooooooooooooooooooooooooddodddddoo"],
+["Authentication & Accounts","98.72%","nnnnnnnnnnnnooodoooooooooddoooooooooooooooooooooooooooooooooooooooooooooooooooooddooddddoo"]];
+const L={o:"Operational",d:"Down",g:"Degraded",n:"No data"};
+const day=i=>{const d=new Date(Date.UTC(2026,7,23+i));return d.toISOString().slice(0,10)};
+const esc=s=>s.replace(/&/g,"&amp;");
+document.getElementById("strips").innerHTML=D.map(r=>r[0]==="g"?`<div class="grp">${r[1]}</div>`:
+`<div>${esc(r[0])}</div><div class="u" style="color:${parseFloat(r[1])<90?'var(--hot)':'inherit'}">${r[1]}</div><div class="bars" role="img" aria-label="${esc(r[0])} daily status, 90 days">${[...r[2]].map((c,i)=>`<i class="b${c}" title="${day(i)}: ${L[c]}"></i>`).join("")}</div>`).join("");
+</script>
+</body>
+</html>
